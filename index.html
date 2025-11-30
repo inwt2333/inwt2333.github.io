@@ -1,10 +1,356 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>Inwt的鸽子窝</title>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INWT2333 | AI & Music</title>
+    <!-- 引入炫酷的字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;500&display=swap" rel="stylesheet">
+    <!-- 引入图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- 全局设置 --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0d0d1e; /* 深邃的夜空蓝 */
+            overflow: hidden;
+            font-family: 'Noto Sans SC', sans-serif;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- 动态背景画布 --- */
+        #canvas-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* --- 主体卡片 (二次元磨砂玻璃质感) --- */
+        .card {
+            position: relative;
+            z-index: 10;
+            width: 350px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px); /* 磨砂效果 */
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 50px rgba(255, 0, 128, 0.4);
+        }
+
+        /* --- 头像区域 --- */
+        .avatar-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            padding: 3px;
+            background: linear-gradient(45deg, #00f260, #0575e6, #ff0080);
+            animation: spin-glow 3s linear infinite;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #1a1a2e;
+        }
+
+        /* --- 故障风标题 (Cyberpunk Glitch) --- */
+        .glitch-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2em;
+            font-weight: bold;
+            color: #fff;
+            position: relative;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .glitch-name::before, .glitch-name::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0d0d1e;
+        }
+        
+        .glitch-name::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        
+        .glitch-name::after {
+            left: -2px;
+            text-shadow: -1px 0 #00fff9;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        /* --- 打字机特效文本 --- */
+        .bio-text {
+            color: #a0a0c0;
+            font-size: 0.9em;
+            margin-bottom: 25px;
+            height: 1.5em; /* 固定高度防止跳动 */
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            background-color: #00fff9;
+            animation: blink 1s infinite;
+        }
+
+        /* --- 音乐可视化波纹 --- */
+        .music-visualizer {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 30px;
+            margin-bottom: 25px;
+            gap: 5px;
+        }
+
+        .bar {
+            width: 6px;
+            background: linear-gradient(to top, #00f260, #0575e6);
+            border-radius: 3px;
+            animation: bounce 1s infinite ease-in-out;
+        }
+        
+        .bar:nth-child(1) { height: 10px; animation-delay: 0.1s; }
+        .bar:nth-child(2) { height: 15px; animation-delay: 0.3s; }
+        .bar:nth-child(3) { height: 25px; animation-delay: 0.0s; }
+        .bar:nth-child(4) { height: 18px; animation-delay: 0.4s; }
+        .bar:nth-child(5) { height: 12px; animation-delay: 0.2s; }
+
+        /* --- 社交按钮 --- */
+        .social-links a {
+            color: rgba(255,255,255,0.7);
+            font-size: 1.5em;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #fff;
+            text-shadow: 0 0 10px #00fff9;
+            transform: scale(1.2);
+        }
+
+        /* --- 动画定义 --- */
+        @keyframes spin-glow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1.2); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(33px, 9999px, 11px, 0); }
+            20% { clip: rect(85px, 9999px, 66px, 0); }
+            40% { clip: rect(10px, 9999px, 90px, 0); }
+            60% { clip: rect(55px, 9999px, 12px, 0); }
+            80% { clip: rect(20px, 9999px, 44px, 0); }
+            100% { clip: rect(70px, 9999px, 5px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(10px, 9999px, 90px, 0); }
+            20% { clip: rect(30px, 9999px, 10px, 0); }
+            40% { clip: rect(80px, 9999px, 5px, 0); }
+            60% { clip: rect(10px, 9999px, 60px, 0); }
+            80% { clip: rect(50px, 9999px, 20px, 0); }
+            100% { clip: rect(20px, 9999px, 90px, 0); }
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello, World!</h1>
+
+    <!-- 背景 Canvas -->
+    <canvas id="canvas-bg"></canvas>
+
+    <!-- 个人主页卡片 -->
+    <div class="card">
+        <!-- 头像 (我先放了一个二次元占位图，你可以换成自己的) -->
+        <div class="avatar-container">
+            <img src="my-avatar.jpg" alt="Avatar" class="avatar">
+        </div>
+
+        <!-- 名字 (带故障特效) -->
+        <h1 class="glitch-name" data-text="Inwt的鸽子窝">Inwt的鸽子窝</h1>
+
+        <!-- 动态打字机介绍 -->
+        <p class="bio-text"><span id="typewriter"></span><span class="cursor">|</span></p>
+
+        <!-- 音乐可视化波纹 -->
+        <div class="music-visualizer">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+
+        <!-- 链接按钮 -->
+        <div class="social-links">
+            <a href="https://github.com/inwt2333" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+            <a href="https://space.bilibili.com/503141548" target="_blank" title="Bilibili"><i class="fab fa-bilibili"></i></a>
+            <a href="inwt233@sjtu.edu.cn" title="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+    </div>
+
+    <script>
+        /* --- 1. 打字机特效 (Typewriter) --- */
+        const texts = ["SJTU", "Violin🎻 & Piano🎹 Lover", "student in AI"]; // 这里修改你想展示的标签
+        let count = 0;
+        let index = 0;
+        let currentText = "";
+        let letter = "";
+        
+        (function type() {
+            if (count === texts.length) {
+                count = 0;
+            }
+            currentText = texts[count];
+            letter = currentText.slice(0, ++index);
+            
+            document.getElementById('typewriter').textContent = letter;
+            if (letter.length === currentText.length) {
+                setTimeout(() => {
+                    index = 0;
+                    count++;
+                }, 2000); // 停顿 2 秒
+            }
+            setTimeout(type, 150);
+        })();
+
+        /* --- 2. 背景 AI 神经网络 + 音符特效 --- */
+        const canvas = document.getElementById("canvas-bg");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.directionX = (Math.random() * 1) - 0.5; // 速度
+                this.directionY = (Math.random() * 1) - 0.5;
+                this.size = Math.random() * 2; // 粒子大小
+                this.color = '#00fff9'; // 科技蓝
+                
+                // 随机决定这个粒子是“圆点”还是“音符” (20%概率是音符)
+                this.isNote = Math.random() > 0.8; 
+                this.noteSymbol = Math.random() > 0.5 ? '♪' : '♫';
+            }
+
+            draw() {
+                ctx.beginPath();
+                if (this.isNote) {
+                    ctx.font = "15px Arial";
+                    ctx.fillStyle = "#ff0080"; // 音符是粉色的
+                    ctx.fillText(this.noteSymbol, this.x, this.y);
+                } else {
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                    ctx.fillStyle = '#00fff9'; // 神经网络点是蓝色的
+                    ctx.fill();
+                }
+            }
+
+            update() {
+                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+                this.x += this.directionX;
+                this.y += this.directionY;
+                this.draw();
+            }
+        }
+
+        function init() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 9000; // 根据屏幕大小决定粒子数量
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connect(); // 绘制连线
+        }
+
+        // 连线函数 (模拟神经网络)
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
+                                   ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    
+                    // 如果距离够近，就连线
+                    if (distance < (canvas.width/7) * (canvas.height/7)) {
+                        opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = 'rgba(0, 255, 249,' + opacityValue + ')';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('resize', function(){
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        });
+
+        init();
+        animate();
+    </script>
 </body>
 </html>
