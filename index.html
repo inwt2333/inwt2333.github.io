@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inwt的鸽子窝🐦</title>
     <!-- 引入炫酷的字体 -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <!-- 引入图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -17,18 +20,35 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth; /* 开启平滑滚动 */
+        }
+
         body {
-            background-color: #0d0d1e; /* 深邃的夜空蓝 */
-            overflow: hidden;
+            /* 移除 overflow: hidden，允许滚动 */
+            background-color: #0d0d1e; 
             font-family: 'Noto Sans SC', sans-serif;
             color: white;
-            height: 100vh;
+            /* height: 100vh; <-- 移除固定高度 */
+        }
+
+        /* --- 分屏容器设置 --- */
+        section {
+            width: 100%;
+            height: 100vh; /* 每一屏都是 100% 视口高度 */
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* === 第一屏：赛博朋克首页 === */
+        #section-home {
             display: flex;
             justify-content: center;
             align-items: center;
+            background-color: #0d0d1e;
         }
 
-        /* --- 动态背景画布 --- */
+        /* --- 动态背景画布 (只在第一屏显示) --- */
         #canvas-bg {
             position: absolute;
             top: 0;
@@ -38,13 +58,13 @@
             z-index: 0;
         }
 
-        /* --- 主体卡片 (二次元磨砂玻璃质感) --- */
+        /* --- 主体卡片 --- */
         .card {
             position: relative;
             z-index: 10;
             width: 350px;
             background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px); /* 磨砂效果 */
+            backdrop-filter: blur(15px);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 40px 20px;
@@ -58,7 +78,68 @@
             box-shadow: 0 0 50px rgba(255, 0, 128, 0.4);
         }
 
-        /* --- 头像区域 --- */
+        /* --- 底部跳动箭头 --- */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.3s;
+        }
+
+        .scroll-indicator:hover {
+            color: #00fff9;
+        }
+
+        .scroll-indicator i {
+            font-size: 2em;
+        }
+
+        /* === 第二屏：纯白自我介绍 === */
+        #section-about {
+            background-color: #ffffff;
+            color: #333; /* 深灰文字 */
+            display: flex;
+            justify-content: center; /* 水平居中容器 */
+            align-items: center;     /* 垂直居中容器 */
+            z-index: 30; /* 确保盖住上面的内容 */
+        }
+
+        .about-content {
+            text-align: left; /* 文字内容左对齐 */
+            max-width: 800px;
+            width: 80%;
+            font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
+        }
+
+        /* --- 文字逐行显现动画类 --- */
+        .reveal-text {
+            font-size: 3em;
+            font-weight: 700;
+            line-height: 1.5;
+            opacity: 0; /* 初始隐藏 */
+            transform: translateY(30px); /* 初始下沉 */
+            transition: all 1s ease-out; /* 过渡效果 */
+            display: block; /* 强制换行 */
+        }
+
+        /* 当添加了 .visible 类后，变为可见 */
+        .reveal-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 设置不同的延迟，实现逐行显示 */
+        .delay-1 { transition-delay: 0.2s; }
+        .delay-2 { transition-delay: 0.8s; } /* 稍微久一点，让用户读完Hello */
+        .delay-3 { transition-delay: 1.4s; }
+
+        /* --- 原有样式保留 --- */
         .avatar-container {
             width: 120px;
             height: 120px;
@@ -66,7 +147,7 @@
             border-radius: 50%;
             padding: 3px;
             background: linear-gradient(45deg, #00f260, #0575e6, #ff0080);
-            animation: spin-glow 3s linear infinite;
+            /* animation: spin-glow 3s linear infinite; */
         }
 
         .avatar {
@@ -77,71 +158,49 @@
             border: 3px solid #1a1a2e;
         }
 
-        /* --- 故障风标题 (Cyberpunk Glitch) --- */
         .glitch-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2em;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.5em;
             font-weight: bold;
             color: #fff;
             position: relative;
             margin-bottom: 10px;
-            text-transform: uppercase;
+            text-transform: none;
         }
         
         .glitch-name::before, .glitch-name::after {
             content: attr(data-text);
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0d0d1e;
+            top: 0; left: 0; width: 100%; height: 100%; background: #0d0d1e;
         }
         
         .glitch-name::before {
-            left: 2px;
-            text-shadow: -1px 0 #ff00c1;
-            clip: rect(44px, 450px, 56px, 0);
+            left: 2px; text-shadow: -1px 0 #ff00c1; clip: rect(44px, 450px, 56px, 0);
             animation: glitch-anim 5s infinite linear alternate-reverse;
         }
         
         .glitch-name::after {
-            left: -2px;
-            text-shadow: -1px 0 #00fff9;
-            clip: rect(44px, 450px, 56px, 0);
+            left: -2px; text-shadow: -1px 0 #00fff9; clip: rect(44px, 450px, 56px, 0);
             animation: glitch-anim2 5s infinite linear alternate-reverse;
         }
 
-        /* --- 打字机特效文本 --- */
         .bio-text {
             color: #a0a0c0;
             font-size: 0.9em;
             margin-bottom: 25px;
-            height: 1.5em; /* 固定高度防止跳动 */
+            height: 1.5em; 
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
         }
         
-        .cursor {
-            display: inline-block;
-            width: 2px;
-            background-color: #00fff9;
-            animation: blink 1s infinite;
-        }
+        .cursor { display: inline-block; width: 2px; background-color: #00fff9; animation: blink 1s infinite; }
 
-        /* --- 音乐可视化波纹 --- */
         .music-visualizer {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            height: 30px;
-            margin-bottom: 25px;
-            gap: 5px;
+            display: flex; justify-content: center; align-items: flex-end; height: 30px; margin-bottom: 25px; gap: 5px;
         }
 
         .bar {
-            width: 6px;
-            background: linear-gradient(to top, #00f260, #0575e6);
-            border-radius: 3px;
-            animation: bounce 1s infinite ease-in-out;
+            width: 6px; background: linear-gradient(to top, #00f260, #0575e6); border-radius: 3px; animation: bounce 1s infinite ease-in-out;
         }
         
         .bar:nth-child(1) { height: 10px; animation-delay: 0.1s; }
@@ -150,120 +209,107 @@
         .bar:nth-child(4) { height: 18px; animation-delay: 0.4s; }
         .bar:nth-child(5) { height: 12px; animation-delay: 0.2s; }
 
-        /* --- 社交按钮 --- */
-        .social-links a {
-            color: rgba(255,255,255,0.7);
-            font-size: 1.5em;
-            margin: 0 10px;
-            transition: all 0.3s;
-        }
+        .social-links a { color: rgba(255,255,255,0.7); font-size: 1.5em; margin: 0 10px; transition: all 0.3s; }
+        .social-links a:hover { color: #fff; text-shadow: 0 0 10px #00fff9; transform: scale(1.2); }
 
-        .social-links a:hover {
-            color: #fff;
-            text-shadow: 0 0 10px #00fff9;
-            transform: scale(1.2);
-        }
-
-        /* --- 动画定义 --- */
-        @keyframes spin-glow {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: scaleY(0.5); }
-            50% { transform: scaleY(1.2); }
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        @keyframes glitch-anim {
-            0% { clip: rect(33px, 9999px, 11px, 0); }
-            20% { clip: rect(85px, 9999px, 66px, 0); }
-            40% { clip: rect(10px, 9999px, 90px, 0); }
-            60% { clip: rect(55px, 9999px, 12px, 0); }
-            80% { clip: rect(20px, 9999px, 44px, 0); }
-            100% { clip: rect(70px, 9999px, 5px, 0); }
-        }
-        @keyframes glitch-anim2 {
-            0% { clip: rect(10px, 9999px, 90px, 0); }
-            20% { clip: rect(30px, 9999px, 10px, 0); }
-            40% { clip: rect(80px, 9999px, 5px, 0); }
-            60% { clip: rect(10px, 9999px, 60px, 0); }
-            80% { clip: rect(50px, 9999px, 20px, 0); }
-            100% { clip: rect(20px, 9999px, 90px, 0); }
-        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0) scaleY(0.5); } 50% { transform: translateY(-5px) scaleY(1.2); } }
+        /* 箭头专用跳动动画 */
+        @keyframes arrow-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes glitch-anim { 0% { clip: rect(33px, 9999px, 11px, 0); } 100% { clip: rect(70px, 9999px, 5px, 0); } }
+        @keyframes glitch-anim2 { 0% { clip: rect(10px, 9999px, 90px, 0); } 100% { clip: rect(20px, 9999px, 90px, 0); } }
     </style>
 </head>
 <body>
 
-    <!-- 背景 Canvas -->
-    <canvas id="canvas-bg"></canvas>
+    <!-- === 第一屏：首页 (Home) === -->
+    <section id="section-home">
+        <!-- 背景 Canvas -->
+        <canvas id="canvas-bg"></canvas>
 
-    <!-- 个人主页卡片 -->
-    <div class="card">
-        <!-- 头像 (我先放了一个二次元占位图，你可以换成自己的) -->
-        <div class="avatar-container">
-            <img src="my-avatar.jpg" alt="Avatar" class="avatar">
+        <!-- 个人主页卡片 -->
+        <div class="card">
+            <div class="avatar-container">
+                <img src="my-avatar.jpg" alt="Avatar" class="avatar">
+            </div>
+            <h1 class="glitch-name" data-text="Inwt的鸽子窝">Inwt的鸽子窝</h1>
+            <p class="bio-text"><span id="typewriter"></span><span class="cursor">|</span></p>
+            <div class="music-visualizer">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+            <div class="social-links">
+                <a href="https://github.com/inwt2333" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                <a href="https://space.bilibili.com/503141548" target="_blank" title="Bilibili"><i class="fab fa-bilibili"></i></a>
+                <a href="mailto:inwt233@sjtu.edu.cn" title="Email"><i class="fas fa-envelope"></i></a>
+            </div>
         </div>
 
-        <!-- 名字 (带故障特效) -->
-        <h1 class="glitch-name" data-text="Inwt的鸽子窝">Inwt的鸽子窝</h1>
+        <!-- 向下的箭头 (点击可平滑滚动) -->
+        <a href="#section-about" class="scroll-indicator" title="Scroll Down">
+            <i class="fas fa-chevron-down"></i>
+        </a>
+    </section>
 
-        <!-- 动态打字机介绍 -->
-        <p class="bio-text"><span id="typewriter"></span><span class="cursor">|</span></p>
-
-        <!-- 音乐可视化波纹 -->
-        <div class="music-visualizer">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
+    <!-- === 第二屏：白色简介 (About) === -->
+    <section id="section-about">
+        <div class="about-content">
+            <!-- 加上 reveal-text 类，JS 会控制它们逐行显示 -->
+            <span class="reveal-text delay-1">Hello,</span>
+            <span class="reveal-text delay-2">我是Inwt,</span>
+            <span class="reveal-text delay-3">一名研究AI的大二学生。</span>
         </div>
-
-        <!-- 链接按钮 -->
-        <div class="social-links">
-            <a href="https://github.com/inwt2333" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
-            <a href="https://space.bilibili.com/503141548" target="_blank" title="Bilibili"><i class="fab fa-bilibili"></i></a>
-            <a href="inwt233@sjtu.edu.cn" title="Email"><i class="fas fa-envelope"></i></a>
-        </div>
-    </div>
+    </section>
 
     <script>
-        /* --- 1. 打字机特效 (Typewriter) --- */
-        const texts = ["SJTU", "Violin🎻 & Piano🎹 Lover", "student in AI"]; // 这里修改你想展示的标签
-        let count = 0;
-        let index = 0;
-        let currentText = "";
-        let letter = "";
-        
+        /* --- 0. 滚动显现动画 (Intersection Observer) --- */
+        // 这个脚本负责检测“第二屏”是否出现在屏幕上
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.3 // 当第二屏显示 30% 时触发动画
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // 如果看到了第二屏，给所有文字加上 'visible' 类
+                    const texts = entry.target.querySelectorAll('.reveal-text');
+                    texts.forEach(text => text.classList.add('visible'));
+                    // 动画只触发一次，取消观察
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // 开始观察第二屏
+        observer.observe(document.getElementById('section-about'));
+
+
+        /* --- 1. 打字机特效 (原版) --- */
+        const texts = ["SJTU", "Violin🎻 & Piano🎹 Lover", "Student in AI", "Always sleepy"]; 
+        let count = 0; let index = 0; let currentText = ""; let letter = "";
+
         (function type() {
-            if (count === texts.length) {
-                count = 0;
-            }
+            if (count === texts.length) count = 0;
             currentText = texts[count];
             letter = currentText.slice(0, ++index);
-            
             document.getElementById('typewriter').textContent = letter;
+
             if (letter.length === currentText.length) {
-                setTimeout(() => {
-                    index = 0;
-                    count++;
-                }, 2000); // 停顿 2 秒
+                count++; index = 0; setTimeout(type, 2000); 
+            } else {
+                setTimeout(type, 150);
             }
-            setTimeout(type, 150);
         })();
 
-        /* --- 2. 背景 AI 神经网络 + 音符特效 --- */
+        /* --- 2. 背景 AI 粒子 (原版) --- */
         const canvas = document.getElementById("canvas-bg");
         const ctx = canvas.getContext("2d");
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        
+        // 注意：粒子画布只在第一屏，所以这里获取第一屏的大小
+        const sectionHome = document.getElementById("section-home");
+        canvas.width = sectionHome.clientWidth;
+        canvas.height = sectionHome.clientHeight;
 
         let particlesArray;
 
@@ -271,81 +317,61 @@
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.directionX = (Math.random() * 1) - 0.5; // 速度
+                this.directionX = (Math.random() * 1) - 0.5; 
                 this.directionY = (Math.random() * 1) - 0.5;
-                this.size = Math.random() * 2; // 粒子大小
-                this.color = '#00fff9'; // 科技蓝
-                
-                // 随机决定这个粒子是“圆点”还是“音符” (20%概率是音符)
+                this.size = Math.random() * 2; 
                 this.isNote = Math.random() > 0.8; 
                 this.noteSymbol = Math.random() > 0.5 ? '♪' : '♫';
             }
-
             draw() {
                 ctx.beginPath();
                 if (this.isNote) {
-                    ctx.font = "15px Arial";
-                    ctx.fillStyle = "#ff0080"; // 音符是粉色的
-                    ctx.fillText(this.noteSymbol, this.x, this.y);
+                    ctx.font = "15px Arial"; ctx.fillStyle = "#ff0080"; ctx.fillText(this.noteSymbol, this.x, this.y);
                 } else {
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                    ctx.fillStyle = '#00fff9'; // 神经网络点是蓝色的
-                    ctx.fill();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); ctx.fillStyle = '#00fff9'; ctx.fill();
                 }
             }
-
             update() {
                 if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
                 if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
-                this.x += this.directionX;
-                this.y += this.directionY;
+                this.x += this.directionX; this.y += this.directionY;
                 this.draw();
             }
         }
 
         function init() {
             particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 9000; // 根据屏幕大小决定粒子数量
-            for (let i = 0; i < numberOfParticles; i++) {
-                particlesArray.push(new Particle());
-            }
+            let numberOfParticles = (canvas.height * canvas.width) / 9000; 
+            for (let i = 0; i < numberOfParticles; i++) { particlesArray.push(new Particle()); }
         }
 
         function animate() {
             requestAnimationFrame(animate);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-            }
-            connect(); // 绘制连线
+            for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); }
+            connect(); 
         }
 
-        // 连线函数 (模拟神经网络)
         function connect() {
             let opacityValue = 1;
             for (let a = 0; a < particlesArray.length; a++) {
                 for (let b = a; b < particlesArray.length; b++) {
                     let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
                                    ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                    
-                    // 如果距离够近，就连线
                     if (distance < (canvas.width/7) * (canvas.height/7)) {
                         opacityValue = 1 - (distance / 20000);
                         ctx.strokeStyle = 'rgba(0, 255, 249,' + opacityValue + ')';
                         ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                        ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(particlesArray[b].x, particlesArray[b].y); ctx.stroke();
                     }
                 }
             }
         }
-
+        
+        // 窗口大小改变时重置
         window.addEventListener('resize', function(){
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = sectionHome.clientWidth;
+            canvas.height = sectionHome.clientHeight;
             init();
         });
 
