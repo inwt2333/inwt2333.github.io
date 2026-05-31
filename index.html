@@ -3,230 +3,935 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inwt的鸽子窝🐦</title>
-    <!-- 引入炫酷的字体 -->
+    <title>韩岳成 | AI Resume</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <!-- 引入图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        /* --- 全局设置 --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-        body { background-color: #0d0d1e; font-family: 'Noto Sans SC', sans-serif; color: white; }
+        body {
+            background: #0d0d1e;
+            color: #fff;
+            font-family: 'Noto Sans SC', sans-serif;
+            overflow-x: hidden;
+        }
 
-        /* --- 分屏容器设置 --- */
         section { width: 100%; position: relative; overflow: hidden; }
-        
-        /* 设置前两屏高度为 100vh */
-        #section-home, #section-about { height: 100vh; }
+        a { color: inherit; text-decoration: none; }
 
-        /* === 第一屏：赛博朋克首页 === */
-        #section-home { display: flex; justify-content: center; align-items: center; background-color: #0d0d1e; }
-        #canvas-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-
-        /* --- 主体卡片 --- */
-        .card {
-            position: relative; z-index: 10; width: 350px;
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
-            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 40px 20px; text-align: center;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2); transition: transform 0.3s;
-        }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 0 50px rgba(255, 0, 128, 0.4); }
-
-        /* --- 底部跳动箭头 --- */
-        .scroll-indicator {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 20;
-            cursor: pointer; animation: bounce 2s infinite; text-align: center; color: rgba(255, 255, 255, 0.6); transition: color 0.3s;
-        }
-        .scroll-indicator:hover { color: #00fff9; } .scroll-indicator i { font-size: 2em; }
-
-        /* === 第二屏：纯白自我介绍 === */
-        #section-about { background-color: #ffffff; color: #333; display: flex; justify-content: center; align-items: center; z-index: 30; }
-        .about-content { text-align: left; max-width: 800px; width: 80%; font-family: 'Rajdhani', 'Noto Sans SC', sans-serif; }
-        .reveal-text { font-size: 3em; font-weight: 700; line-height: 1.5; opacity: 0; transform: translateY(30px); transition: all 1s ease-out; display: block; }
-        .reveal-text.visible { opacity: 1; transform: translateY(0); }
-        .delay-1 { transition-delay: 0.2s; } .delay-2 { transition-delay: 0.8s; } .delay-3 { transition-delay: 1.4s; }
-
-        /* === 第三屏：博客列表 (修改版) === */
-        #section-blog {
-            background-color: #f9f9f9; 
-            color: #333;
+        .site-nav {
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 80px 20px;
-            min-height: 100vh; /* 最小高度一屏，内容多可自动撑开 */
-            height: auto; 
+            gap: 10px;
+            padding: 9px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            background: rgba(13, 13, 30, 0.58);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 0 24px rgba(0, 255, 249, 0.12);
+        }
+        .site-nav a {
+            min-height: 34px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 13px;
+            border-radius: 999px;
+            color: rgba(255, 255, 255, 0.74);
+            font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+        .site-nav a:hover {
+            color: #fff;
+            background: rgba(0, 255, 249, 0.13);
+            text-shadow: 0 0 12px rgba(0, 255, 249, 0.65);
         }
 
-        .blog-header {
-            font-family: 'Rajdhani', sans-serif; font-size: 2.5em; margin-bottom: 40px; font-weight: 700; color: #0d0d1e;
+        #section-home {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 110px 24px 90px;
+            background: #0d0d1e;
+        }
+        #canvas-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        #section-home::after {
+            content: "";
+            position: absolute;
+            inset: auto 0 0;
+            height: 34%;
+            background: linear-gradient(to bottom, rgba(13, 13, 30, 0), #111124);
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .blog-container {
-            max-width: 900px; width: 100%; display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+        .hero-shell {
+            position: relative;
+            z-index: 10;
+            width: min(1120px, 100%);
+            display: grid;
+            grid-template-columns: 370px minmax(0, 1fr);
+            gap: 42px;
+            align-items: center;
+        }
+        .card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.055);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 38px 22px;
+            text-align: center;
+            box-shadow: 0 0 32px rgba(0, 255, 255, 0.19);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 52px rgba(255, 0, 128, 0.34);
+        }
+        .card::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(0, 255, 249, 0.28), transparent 32%, rgba(255, 0, 128, 0.25));
+            pointer-events: none;
+            opacity: 0.55;
+            z-index: -1;
+        }
+        .avatar-container {
+            width: 126px;
+            height: 126px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            padding: 3px;
+            background: linear-gradient(45deg, #00f260, #0575e6, #ff0080);
+        }
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #1a1a2e;
+        }
+        .glitch-name {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.7rem;
+            font-weight: 700;
+            color: #fff;
+            position: relative;
+            margin-bottom: 6px;
+            line-height: 1.05;
+        }
+        .glitch-name::before,
+        .glitch-name::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0d0d1e;
+        }
+        .glitch-name::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch-name::after {
+            left: -2px;
+            text-shadow: -1px 0 #00fff9;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        .identity {
+            color: #00fff9;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.78rem;
+            letter-spacing: 0;
+            margin-bottom: 12px;
+        }
+        .bio-text {
+            color: #a0a0c0;
+            font-size: 0.92rem;
+            margin-bottom: 25px;
+            min-height: 1.6em;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+        }
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            background-color: #00fff9;
+            animation: blink 1s infinite;
+        }
+        .music-visualizer {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 30px;
+            margin-bottom: 25px;
+            gap: 5px;
+        }
+        .bar {
+            width: 6px;
+            background: linear-gradient(to top, #00f260, #0575e6);
+            border-radius: 3px;
+            animation: bounce 1s infinite ease-in-out;
+        }
+        .bar:nth-child(1) { height: 10px; animation-delay: 0.1s; }
+        .bar:nth-child(2) { height: 15px; animation-delay: 0.3s; }
+        .bar:nth-child(3) { height: 25px; animation-delay: 0s; }
+        .bar:nth-child(4) { height: 18px; animation-delay: 0.4s; }
+        .bar:nth-child(5) { height: 12px; animation-delay: 0.2s; }
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+        }
+        .social-links a {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 50%;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 1.25rem;
+            transition: all 0.3s;
+        }
+        .social-links a:hover {
+            color: #fff;
+            border-color: rgba(0, 255, 249, 0.55);
+            text-shadow: 0 0 10px #00fff9;
+            transform: scale(1.1);
         }
 
-        .blog-card {
-            background: white; border-radius: 12px; padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;
-            display: flex; flex-direction: column; text-decoration: none; /* 去掉链接下划线 */
+        .hero-copy {
+            padding: 10px 0;
         }
-        .blog-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        
-        .post-date { font-size: 0.8em; color: #999; margin-bottom: 10px; font-family: 'Share Tech Mono', monospace; }
-        .post-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; color: #333; line-height: 1.4; }
-        .post-summary { font-size: 0.9em; color: #666; line-height: 1.6; flex-grow: 1; }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            color: #00fff9;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.82rem;
+        }
+        .eyebrow::before {
+            content: "";
+            width: 36px;
+            height: 1px;
+            background: linear-gradient(90deg, #00fff9, rgba(255,255,255,0));
+        }
+        .hero-title {
+            max-width: 740px;
+            font-size: clamp(2.45rem, 6vw, 5.5rem);
+            line-height: 0.96;
+            font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+        .hero-title span {
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.76);
+            text-shadow: 0 0 28px rgba(255, 0, 128, 0.24);
+        }
+        .hero-summary {
+            max-width: 720px;
+            margin: 24px 0 28px;
+            color: rgba(255, 255, 255, 0.76);
+            font-size: 1.05rem;
+            line-height: 1.9;
+        }
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .action-btn {
+            min-height: 46px;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 0 18px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            font-weight: 700;
+            transition: all 0.24s ease;
+        }
+        .action-btn.primary {
+            border-color: rgba(0, 255, 249, 0.58);
+            background: linear-gradient(135deg, rgba(0, 255, 249, 0.18), rgba(255, 0, 128, 0.13));
+            box-shadow: 0 0 20px rgba(0, 255, 249, 0.13);
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.42);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            color: rgba(255, 255, 255, 0.68);
+            animation: arrow-bounce 2s infinite;
+            transition: color 0.3s;
+        }
+        .scroll-indicator:hover { color: #00fff9; }
 
-        /* --- 原有样式保留 --- */
-        .avatar-container { width: 120px; height: 120px; margin: 0 auto 20px; border-radius: 50%; padding: 3px; background: linear-gradient(45deg, #00f260, #0575e6, #ff0080); }
-        .avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #1a1a2e; }
-        .glitch-name { font-family: 'Rajdhani', sans-serif; font-size: 2.5em; font-weight: bold; color: #fff; position: relative; margin-bottom: 10px; text-transform: none; }
-        .glitch-name::before, .glitch-name::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0d0d1e; }
-        .glitch-name::before { left: 2px; text-shadow: -1px 0 #ff00c1; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim 5s infinite linear alternate-reverse; }
-        .glitch-name::after { left: -2px; text-shadow: -1px 0 #00fff9; clip: rect(44px, 450px, 56px, 0); animation: glitch-anim2 5s infinite linear alternate-reverse; }
-        .bio-text { color: #a0a0c0; font-size: 0.9em; margin-bottom: 25px; height: 1.5em; font-family: 'Rajdhani', sans-serif; font-weight: 500; }
-        .cursor { display: inline-block; width: 2px; background-color: #00fff9; animation: blink 1s infinite; }
-        .music-visualizer { display: flex; justify-content: center; align-items: flex-end; height: 30px; margin-bottom: 25px; gap: 5px; }
-        .bar { width: 6px; background: linear-gradient(to top, #00f260, #0575e6); border-radius: 3px; animation: bounce 1s infinite ease-in-out; }
-        .bar:nth-child(1) { height: 10px; animation-delay: 0.1s; } .bar:nth-child(2) { height: 15px; animation-delay: 0.3s; } .bar:nth-child(3) { height: 25px; animation-delay: 0.0s; } .bar:nth-child(4) { height: 18px; animation-delay: 0.4s; } .bar:nth-child(5) { height: 12px; animation-delay: 0.2s; }
-        .social-links a { color: rgba(255,255,255,0.7); font-size: 1.5em; margin: 0 10px; transition: all 0.3s; }
-        .social-links a:hover { color: #fff; text-shadow: 0 0 10px #00fff9; transform: scale(1.2); }
+        .light-section {
+            background: #f7f8fb;
+            color: #232332;
+            padding: 92px 22px;
+        }
+        .section-inner {
+            width: min(1120px, 100%);
+            margin: 0 auto;
+        }
+        .section-kicker {
+            color: #ff0080;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.82rem;
+            margin-bottom: 8px;
+        }
+        .section-title {
+            font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            line-height: 1;
+            color: #0d0d1e;
+            margin-bottom: 34px;
+        }
 
-        @keyframes bounce { 0%, 100% { transform: translateY(0) scaleY(0.5); } 50% { transform: translateY(-5px) scaleY(1.2); } }
-        @keyframes arrow-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        @keyframes glitch-anim { 0% { clip: rect(33px, 9999px, 11px, 0); } 100% { clip: rect(70px, 9999px, 5px, 0); } }
-        @keyframes glitch-anim2 { 0% { clip: rect(10px, 9999px, 90px, 0); } 100% { clip: rect(20px, 9999px, 90px, 0); } }
+        #section-about {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .resume-grid {
+            display: grid;
+            grid-template-columns: 1.03fr 0.97fr;
+            gap: 28px;
+            align-items: stretch;
+        }
+        .summary-panel {
+            position: relative;
+            padding: 34px;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 18px 55px rgba(13, 13, 30, 0.08);
+            border: 1px solid rgba(13, 13, 30, 0.06);
+        }
+        .summary-panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 34px;
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, #00fff9, #ff0080);
+        }
+        .summary-panel h3 {
+            font-size: 1.48rem;
+            color: #0d0d1e;
+            margin-bottom: 16px;
+        }
+        .summary-panel p {
+            color: #4d5060;
+            line-height: 1.95;
+            font-size: 1rem;
+        }
+        .keyword-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+        }
+        .keyword-cloud span {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #f2f5fb;
+            color: #2d3342;
+            font-size: 0.9rem;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .metric-card {
+            min-height: 142px;
+            padding: 24px;
+            border-radius: 16px;
+            background: #0d0d1e;
+            color: #fff;
+            border: 1px solid rgba(0, 255, 249, 0.16);
+            box-shadow: 0 18px 44px rgba(13, 13, 30, 0.13);
+        }
+        .metric-value {
+            display: block;
+            color: #00fff9;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        .metric-card p {
+            color: rgba(255,255,255,0.72);
+            line-height: 1.6;
+            font-size: 0.94rem;
+        }
+        .education-card {
+            margin-top: 16px;
+            padding: 24px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #fff, #f0f7ff);
+            border: 1px solid rgba(5, 117, 230, 0.12);
+        }
+        .education-card h3 {
+            color: #0d0d1e;
+            margin-bottom: 8px;
+        }
+        .education-card p {
+            color: #555a68;
+            line-height: 1.8;
+        }
+
+        #section-research {
+            background:
+                radial-gradient(circle at 16% 8%, rgba(0,255,249,0.12), transparent 30%),
+                radial-gradient(circle at 88% 22%, rgba(255,0,128,0.12), transparent 28%),
+                #111124;
+            padding: 92px 22px 100px;
+            color: #fff;
+        }
+        #section-research .section-title { color: #fff; }
+        .timeline {
+            display: grid;
+            gap: 18px;
+        }
+        .timeline-item {
+            position: relative;
+            display: grid;
+            grid-template-columns: 190px minmax(0, 1fr);
+            gap: 24px;
+            padding: 26px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.055);
+            border: 1px solid rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 16px 45px rgba(0,0,0,0.18);
+        }
+        .timeline-time {
+            color: #00fff9;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.92rem;
+        }
+        .timeline-body h3 {
+            font-size: 1.22rem;
+            line-height: 1.45;
+            margin-bottom: 12px;
+        }
+        .timeline-body ul {
+            display: grid;
+            gap: 8px;
+            padding-left: 18px;
+            color: rgba(255,255,255,0.76);
+            line-height: 1.75;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(255, 0, 128, 0.15);
+            color: #ff8fc8;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.76rem;
+            vertical-align: middle;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+        .detail-card {
+            padding: 26px;
+            border-radius: 16px;
+            background: #fff;
+            border: 1px solid rgba(13, 13, 30, 0.07);
+            box-shadow: 0 14px 42px rgba(13, 13, 30, 0.06);
+        }
+        .detail-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #0d0d1e;
+            margin-bottom: 16px;
+            font-size: 1.24rem;
+        }
+        .detail-card h3 i { color: #0575e6; }
+        .detail-card ul {
+            display: grid;
+            gap: 12px;
+            padding-left: 19px;
+            color: #4f5361;
+            line-height: 1.72;
+        }
+        .award-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eef0f5;
+            list-style: none;
+        }
+        .award-list {
+            padding-left: 0;
+        }
+        .award-list span {
+            color: #8b90a0;
+            white-space: nowrap;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .site-footer {
+            padding: 34px 22px;
+            background: #0d0d1e;
+            color: rgba(255,255,255,0.62);
+            text-align: center;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.86rem;
+        }
+
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .reveal-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scaleY(0.5); }
+            50% { transform: translateY(-5px) scaleY(1.2); }
+        }
+        @keyframes arrow-bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        @keyframes glitch-anim {
+            0% { clip: rect(33px, 9999px, 11px, 0); }
+            100% { clip: rect(70px, 9999px, 5px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(10px, 9999px, 90px, 0); }
+            100% { clip: rect(20px, 9999px, 90px, 0); }
+        }
+
+        @media (max-width: 920px) {
+            .hero-shell,
+            .resume-grid,
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            .hero-shell { gap: 28px; }
+            .card { width: min(360px, 100%); margin: 0 auto; }
+            .timeline-item { grid-template-columns: 1fr; gap: 10px; }
+        }
+
+        @media (max-width: 680px) {
+            .site-nav {
+                top: 10px;
+                width: calc(100% - 20px);
+                justify-content: space-between;
+                gap: 2px;
+                padding: 7px;
+                overflow-x: auto;
+            }
+            .site-nav a {
+                padding: 0 10px;
+                font-size: 0.88rem;
+            }
+            #section-home { padding: 92px 16px 72px; }
+            .hero-title { font-size: 2.65rem; }
+            .hero-summary { font-size: 0.98rem; }
+            .light-section,
+            #section-research {
+                padding: 72px 16px;
+            }
+            .summary-panel,
+            .metric-card,
+            .education-card,
+            .timeline-item,
+            .detail-card {
+                border-radius: 14px;
+                padding: 22px;
+            }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .award-list li {
+                display: block;
+            }
+            .award-list span {
+                display: block;
+                margin-top: 4px;
+            }
+        }
     </style>
 </head>
 <body>
+    <nav class="site-nav" aria-label="Primary">
+        <a href="#section-home" title="Home"><i class="fas fa-house"></i>Home</a>
+        <a href="#section-about" title="Resume"><i class="fas fa-id-card"></i>Resume</a>
+        <a href="#section-research" title="Research"><i class="fas fa-microchip"></i>Research</a>
+    </nav>
 
-    <!-- === 第一屏：首页 === -->
     <section id="section-home">
         <canvas id="canvas-bg"></canvas>
-        <div class="card">
-            <div class="avatar-container">
-                <img src="my-avatar.jpg" alt="Avatar" class="avatar">
+        <div class="hero-shell">
+            <div class="card reveal-up">
+                <div class="avatar-container">
+                    <img src="my-avatar.jpg" alt="韩岳成头像" class="avatar">
+                </div>
+                <h1 class="glitch-name" data-text="韩岳成">韩岳成</h1>
+                <div class="identity">SJTU AI UNDERGRADUATE</div>
+                <p class="bio-text"><span id="typewriter"></span><span class="cursor">|</span></p>
+                <div class="music-visualizer" aria-hidden="true">
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                </div>
+                <div class="social-links">
+                    <a href="https://github.com/inwt2333" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="https://space.bilibili.com/503141548" target="_blank" title="Bilibili"><i class="fab fa-bilibili"></i></a>
+                    <a href="mailto:inwt233@163.com" title="Email"><i class="fas fa-envelope"></i></a>
+                    <a href="tel:+8613904682299" title="Phone"><i class="fas fa-phone"></i></a>
+                </div>
             </div>
-            <h1 class="glitch-name" data-text="Inwt的鸽子窝">Inwt的鸽子窝</h1>
-            <p class="bio-text"><span id="typewriter"></span><span class="cursor">|</span></p>
-            <div class="music-visualizer">
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-            </div>
-            <div class="social-links">
-                <a href="https://github.com/inwt2333" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
-                <a href="https://space.bilibili.com/503141548" target="_blank" title="Bilibili"><i class="fab fa-bilibili"></i></a>
-                <a href="mailto:inwt233@sjtu.edu.cn" title="Email"><i class="fas fa-envelope"></i></a>
+
+            <div class="hero-copy reveal-up">
+                <div class="eyebrow">PORTFOLIO / RESUME</div>
+                <h2 class="hero-title">Exploring <span>Agent</span> architectures and real-world AI applications.</h2>
+                <p class="hero-summary">
+                    上海交通大学人工智能学院本科在读。关注 Transformer、LLM、Agent 架构与多智能体协同，希望把扎实的数学基础、工程实践和系统视角连接起来，探索更可解释、更能自我演化的智能系统。
+                </p>
+                <div class="hero-actions">
+                    <a class="action-btn primary" href="#section-about"><i class="fas fa-arrow-down"></i>查看简历</a>
+                    <a class="action-btn" href="#section-research"><i class="fas fa-flask"></i>科研经历</a>
+                    <a class="action-btn" href="mailto:inwt233@163.com"><i class="fas fa-paper-plane"></i>联系我</a>
+                </div>
             </div>
         </div>
-        <a href="#section-about" class="scroll-indicator"><i class="fas fa-chevron-down"></i></a>
+        <a href="#section-about" class="scroll-indicator" title="Scroll"><i class="fas fa-chevron-down"></i></a>
     </section>
 
-    <!-- === 第二屏：简介 === -->
-    <section id="section-about">
-        <div class="about-content">
-            <span class="reveal-text delay-1">Hello,</span>
-            <span class="reveal-text delay-2">我是Inwt,</span>
-            <span class="reveal-text delay-3">一名研究AI的大二学生。</span>
+    <section id="section-about" class="light-section">
+        <div class="section-inner">
+            <div class="section-kicker reveal-up">PROFILE SNAPSHOT</div>
+            <h2 class="section-title reveal-up">从数学基础到 Agent 系统工程</h2>
+            <div class="resume-grid">
+                <article class="summary-panel reveal-up">
+                    <h3>个人总结</h3>
+                    <p>
+                        我是韩岳成，上海交通大学人工智能学院本科在读，具备扎实的数学基础与工程实践能力。深入研究 Transformer、LLM 与 Agent 架构，对大模型推理机制、多智能体系统协同及系统自进化方向具有浓厚兴趣。
+                    </p>
+                    <div class="keyword-cloud">
+                        <span>Transformer</span>
+                        <span>LLM Reasoning</span>
+                        <span>Agent Systems</span>
+                        <span>PyTorch</span>
+                        <span>Python / C++</span>
+                        <span>Multi-Agent Routing</span>
+                    </div>
+                </article>
+
+                <div class="reveal-up">
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-value">90.61</span>
+                            <p>平均学积分，当前专业排名 20/66。</p>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">3.86</span>
+                            <p>本科绩点，综合评价排名 14/66。</p>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">ICML 2026</span>
+                            <p>AgentXRay 三作，聚焦 Agent 工作流重构与可解释性。</p>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-value">MCM</span>
+                            <p>美国大学生数学建模竞赛 Meritorious Winner。</p>
+                        </div>
+                    </div>
+                    <div class="education-card">
+                        <h3>教育背景</h3>
+                        <p><strong>上海交通大学，人工智能学院（本科）</strong></p>
+                        <p>2024.8 - 至今 | 平均学积分 90.61，绩点 3.86，综合评价 14/66</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- === 第三屏：博客列表 === -->
-    <section id="section-blog">
-        <h2 class="blog-header">MY_ARCHIVES</h2>
-        <div class="blog-container" id="blog-list">
-            <!-- JS 会把卡片插在这里 -->
+    <section id="section-research">
+        <div class="section-inner">
+            <div class="section-kicker reveal-up">RESEARCH & PROJECTS</div>
+            <h2 class="section-title reveal-up">科研、项目与实践轨迹</h2>
+            <div class="timeline">
+                <article class="timeline-item reveal-up">
+                    <div class="timeline-time">ICML 2026</div>
+                    <div class="timeline-body">
+                        <h3>AgentXRay: White-Boxing Agentic Systems via Workflow Reconstruction <span class="badge">三作</span></h3>
+                        <ul>
+                            <li>提出 Agent 流程白盒化分析框架，通过重构工作流实现对复杂智能体决策链的深度解耦与透明化监控。</li>
+                            <li>负责大规模实验验证，通过实验证明该方法在提升 Agent 系统可解释性方面的有效性。</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="timeline-item reveal-up">
+                    <div class="timeline-time">2026.3 - 至今</div>
+                    <div class="timeline-body">
+                        <h3>S-GAR: 基于隐空间表征的异构智能体路由机制</h3>
+                        <ul>
+                            <li>针对多智能体系统中的硬编码依赖与高延迟检索痛点，提出基于隐空间表征的统一数学契约框架。</li>
+                            <li>构建轻量级 Mapper 模型实现异构资源（LLM / Tool / Skill）的毫秒级寻址，支持系统在 O(1) 复杂度下动态演化与自适应路由。</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="timeline-item reveal-up">
+                    <div class="timeline-time">Project</div>
+                    <div class="timeline-body">
+                        <h3>量化交易策略研究</h3>
+                        <ul>
+                            <li>研究多因子量化交易策略，使用 Python 构建数据处理与策略回测系统，进行多参数组合实验比较。</li>
+                            <li>分析策略收益率、最大回撤与夏普比率，实现交易策略的自动化验证。</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="timeline-item reveal-up">
+                    <div class="timeline-time">Project</div>
+                    <div class="timeline-body">
+                        <h3>Jittor 深度学习框架应用开发</h3>
+                        <ul>
+                            <li>参与 Jittor 深度学习框架下的模型开发与算子实现，熟悉深度学习框架的使用流程与计算逻辑。</li>
+                        </ul>
+                    </div>
+                </article>
+
+                <article class="timeline-item reveal-up">
+                    <div class="timeline-time">2025.7</div>
+                    <div class="timeline-body">
+                        <h3>世界人工智能大会（WAIC）</h3>
+                        <ul>
+                            <li>参与行业前沿技术交流，深入调研全球大模型应用生态与 AI 产业化发展趋势。</li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
         </div>
     </section>
+
+    <section class="light-section">
+        <div class="section-inner">
+            <div class="section-kicker reveal-up">SKILLS & HONORS</div>
+            <h2 class="section-title reveal-up">能力栈与阶段性成果</h2>
+            <div class="two-column">
+                <article class="detail-card reveal-up">
+                    <h3><i class="fas fa-brain"></i>个人能力</h3>
+                    <ul>
+                        <li><strong>人工智能与大模型：</strong>熟练掌握 Transformer 及 LLM 推理架构，具备 Agent 开发实践经验；精通 PyTorch 模型训练流程、调参及实验管理。</li>
+                        <li><strong>编程与工程：</strong>熟练使用 Python 和 C++ 进行算法实现与数据处理，熟悉 Git 版本控制工作流，能够独立进行多实验环境下的开发与调试。</li>
+                    </ul>
+                </article>
+                <article class="detail-card reveal-up">
+                    <h3><i class="fas fa-trophy"></i>竞赛获奖</h3>
+                    <ul class="award-list">
+                        <li>美国大学生数学建模竞赛 <strong>Meritorious Winner（一等奖）</strong><span>2026.2</span></li>
+                        <li>上海交通大学 <strong>三好学生</strong><span>2025.10</span></li>
+                        <li>致远优秀奖学金<span>2024.12 / 2025.12</span></li>
+                        <li>本科生优秀奖学金 C 等<span>2025.12</span></li>
+                        <li>蓝桥杯全国软件和信息技术专业人才大赛 <strong>省级二等奖</strong><span>2024.5</span></li>
+                        <li>全国中学生物理奥林匹克竞赛 <strong>省级二等奖</strong><span>2023.9</span></li>
+                    </ul>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        Han Yuecheng / inwt2333 / Built with neon, notes, and curiosity.
+    </footer>
 
     <script>
-        /* --- 动画与特效 JS --- */
-        const observer = new IntersectionObserver((entries, observer) => {
+        const revealObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const texts = entry.target.querySelectorAll('.reveal-text');
-                    texts.forEach(text => text.classList.add('visible'));
-                    observer.unobserve(entry.target);
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.3 });
-        observer.observe(document.getElementById('section-about'));
+        }, { threshold: 0.18 });
+        document.querySelectorAll('.reveal-up').forEach(item => revealObserver.observe(item));
 
-        const texts = ["SJTU", "Violin🎻 & Piano🎹 Lover", "Student in AI", "Always sleepy"]; 
-        let count = 0; let index = 0; let currentText = ""; let letter = "";
+        const texts = [
+            "Transformer & LLM Reasoning",
+            "Agent Workflow Reconstruction",
+            "Violin & Piano Lover",
+            "Python / C++ / PyTorch"
+        ];
+        let count = 0;
+        let index = 0;
+        let currentText = "";
+        let letter = "";
         (function type() {
             if (count === texts.length) count = 0;
             currentText = texts[count];
             letter = currentText.slice(0, ++index);
             document.getElementById('typewriter').textContent = letter;
-            if (letter.length === currentText.length) { count++; index = 0; setTimeout(type, 2000); } 
-            else { setTimeout(type, 150); }
+            if (letter.length === currentText.length) {
+                count++;
+                index = 0;
+                setTimeout(type, 1900);
+            } else {
+                setTimeout(type, 95);
+            }
         })();
 
         const canvas = document.getElementById("canvas-bg");
         const ctx = canvas.getContext("2d");
         const sectionHome = document.getElementById("section-home");
-        canvas.width = sectionHome.clientWidth; canvas.height = sectionHome.clientHeight;
         let particlesArray;
+        let mouse = { x: null, y: null };
+
+        function resizeCanvas() {
+            canvas.width = sectionHome.clientWidth;
+            canvas.height = sectionHome.clientHeight;
+        }
+
         class Particle {
-            constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.directionX = (Math.random() * 1) - 0.5; this.directionY = (Math.random() * 1) - 0.5; this.size = Math.random() * 2; this.isNote = Math.random() > 0.8; this.noteSymbol = Math.random() > 0.5 ? '♪' : '♫'; }
-            draw() { ctx.beginPath(); if (this.isNote) { ctx.font = "15px Arial"; ctx.fillStyle = "#ff0080"; ctx.fillText(this.noteSymbol, this.x, this.y); } else { ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); ctx.fillStyle = '#00fff9'; ctx.fill(); } }
-            update() { if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX; if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY; this.x += this.directionX; this.y += this.directionY; this.draw(); }
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.directionX = (Math.random() * 1) - 0.5;
+                this.directionY = (Math.random() * 1) - 0.5;
+                this.size = Math.random() * 2.2 + 0.4;
+                this.isNote = Math.random() > 0.84;
+                this.noteSymbol = Math.random() > 0.5 ? '♪' : '♫';
+                this.hue = Math.random() > 0.5 ? '#00fff9' : '#ff0080';
+            }
+            draw() {
+                ctx.beginPath();
+                if (this.isNote) {
+                    ctx.font = "15px Arial";
+                    ctx.fillStyle = this.hue;
+                    ctx.fillText(this.noteSymbol, this.x, this.y);
+                } else {
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                    ctx.fillStyle = this.hue;
+                    ctx.fill();
+                }
+            }
+            update() {
+                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+                if (mouse.x && mouse.y) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 92) {
+                        this.x -= dx / 34;
+                        this.y -= dy / 34;
+                    }
+                }
+                this.x += this.directionX;
+                this.y += this.directionY;
+                this.draw();
+            }
         }
-        function init() { particlesArray = []; let numberOfParticles = (canvas.height * canvas.width) / 9000; for (let i = 0; i < numberOfParticles; i++) { particlesArray.push(new Particle()); } }
-        function animate() { requestAnimationFrame(animate); ctx.clearRect(0, 0, canvas.width, canvas.height); for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); } connect(); }
-        function connect() { let opacityValue = 1; for (let a = 0; a < particlesArray.length; a++) { for (let b = a; b < particlesArray.length; b++) { let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y)); if (distance < (canvas.width/7) * (canvas.height/7)) { opacityValue = 1 - (distance / 20000); ctx.strokeStyle = 'rgba(0, 255, 249,' + opacityValue + ')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(particlesArray[b].x, particlesArray[b].y); ctx.stroke(); } } } }
-        window.addEventListener('resize', function(){ canvas.width = sectionHome.clientWidth; canvas.height = sectionHome.clientHeight; init(); });
-        init(); animate();
-
-        /* --- 3. 博客渲染系统 (跳转版) --- */
-        document.addEventListener('DOMContentLoaded', () => {
-            const blogContainer = document.getElementById('blog-list');
-            
-            // 获取文章索引列表
-            fetch('posts.json')
-                .then(response => response.json())
-                .then(data => {
-                    renderBlogList(data);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    blogContainer.innerHTML = '<p style="text-align:center; color:#999;">文章列表加载失败</p>';
-                });
+        function init() {
+            particlesArray = [];
+            const numberOfParticles = Math.min(150, Math.floor((canvas.height * canvas.width) / 8500));
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connect();
+        }
+        function connect() {
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    const distance = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2);
+                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                        const opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = 'rgba(0, 255, 249,' + Math.max(0, opacityValue) + ')';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
         });
-
-        function renderBlogList(data) {
-            const blogContainer = document.getElementById('blog-list');
-            blogContainer.innerHTML = ''; // 清空
-
-            data.forEach((post) => {
-                const card = document.createElement('div');
-                card.className = 'blog-card';
-                
-                // === 关键修改 ===
-                // 点击卡片，打开新窗口 (article.html)，并带上文件名作为参数
-                card.onclick = () => {
-                    // encodeURIComponent 是为了防止文件名里有特殊字符导致网址出错
-                    const targetUrl = `article.html?file=${encodeURIComponent(post.file)}&title=${encodeURIComponent(post.title)}&date=${encodeURIComponent(post.date)}`;
-                    window.open(targetUrl, '_blank'); 
-                };
-                
-                card.innerHTML = `
-                    <div class="post-date">${post.date}</div>
-                    <h3 class="post-title">${post.title}</h3>
-                    <div class="post-summary">${post.summary}</div>
-                `;
-                blogContainer.appendChild(card);
-            });
-        }
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            init();
+        });
+        resizeCanvas();
+        init();
+        animate();
     </script>
 </body>
 </html>
