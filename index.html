@@ -168,6 +168,12 @@
             letter-spacing: 0;
             margin-bottom: 12px;
         }
+        .english-name {
+            color: rgba(255, 255, 255, 0.72);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.86rem;
+            margin: -2px 0 10px;
+        }
         .bio-text {
             color: #a0a0c0;
             font-size: 0.92rem;
@@ -484,6 +490,25 @@
             color: rgba(255,255,255,0.76);
             line-height: 1.75;
         }
+        .paper-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            margin-top: 14px;
+            padding: 8px 12px;
+            border: 1px solid rgba(0, 255, 249, 0.28);
+            border-radius: 999px;
+            color: #00fff9;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.86rem;
+            transition: all 0.24s ease;
+        }
+        .paper-link:hover {
+            border-color: rgba(255, 0, 128, 0.55);
+            color: #fff;
+            background: rgba(255, 0, 128, 0.12);
+        }
         .badge {
             display: inline-flex;
             align-items: center;
@@ -640,6 +665,7 @@
         <a href="#section-about" title="Resume"><i class="fas fa-id-card"></i>Resume</a>
         <a href="#section-research" title="Research"><i class="fas fa-microchip"></i>Research</a>
         <a href="https://inwt233.cn/Classic-Music/?event=perf_1275e45ad143be37" target="_blank" rel="noopener" title="古典乐演出日历"><i class="fas fa-music"></i>Music</a>
+        <a href="https://inwt233.gitbook.io/ai-learning" target="_blank" rel="noopener" title="AI-learning"><i class="fas fa-graduation-cap"></i>AI-learning</a>
     </nav>
 
     <section id="section-home">
@@ -650,6 +676,7 @@
                     <img src="my-avatar.jpg" alt="韩岳成头像" class="avatar">
                 </div>
                 <h1 class="glitch-name" data-text="韩岳成">韩岳成</h1>
+                <div class="english-name">Yuecheng Han</div>
                 <div class="identity">SJTU AI UNDERGRADUATE</div>
                 <p class="bio-text"><span id="typewriter"></span><span class="cursor">|</span></p>
                 <div class="music-visualizer" aria-hidden="true">
@@ -747,6 +774,7 @@
                             <li>提出 Agent 流程白盒化分析框架，通过重构工作流实现对复杂智能体决策链的深度解耦与透明化监控。</li>
                             <li>负责大规模实验验证，通过实验证明该方法在提升 Agent 系统可解释性方面的有效性。</li>
                         </ul>
+                        <a class="paper-link" href="https://arxiv.org/abs/2602.05353" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i>arXiv:2602.05353</a>
                     </div>
                 </article>
 
