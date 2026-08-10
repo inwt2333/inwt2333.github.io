@@ -3,989 +3,1068 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>韩岳成-个人简介</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="description" content="韩岳成，上海交通大学人工智能学院本科生，关注 Agent 架构、大模型推理与多智能体系统。">
+    <meta name="theme-color" content="#07090c">
+    <title>韩岳成 - 个人简介</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body {
-            background: #0d0d1e;
-            color: #fff;
-            font-family: 'Noto Sans SC', sans-serif;
-            overflow-x: hidden;
+        :root {
+            --ink: #07090c;
+            --ink-2: #0d1117;
+            --panel: #12171f;
+            --paper: #f1f3f0;
+            --paper-2: #dfe4e2;
+            --text: #f5f7f6;
+            --muted: #8c969f;
+            --cyan: #42f5e9;
+            --red: #ff5a4f;
+            --lime: #c8ff58;
+            --line: rgba(255, 255, 255, 0.13);
+            --mono: 'Space Mono', monospace;
+            --sans: 'Manrope', 'Noto Sans SC', sans-serif;
+            --page: min(1280px, calc(100vw - 64px));
         }
 
-        section { width: 100%; position: relative; overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+        body {
+            overflow-x: hidden;
+            background: var(--ink);
+            color: var(--text);
+            font-family: var(--sans);
+            line-height: 1.6;
+            text-rendering: optimizeLegibility;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0.16;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.26'/%3E%3C/svg%3E");
+        }
         a { color: inherit; text-decoration: none; }
+        button, a { -webkit-tap-highlight-color: transparent; }
+        ::selection { background: var(--cyan); color: var(--ink); }
 
-        .site-nav {
+        .page-shell { width: var(--page); margin: 0 auto; }
+        .mono { font-family: var(--mono); }
+        .accent-cyan { color: var(--cyan); }
+        .accent-red { color: var(--red); }
+
+        .site-nav-wrap {
             position: fixed;
             top: 18px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 9px 12px;
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 999px;
-            background: rgba(13, 13, 30, 0.58);
-            backdrop-filter: blur(18px);
-            box-shadow: 0 0 24px rgba(0, 255, 249, 0.12);
-        }
-        .site-nav a {
-            min-height: 34px;
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 0 13px;
-            border-radius: 999px;
-            color: rgba(255, 255, 255, 0.74);
-            font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
-            font-size: 0.95rem;
-            transition: all 0.25s ease;
-            white-space: nowrap;
-        }
-        .site-nav a:hover {
-            color: #fff;
-            background: rgba(0, 255, 249, 0.13);
-            text-shadow: 0 0 12px rgba(0, 255, 249, 0.65);
-        }
-
-        #section-home {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 110px 24px 90px;
-            background: #0d0d1e;
-        }
-        #canvas-bg {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-        #section-home::after {
-            content: "";
-            position: absolute;
-            inset: auto 0 0;
-            height: 34%;
-            background: linear-gradient(to bottom, rgba(13, 13, 30, 0), #111124);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .hero-shell {
-            position: relative;
-            z-index: 10;
-            width: min(1120px, 100%);
-            display: grid;
-            grid-template-columns: 370px minmax(0, 1fr);
-            gap: 42px;
-            align-items: center;
-        }
-        .card {
-            position: relative;
-            background: rgba(255, 255, 255, 0.055);
-            backdrop-filter: blur(16px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 38px 22px;
-            text-align: center;
-            box-shadow: 0 0 32px rgba(0, 255, 255, 0.19);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 52px rgba(255, 0, 128, 0.34);
-        }
-        .card::before {
-            content: "";
-            position: absolute;
-            inset: -1px;
-            border-radius: inherit;
-            background: linear-gradient(135deg, rgba(0, 255, 249, 0.28), transparent 32%, rgba(255, 0, 128, 0.25));
-            pointer-events: none;
-            opacity: 0.55;
-            z-index: -1;
-        }
-        .avatar-container {
-            width: 126px;
-            height: 126px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            padding: 3px;
-            background: linear-gradient(45deg, #00f260, #0575e6, #ff0080);
-        }
-        .avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #1a1a2e;
-        }
-        .glitch-name {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2.7rem;
-            font-weight: 700;
-            color: #fff;
-            position: relative;
-            margin-bottom: 6px;
-            line-height: 1.05;
-        }
-        .glitch-name::before,
-        .glitch-name::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: #0d0d1e;
+            z-index: 100;
+            padding: 0 24px;
         }
-        .glitch-name::before {
-            left: 2px;
-            text-shadow: -1px 0 #ff00c1;
-            clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim 5s infinite linear alternate-reverse;
-        }
-        .glitch-name::after {
-            left: -2px;
-            text-shadow: -1px 0 #00fff9;
-            clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim2 5s infinite linear alternate-reverse;
-        }
-        .identity {
-            color: #00fff9;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.78rem;
-            letter-spacing: 0;
-            margin-bottom: 12px;
-        }
-        .english-name {
-            color: rgba(255, 255, 255, 0.72);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.86rem;
-            margin: -2px 0 10px;
-        }
-        .bio-text {
-            color: #a0a0c0;
-            font-size: 0.92rem;
-            margin-bottom: 25px;
-            min-height: 1.6em;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 500;
-        }
-        .cursor {
-            display: inline-block;
-            width: 2px;
-            background-color: #00fff9;
-            animation: blink 1s infinite;
-        }
-        .music-visualizer {
+        .site-nav {
+            width: min(1280px, 100%);
+            height: 58px;
+            margin: 0 auto;
             display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            height: 30px;
-            margin-bottom: 25px;
-            gap: 5px;
-        }
-        .bar {
-            width: 6px;
-            background: linear-gradient(to top, #00f260, #0575e6);
-            border-radius: 3px;
-            animation: bounce 1s infinite ease-in-out;
-        }
-        .bar:nth-child(1) { height: 10px; animation-delay: 0.1s; }
-        .bar:nth-child(2) { height: 15px; animation-delay: 0.3s; }
-        .bar:nth-child(3) { height: 25px; animation-delay: 0s; }
-        .bar:nth-child(4) { height: 18px; animation-delay: 0.4s; }
-        .bar:nth-child(5) { height: 12px; animation-delay: 0.2s; }
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-        }
-        .social-links a {
-            width: 42px;
-            height: 42px;
-            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 50%;
-            color: rgba(255, 255, 255, 0.75);
-            font-size: 1.25rem;
-            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 6px;
+            background: rgba(7, 9, 12, 0.78);
+            backdrop-filter: blur(18px) saturate(140%);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
         }
-        .social-links a:hover {
-            color: #fff;
-            border-color: rgba(0, 255, 249, 0.55);
-            text-shadow: 0 0 10px #00fff9;
-            transform: scale(1.1);
+        .nav-brand {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 22px;
+            border-right: 1px solid var(--line);
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
         }
-
-        .hero-copy {
-            padding: 10px 0;
+        .brand-mark {
+            width: 9px;
+            height: 9px;
+            background: var(--cyan);
+            box-shadow: 0 0 16px var(--cyan);
+            animation: pulse 2.4s ease-in-out infinite;
         }
-        .eyebrow {
+        .nav-links { display: flex; align-items: stretch; height: 100%; margin-left: auto; }
+        .nav-links a {
+            position: relative;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 16px;
-            color: #00fff9;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.82rem;
+            padding: 0 18px;
+            border-left: 1px solid var(--line);
+            color: #a9b1b8;
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            transition: color 180ms ease, background 180ms ease;
         }
-        .eyebrow::before {
-            content: "";
-            width: 36px;
-            height: 1px;
-            background: linear-gradient(90deg, #00fff9, rgba(255,255,255,0));
+        .nav-links a:hover, .nav-links a.active { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--cyan);
+            transition: width 180ms ease, left 180ms ease;
         }
-        .hero-title {
-            max-width: 740px;
-            font-size: clamp(2.45rem, 6vw, 5.5rem);
-            line-height: 0.96;
-            font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
-            font-weight: 700;
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; left: 0; }
+        .nav-links .external::after { background: var(--lime); }
+        .nav-links i { font-size: 0.72rem; }
+        .nav-toggle { display: none; }
+
+        .hero {
+            position: relative;
+            min-height: min(920px, 100svh);
+            padding: 128px 0 58px;
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+            border-bottom: 1px solid var(--line);
+            isolation: isolate;
+        }
+        #agent-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -3; }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            background:
+                linear-gradient(90deg, var(--ink) 0%, rgba(7, 9, 12, 0.91) 38%, rgba(7, 9, 12, 0.18) 72%, var(--ink) 100%),
+                linear-gradient(0deg, var(--ink) 0%, transparent 28%);
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: linear-gradient(to bottom, black, transparent 88%);
+        }
+        .hero-grid {
+            width: var(--page);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(0, 1.14fr) minmax(380px, 0.86fr);
+            align-items: center;
+            gap: 52px;
+        }
+        .hero-copy { position: relative; z-index: 3; padding: 46px 0; }
+        .system-line {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 34px;
+            color: var(--cyan);
+            font: 0.68rem/1.4 var(--mono);
+            text-transform: uppercase;
+        }
+        .system-line::before { content: ''; width: 42px; height: 1px; background: var(--cyan); }
+        .hero-name {
+            font-size: clamp(4.2rem, 9.6vw, 9rem);
+            line-height: 0.82;
+            font-weight: 900;
             letter-spacing: 0;
+            white-space: nowrap;
         }
-        .hero-title span {
+        .hero-name span { position: relative; display: inline-block; }
+        .hero-name span::after {
+            content: attr(data-ghost);
+            position: absolute;
+            left: 5px;
+            top: 4px;
+            z-index: -1;
             color: transparent;
-            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.76);
-            text-shadow: 0 0 28px rgba(255, 0, 128, 0.24);
+            -webkit-text-stroke: 1px rgba(66, 245, 233, 0.4);
+            clip-path: inset(62% 0 12% 0);
         }
+        .english-name {
+            margin-top: 22px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #c5ccd1;
+            font: 700 clamp(1rem, 1.8vw, 1.35rem)/1 var(--mono);
+            text-transform: uppercase;
+        }
+        .english-name::after { content: ''; flex: 1; max-width: 150px; height: 1px; background: var(--line); }
+        .hero-statement {
+            max-width: 700px;
+            margin-top: 38px;
+            font-size: clamp(1.35rem, 2.25vw, 2.1rem);
+            line-height: 1.45;
+            font-weight: 500;
+        }
+        .hero-statement em { color: var(--cyan); font-style: normal; }
         .hero-summary {
-            max-width: 720px;
-            margin: 24px 0 28px;
-            color: rgba(255, 255, 255, 0.76);
-            font-size: 1.05rem;
+            max-width: 650px;
+            margin-top: 22px;
+            color: #9da7af;
+            font-size: 0.96rem;
             line-height: 1.9;
         }
-        .hero-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 34px; }
+        .command-button {
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 11px;
+            padding: 0 18px;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.025);
+            color: var(--text);
+            font: 700 0.72rem/1 var(--mono);
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
         }
-        .action-btn {
-            min-height: 46px;
+        .command-button:hover { transform: translateY(-2px); border-color: var(--cyan); background: rgba(66,245,233,0.08); }
+        .command-button.primary { background: var(--cyan); border-color: var(--cyan); color: var(--ink); }
+        .command-button.primary:hover { background: var(--lime); border-color: var(--lime); }
+
+        .portrait-stage {
+            position: relative;
+            min-width: 0;
+            align-self: stretch;
+            min-height: 610px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .identity-console {
+            position: relative;
+            min-width: 0;
+            width: min(100%, 470px);
+            min-height: 430px;
+            padding: 34px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            background:
+                linear-gradient(rgba(66,245,233,0.055) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(66,245,233,0.055) 1px, transparent 1px),
+                #0a0e13;
+            background-size: 28px 28px;
+            box-shadow: -30px 30px 80px rgba(0,0,0,0.36);
+        }
+        .identity-console::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(66,245,233,0.08), transparent 38%, rgba(255,90,79,0.05));
+        }
+        .identity-top {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--line);
+        }
+        .avatar-medallion {
+            width: 136px;
+            height: 136px;
+            flex: 0 0 136px;
+            padding: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(66,245,233,0.45);
+            border-radius: 50%;
+            background: var(--paper);
+            box-shadow: 0 0 0 8px rgba(66,245,233,0.035), 0 0 32px rgba(66,245,233,0.08);
+        }
+        .avatar-medallion img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .identity-card-name { color: var(--text); font: 700 1.35rem/1.15 var(--mono); }
+        .identity-card-name span { display: block; color: #7d878e; }
+        .identity-role { margin-top: 12px; color: var(--cyan); font: 700 0.7rem/1.55 var(--mono); }
+        .identity-school { margin-top: 5px; color: #8e989f; font-size: 0.76rem; }
+        .score-panel {
+            position: relative;
+            min-width: 0;
+            z-index: 2;
+            margin-top: 34px;
+        }
+        .music-display {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            height: 184px;
+            overflow: hidden;
+        }
+        .music-staff {
+            position: absolute;
+            inset: 0 0 auto;
+            height: 112px;
+            border-left: 1px solid rgba(255,255,255,0.16);
+            border-right: 1px solid rgba(255,255,255,0.16);
+            background: repeating-linear-gradient(to bottom, transparent 0, transparent 18px, rgba(255,255,255,0.14) 18px, rgba(255,255,255,0.14) 19px);
+        }
+        .melody-phrase {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            will-change: opacity, transform;
+        }
+        .melody-phrase:first-child { animation: phrase-one 12s ease-in-out infinite; }
+        .melody-phrase:last-child { animation: phrase-two 12s ease-in-out infinite; }
+        .visual-note {
+            position: absolute;
+            left: var(--x);
+            top: var(--y);
+            color: var(--c, var(--cyan));
+            font-family: "Segoe UI Symbol", "Noto Music", sans-serif;
+            font-size: 29px;
+            line-height: 1;
+            white-space: nowrap;
+            filter: drop-shadow(0 0 5px color-mix(in srgb, var(--c, var(--cyan)) 54%, transparent));
+            transform: translate(-50%, -78%);
+            transform-origin: 50% 78%;
+            animation: note-float 2.5s ease-in-out infinite alternate;
+            animation-delay: var(--delay, 0s);
+        }
+        .visual-note.n4 { font-size: 31px; transform: translate(-50%, -76%); transform-origin: 50% 76%; }
+        .frequency-row {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 5px;
+            height: 52px;
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            padding: 0 2px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.13);
+        }
+        .frequency-row span {
+            flex: 1;
+            height: var(--h);
+            min-width: 3px;
+            background: linear-gradient(to top, rgba(66,245,233,0.16), var(--c, var(--cyan)));
+            box-shadow: 0 0 8px color-mix(in srgb, var(--c, var(--cyan)) 35%, transparent);
+            transform-origin: bottom;
+            animation: frequency 2.2s ease-in-out infinite alternate;
+            animation-delay: var(--d);
+        }
+        .hero-index {
+            position: absolute;
+            left: max(24px, calc((100vw - 1280px) / 2));
+            bottom: 24px;
+            z-index: 4;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            color: #68727a;
+            font: 0.62rem/1 var(--mono);
+        }
+        .hero-index::before { content: ''; width: 8px; height: 8px; border: 1px solid var(--red); }
+
+        .marquee {
+            overflow: hidden;
+            border-bottom: 1px solid var(--line);
+            background: var(--cyan);
+            color: var(--ink);
+        }
+        .marquee-track {
+            width: max-content;
+            display: flex;
+            align-items: center;
+            gap: 34px;
+            padding: 13px 0;
+            animation: marquee 28s linear infinite;
+            font: 700 0.72rem/1 var(--mono);
+            text-transform: uppercase;
+        }
+        .marquee-track span::after { content: '✦'; margin-left: 34px; }
+
+        .section { position: relative; padding: 120px 0; border-bottom: 1px solid var(--line); }
+        .section-head {
+            display: grid;
+            grid-template-columns: 160px minmax(0, 1fr);
+            gap: 36px;
+            align-items: start;
+            margin-bottom: 68px;
+        }
+        .section-code { color: var(--cyan); font: 0.68rem/1.5 var(--mono); }
+        .section-title { font-size: clamp(2.4rem, 5vw, 5.2rem); line-height: 1.05; font-weight: 700; }
+        .section-title .outline { color: #737d85; font-weight: 500; }
+
+        .profile { background: var(--paper); color: var(--ink); }
+        .profile .section-code { color: #007e77; }
+        .profile .section-title .outline { color: #747d7f; }
+        .profile-layout { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(330px, 0.82fr); gap: 76px; }
+        .profile-lead {
+            font-size: clamp(1.5rem, 2.8vw, 2.6rem);
+            line-height: 1.48;
+            font-weight: 600;
+        }
+        .profile-lead span { box-shadow: inset 0 -0.35em 0 rgba(66,245,233,0.48); }
+        .profile-copy { margin-top: 28px; max-width: 760px; color: #4a5358; line-height: 2; font-size: 1rem; }
+        .topic-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 32px; }
+        .topic-row span { padding: 8px 11px; border: 1px solid rgba(7,9,12,0.2); border-radius: 3px; font: 0.66rem/1 var(--mono); }
+        .profile-data { border-top: 1px solid rgba(7,9,12,0.22); }
+        .data-row {
+            display: grid;
+            grid-template-columns: 92px minmax(0,1fr);
+            gap: 18px;
+            padding: 22px 0;
+            border-bottom: 1px solid rgba(7,9,12,0.14);
+        }
+        .data-value { font: 700 1.55rem/1.2 var(--mono); }
+        .data-label { color: #5a6267; font-size: 0.86rem; line-height: 1.65; }
+        .education-line { margin-top: 28px; padding-left: 18px; border-left: 3px solid var(--red); }
+        .education-line strong { display: block; margin-bottom: 5px; font-size: 1.05rem; }
+        .education-line p { color: #5a6267; font-size: 0.86rem; }
+
+        .quote-band { padding: 0; background: #e4e8e5; color: var(--ink); }
+        .quote-layout { display: grid; grid-template-columns: 0.42fr 1.58fr; min-height: 420px; }
+        .quote-label {
+            padding: 62px 48px 62px 0;
+            border-right: 1px solid rgba(7,9,12,0.18);
+            color: #687175;
+            font: 0.68rem/1.7 var(--mono);
+        }
+        .quote-label i { display: block; margin-bottom: 28px; color: var(--red); font-size: 1.6rem; }
+        .quote-content { padding: 62px 0 62px 72px; display: flex; flex-direction: column; justify-content: center; }
+        blockquote { max-width: 950px; font-size: clamp(1.28rem, 2.35vw, 2.1rem); line-height: 1.75; font-weight: 600; }
+        .quote-source { margin-top: 30px; color: #5b6468; font-size: 0.82rem; line-height: 1.7; }
+        .quote-source strong { color: var(--ink); }
+
+        .research { background: var(--ink-2); }
+        .research::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.3;
+            background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 80px 80px;
+            pointer-events: none;
+        }
+        .project-list { position: relative; border-top: 1px solid var(--line); }
+        .project {
+            position: relative;
+            display: grid;
+            grid-template-columns: 180px minmax(260px, 0.8fr) minmax(320px, 1.2fr);
+            gap: 34px;
+            padding: 38px 0;
+            border-bottom: 1px solid var(--line);
+            transition: padding 220ms ease, background 220ms ease;
+        }
+        .project::before {
+            content: '';
+            position: absolute;
+            inset: 0 -24px;
+            z-index: 0;
+            background: rgba(255,255,255,0.035);
+            opacity: 0;
+            transition: opacity 220ms ease;
+        }
+        .project:hover::before { opacity: 1; }
+        .project > * { position: relative; z-index: 1; }
+        .project-meta { color: var(--cyan); font: 0.68rem/1.7 var(--mono); }
+        .project-meta .project-type { display: block; margin-top: 8px; color: #69737b; }
+        .project-title { font-size: clamp(1.25rem, 2vw, 1.75rem); line-height: 1.35; font-weight: 700; }
+        .project-title small { display: block; margin-top: 12px; color: var(--red); font: 0.68rem/1 var(--mono); }
+        .project-detail { color: #9ba5ac; font-size: 0.93rem; }
+        .project-detail ul { display: grid; gap: 9px; list-style: none; }
+        .project-detail li { position: relative; padding-left: 18px; }
+        .project-detail li::before { content: '↳'; position: absolute; left: 0; color: var(--cyan); font-family: var(--mono); }
+        .project-link {
+            width: fit-content;
             display: inline-flex;
             align-items: center;
             gap: 9px;
-            padding: 0 18px;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 999px;
-            background: rgba(255,255,255,0.06);
-            color: #fff;
-            font-weight: 700;
-            transition: all 0.24s ease;
+            margin-top: 18px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--cyan);
+            color: var(--cyan);
+            font: 0.7rem/1.4 var(--mono);
         }
-        .action-btn.primary {
-            border-color: rgba(0, 255, 249, 0.58);
-            background: linear-gradient(135deg, rgba(0, 255, 249, 0.18), rgba(255, 0, 128, 0.13));
-            box-shadow: 0 0 20px rgba(0, 255, 249, 0.13);
-        }
-        .action-btn:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255,255,255,0.42);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-        }
-        .scroll-indicator {
-            position: absolute;
-            bottom: 28px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-            width: 42px;
-            height: 42px;
-            display: grid;
-            place-items: center;
-            color: rgba(255, 255, 255, 0.68);
-            animation: arrow-bounce 2s infinite;
-            transition: color 0.3s;
-        }
-        .scroll-indicator:hover { color: #00fff9; }
+        .project-link:hover { color: var(--lime); border-color: var(--lime); }
 
-        .light-section {
-            background: #f7f8fb;
-            color: #232332;
-            padding: 92px 22px;
+        .capabilities { background: var(--paper); color: var(--ink); }
+        .capabilities .section-code { color: #007e77; }
+        .capabilities .section-title .outline { color: #747d7f; }
+        .capability-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 72px; }
+        .skill-block + .skill-block { margin-top: 42px; }
+        .skill-number { color: #008d84; font: 0.66rem/1 var(--mono); }
+        .skill-block h3 { margin: 8px 0 14px; font-size: 1.45rem; }
+        .skill-block p { color: #50595e; line-height: 1.9; }
+        .tech-stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+        .tech-stack span { padding: 7px 10px; border-radius: 3px; background: var(--ink); color: var(--text); font: 0.65rem/1 var(--mono); }
+        .award-list { border-top: 1px solid rgba(7,9,12,0.2); }
+        .award-item {
+            display: grid;
+            grid-template-columns: 68px minmax(0, 1fr);
+            gap: 20px;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(7,9,12,0.13);
         }
-        .section-inner {
-            width: min(1120px, 100%);
-            margin: 0 auto;
-        }
-        .section-kicker {
-            color: #ff0080;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.82rem;
-            margin-bottom: 8px;
-        }
-        .section-title {
-            font-family: 'Rajdhani', 'Noto Sans SC', sans-serif;
-            font-size: clamp(2rem, 4vw, 3.2rem);
-            line-height: 1;
-            color: #0d0d1e;
-            margin-bottom: 34px;
-        }
+        .award-date { color: #737c80; font: 0.64rem/1.55 var(--mono); }
+        .award-name { font-size: 0.96rem; font-weight: 600; }
+        .award-name strong { color: #007e77; }
 
-        #section-about {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-        }
-        .resume-grid {
-            display: grid;
-            grid-template-columns: 1.03fr 0.97fr;
-            gap: 28px;
-            align-items: stretch;
-        }
-        .summary-panel {
-            position: relative;
-            padding: 34px;
-            border-radius: 18px;
-            background: #fff;
-            box-shadow: 0 18px 55px rgba(13, 13, 30, 0.08);
-            border: 1px solid rgba(13, 13, 30, 0.06);
-        }
-        .summary-panel::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 34px;
-            width: 120px;
-            height: 3px;
-            background: linear-gradient(90deg, #00fff9, #ff0080);
-        }
-        .summary-panel h3 {
-            font-size: 1.48rem;
-            color: #0d0d1e;
-            margin-bottom: 16px;
-        }
-        .summary-panel p {
-            color: #4d5060;
-            line-height: 1.95;
-            font-size: 1rem;
-        }
-        .keyword-cloud {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 22px;
-        }
-        .keyword-cloud span {
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: #f2f5fb;
-            color: #2d3342;
-            font-size: 0.9rem;
-        }
-        .press-quote {
-            margin-top: 24px;
-            padding: 20px 22px;
-            border-left: 3px solid #ff0080;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(0, 255, 249, 0.08), rgba(255, 0, 128, 0.06));
-        }
-        .summary-panel .press-quote p {
-            color: #303342;
-            line-height: 1.86;
-            font-size: 0.96rem;
-        }
-        .press-source {
-            display: block;
-            margin-top: 12px;
-            color: #7b8192;
-            font-size: 0.82rem;
-            line-height: 1.7;
-        }
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
-        }
-        .metric-card {
-            min-height: 142px;
-            padding: 24px;
-            border-radius: 16px;
-            background: #0d0d1e;
-            color: #fff;
-            border: 1px solid rgba(0, 255, 249, 0.16);
-            box-shadow: 0 18px 44px rgba(13, 13, 30, 0.13);
-        }
-        .metric-value {
-            display: block;
-            color: #00fff9;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-        }
-        .metric-card p {
-            color: rgba(255,255,255,0.72);
-            line-height: 1.6;
-            font-size: 0.94rem;
-        }
-        .education-card {
-            margin-top: 16px;
-            padding: 24px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #fff, #f0f7ff);
-            border: 1px solid rgba(5, 117, 230, 0.12);
-        }
-        .education-card h3 {
-            color: #0d0d1e;
-            margin-bottom: 8px;
-        }
-        .education-card p {
-            color: #555a68;
-            line-height: 1.8;
-        }
-
-        #section-research {
-            background:
-                radial-gradient(circle at 16% 8%, rgba(0,255,249,0.12), transparent 30%),
-                radial-gradient(circle at 88% 22%, rgba(255,0,128,0.12), transparent 28%),
-                #111124;
-            padding: 92px 22px 100px;
-            color: #fff;
-        }
-        #section-research .section-title { color: #fff; }
-        .timeline {
-            display: grid;
-            gap: 18px;
-        }
-        .timeline-item {
-            position: relative;
-            display: grid;
-            grid-template-columns: 190px minmax(0, 1fr);
-            gap: 24px;
-            padding: 26px;
-            border-radius: 18px;
-            background: rgba(255,255,255,0.055);
-            border: 1px solid rgba(255,255,255,0.12);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 16px 45px rgba(0,0,0,0.18);
-        }
-        .timeline-time {
-            color: #00fff9;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.92rem;
-        }
-        .timeline-body h3 {
-            font-size: 1.22rem;
-            line-height: 1.45;
-            margin-bottom: 12px;
-        }
-        .timeline-body ul {
-            display: grid;
-            gap: 8px;
-            padding-left: 18px;
-            color: rgba(255,255,255,0.76);
-            line-height: 1.75;
-        }
-        .paper-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+        .connect { padding: 100px 0 0; background: var(--ink); }
+        .connect-head { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 54px; }
+        .connect-title { max-width: 800px; font-size: clamp(3rem, 7vw, 7rem); line-height: 0.98; }
+        .connect-title span { color: var(--cyan); }
+        .connect-note { max-width: 330px; color: #89939a; font-size: 0.9rem; }
+        .phone-link {
             width: fit-content;
-            margin-top: 14px;
-            padding: 8px 12px;
-            border: 1px solid rgba(0, 255, 249, 0.28);
-            border-radius: 999px;
-            color: #00fff9;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.86rem;
-            transition: all 0.24s ease;
-        }
-        .paper-link:hover {
-            border-color: rgba(255, 0, 128, 0.55);
-            color: #fff;
-            background: rgba(255, 0, 128, 0.12);
-        }
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            margin-left: 8px;
-            padding: 3px 9px;
-            border-radius: 999px;
-            background: rgba(255, 0, 128, 0.15);
-            color: #ff8fc8;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.76rem;
-            vertical-align: middle;
-        }
-
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 22px;
-        }
-        .detail-card {
-            padding: 26px;
-            border-radius: 16px;
-            background: #fff;
-            border: 1px solid rgba(13, 13, 30, 0.07);
-            box-shadow: 0 14px 42px rgba(13, 13, 30, 0.06);
-        }
-        .detail-card h3 {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #0d0d1e;
-            margin-bottom: 16px;
-            font-size: 1.24rem;
+            gap: 9px;
+            margin-top: 15px;
+            color: var(--cyan);
+            font: 0.68rem/1.4 var(--mono);
         }
-        .detail-card h3 i { color: #0575e6; }
-        .detail-card ul {
-            display: grid;
-            gap: 12px;
-            padding-left: 19px;
-            color: #4f5361;
-            line-height: 1.72;
+        .phone-link:hover { color: var(--lime); }
+        .link-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-bottom: 0; }
+        .big-link {
+            min-height: 164px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+            border-right: 1px solid var(--line);
+            background: rgba(255,255,255,0.018);
+            transition: background 200ms ease, color 200ms ease;
         }
-        .award-list li {
+        .big-link:last-child { border-right: 0; }
+        .big-link:hover { background: var(--cyan); color: var(--ink); }
+        .big-link:nth-child(2):hover { background: var(--red); }
+        .big-link:nth-child(3):hover { background: var(--lime); }
+        .big-link:nth-child(4):hover { background: var(--paper); }
+        .link-label { font: 0.65rem/1 var(--mono); opacity: 0.7; }
+        .link-name { display: flex; justify-content: space-between; align-items: end; gap: 12px; font-size: 1.12rem; font-weight: 700; }
+        .link-name i { font-size: 0.9rem; }
+        .site-footer {
             display: flex;
             justify-content: space-between;
-            gap: 16px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eef0f5;
-            list-style: none;
-        }
-        .award-list {
-            padding-left: 0;
-        }
-        .award-list span {
-            color: #8b90a0;
-            white-space: nowrap;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.85rem;
+            gap: 20px;
+            padding: 26px 0;
+            color: #69737b;
+            font: 0.62rem/1.6 var(--mono);
+            border-top: 1px solid var(--line);
         }
 
-        .site-footer {
-            padding: 34px 22px;
-            background: #0d0d1e;
-            color: rgba(255,255,255,0.62);
-            text-align: center;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.86rem;
+        .reveal { opacity: 0; transform: translateY(28px); transition: opacity 700ms cubic-bezier(.2,.7,.2,1), transform 700ms cubic-bezier(.2,.7,.2,1); }
+        .reveal.is-visible { opacity: 1; transform: none; }
+        .delay-1 { transition-delay: 80ms; }
+        .delay-2 { transition-delay: 160ms; }
+
+        @keyframes pulse { 50% { opacity: 0.45; box-shadow: 0 0 4px var(--cyan); } }
+        @keyframes marquee { to { transform: translateX(-50%); } }
+        @keyframes phrase-one {
+            0%, 42% { opacity: 1; transform: translateX(0); }
+            48%, 94% { opacity: 0; transform: translateX(-12px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes phrase-two {
+            0%, 44% { opacity: 0; transform: translateX(12px); }
+            50%, 92% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(-8px); }
+        }
+        @keyframes note-float { to { filter: brightness(1.18) drop-shadow(0 0 7px currentColor); } }
+        @keyframes frequency { to { transform: scaleY(0.45); opacity: 0.62; } }
+
+        @media (max-width: 1040px) {
+            :root { --page: min(100% - 40px, 900px); }
+            .nav-links a { padding: 0 12px; }
+            .nav-links a span { display: none; }
+            .hero { min-height: auto; }
+            .hero-grid { grid-template-columns: 1fr 350px; gap: 26px; }
+            .identity-console { min-height: 420px; padding: 28px; }
+            .profile-layout, .capability-grid { gap: 42px; }
+            .project { grid-template-columns: 120px minmax(220px, 0.8fr) minmax(300px, 1.2fr); gap: 24px; }
+            .link-grid { grid-template-columns: repeat(2, 1fr); }
+            .big-link:nth-child(2) { border-right: 0; }
+            .big-link:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
         }
 
-        .reveal-up {
-            opacity: 0;
-            transform: translateY(28px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-        .reveal-up.visible {
-            opacity: 1;
-            transform: translateY(0);
+        @media (max-width: 760px) {
+            :root { --page: calc(100% - 32px); }
+            html { scroll-padding-top: 76px; }
+            .site-nav-wrap { top: 10px; padding: 0 10px; }
+            .site-nav { height: 54px; overflow: visible; }
+            .nav-brand { padding: 0 16px; border-right: 0; }
+            .nav-toggle {
+                width: 54px;
+                height: 54px;
+                margin-left: auto;
+                display: grid;
+                place-items: center;
+                border: 0;
+                border-left: 1px solid var(--line);
+                background: transparent;
+                color: var(--text);
+                font-size: 1rem;
+                cursor: pointer;
+            }
+            .nav-links {
+                position: absolute;
+                top: 61px;
+                left: 10px;
+                right: 10px;
+                height: auto;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                background: rgba(7,9,12,0.97);
+                backdrop-filter: blur(18px);
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(-8px);
+                transition: opacity 180ms ease, transform 180ms ease;
+                overflow: hidden;
+            }
+            .site-nav.open .nav-links { opacity: 1; pointer-events: auto; transform: none; }
+            .nav-links a { min-height: 48px; border-left: 0; border-bottom: 1px solid var(--line); padding: 0 14px; }
+            .nav-links a:nth-child(odd) { border-right: 1px solid var(--line); }
+            .nav-links a span { display: inline; }
+            .hero { padding: 104px 0 54px; min-height: auto; }
+            .hero-grid { grid-template-columns: 1fr; }
+            .hero-copy { padding: 20px 0 0; }
+            .system-line { margin-bottom: 24px; }
+            .hero-name { font-size: clamp(4.1rem, 21vw, 6.4rem); }
+            .hero-statement { margin-top: 30px; }
+            .portrait-stage { min-height: 430px; margin-top: 12px; }
+            .identity-console { width: 100%; min-height: 350px; padding: 24px; }
+            .avatar-medallion { width: 108px; height: 108px; flex-basis: 108px; }
+            .identity-card-name { font-size: 1.15rem; }
+            .music-display { height: 172px; }
+            .hero-index { display: none; }
+            .section { padding: 82px 0; }
+            .section-head { grid-template-columns: 1fr; gap: 14px; margin-bottom: 46px; }
+            .profile-layout, .capability-grid { grid-template-columns: 1fr; gap: 54px; }
+            .quote-layout { grid-template-columns: 1fr; }
+            .quote-label { padding: 36px 0 24px; border-right: 0; border-bottom: 1px solid rgba(7,9,12,0.18); }
+            .quote-label i { display: inline; margin: 0 14px 0 0; }
+            .quote-content { padding: 36px 0 58px; }
+            .project { grid-template-columns: 1fr; gap: 12px; padding: 30px 0; }
+            .project-meta { display: flex; justify-content: space-between; }
+            .project-meta .project-type { margin: 0; }
+            .connect { padding-top: 76px; }
+            .connect-head { align-items: start; flex-direction: column; margin-bottom: 38px; }
+            .link-grid { grid-template-columns: 1fr; }
+            .big-link { min-height: 126px; border-right: 0; border-bottom: 1px solid var(--line); }
+            .big-link:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+            .site-footer { flex-direction: column; }
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0) scaleY(0.5); }
-            50% { transform: translateY(-5px) scaleY(1.2); }
-        }
-        @keyframes arrow-bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-            40% { transform: translateX(-50%) translateY(-10px); }
-            60% { transform: translateX(-50%) translateY(-5px); }
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-        @keyframes glitch-anim {
-            0% { clip: rect(33px, 9999px, 11px, 0); }
-            100% { clip: rect(70px, 9999px, 5px, 0); }
-        }
-        @keyframes glitch-anim2 {
-            0% { clip: rect(10px, 9999px, 90px, 0); }
-            100% { clip: rect(20px, 9999px, 90px, 0); }
+        @media (max-width: 420px) {
+            .nav-brand { font-size: 0.7rem; }
+            .hero-name { font-size: 4rem; }
+            .hero-actions { display: grid; grid-template-columns: 1fr 1fr; }
+            .command-button:last-child { grid-column: 1 / -1; }
+            .portrait-stage { min-height: 390px; }
+            .identity-console { min-height: 330px; padding: 20px; }
+            .identity-top { gap: 16px; padding-bottom: 22px; }
+            .avatar-medallion { width: 92px; height: 92px; flex-basis: 92px; }
+            .score-panel { margin-top: 24px; }
+            .data-row { grid-template-columns: 78px 1fr; }
+            blockquote { font-size: 1.2rem; }
         }
 
-        @media (max-width: 920px) {
-            .hero-shell,
-            .resume-grid,
-            .two-column {
-                grid-template-columns: 1fr;
-            }
-            .hero-shell { gap: 28px; }
-            .card { width: min(360px, 100%); margin: 0 auto; }
-            .timeline-item { grid-template-columns: 1fr; gap: 10px; }
-        }
-
-        @media (max-width: 680px) {
-            .site-nav {
-                top: 10px;
-                width: calc(100% - 20px);
-                justify-content: space-between;
-                gap: 2px;
-                padding: 7px;
-                overflow-x: auto;
-            }
-            .site-nav a {
-                padding: 0 10px;
-                font-size: 0.88rem;
-            }
-            #section-home { padding: 92px 16px 72px; }
-            .hero-title { font-size: 2.65rem; }
-            .hero-summary { font-size: 0.98rem; }
-            .light-section,
-            #section-research {
-                padding: 72px 16px;
-            }
-            .summary-panel,
-            .metric-card,
-            .education-card,
-            .timeline-item,
-            .detail-card {
-                border-radius: 14px;
-                padding: 22px;
-            }
-            .metrics-grid { grid-template-columns: 1fr; }
-            .award-list li {
-                display: block;
-            }
-            .award-list span {
-                display: block;
-                margin-top: 4px;
-            }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+            .reveal { opacity: 1; transform: none; }
         }
     </style>
 </head>
 <body>
-    <nav class="site-nav" aria-label="Primary">
-        <a href="#section-home" title="Home"><i class="fas fa-house"></i>Home</a>
-        <a href="#section-about" title="Resume"><i class="fas fa-id-card"></i>Resume</a>
-        <a href="#section-research" title="Research"><i class="fas fa-microchip"></i>Research</a>
-        <a href="https://inwt233.cn/Classic-Music/" target="_blank" rel="noopener" title="古典乐演出日历"><i class="fas fa-music"></i>Music</a>
-        <a href="https://inwt233.gitbook.io/ai-learning" target="_blank" rel="noopener" title="AI-learning"><i class="fas fa-graduation-cap"></i>AI-learning</a>
-    </nav>
-
-    <section id="section-home">
-        <canvas id="canvas-bg"></canvas>
-        <div class="hero-shell">
-            <div class="card reveal-up">
-                <div class="avatar-container">
-                    <img src="my-avatar.jpg" alt="韩岳成头像" class="avatar">
-                </div>
-                <h1 class="glitch-name" data-text="韩岳成">韩岳成</h1>
-                <div class="english-name">Yuecheng Han</div>
-                <div class="identity">SJTU AI UNDERGRADUATE</div>
-                <p class="bio-text"><span id="typewriter"></span><span class="cursor">|</span></p>
-                <div class="music-visualizer" aria-hidden="true">
-                    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                </div>
-                <div class="social-links">
-                    <a href="https://github.com/inwt2333" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
-                    <a href="https://space.bilibili.com/503141548" target="_blank" title="Bilibili"><i class="fab fa-bilibili"></i></a>
-                    <a href="mailto:inwt233@163.com" title="Email"><i class="fas fa-envelope"></i></a>
-                    <a href="tel:+8613904682299" title="Phone"><i class="fas fa-phone"></i></a>
-                </div>
+    <div class="site-nav-wrap">
+        <nav class="site-nav" aria-label="主导航">
+            <a class="nav-brand" href="#home" aria-label="返回首页">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <span>YUECHENG.HAN</span>
+            </a>
+            <button class="nav-toggle" type="button" aria-label="打开导航" aria-expanded="false">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="nav-links">
+                <a href="#profile" data-section="profile"><i class="fa-regular fa-user"></i><span>PROFILE</span></a>
+                <a href="#research" data-section="research"><i class="fa-solid fa-diagram-project"></i><span>RESEARCH</span></a>
+                <a href="#honors" data-section="honors"><i class="fa-solid fa-medal"></i><span>HONORS</span></a>
+                <a class="external" href="https://inwt233.cn/Classic-Music/" target="_blank" rel="noopener" title="古典乐演出日历"><i class="fa-solid fa-music"></i><span>MUSIC</span></a>
+                <a class="external" href="https://inwt233.gitbook.io/ai-learning" target="_blank" rel="noopener" title="AI-learning"><i class="fa-solid fa-book-open"></i><span>AI-LEARNING</span></a>
             </div>
+        </nav>
+    </div>
 
-            <div class="hero-copy reveal-up">
-                <div class="eyebrow">PORTFOLIO / RESUME</div>
-                <h2 class="hero-title">Exploring <span>Agent</span> architectures and real-world AI applications.</h2>
-                <p class="hero-summary">
-                    上海交通大学人工智能学院本科在读。关注 Transformer、LLM、Agent 架构与多智能体协同，希望把扎实的数学基础、工程实践和系统视角连接起来，探索更可解释、更能自我演化的智能系统。
-                </p>
-                <div class="hero-actions">
-                    <a class="action-btn primary" href="#section-about"><i class="fas fa-arrow-down"></i>查看简历</a>
-                    <a class="action-btn" href="#section-research"><i class="fas fa-flask"></i>科研经历</a>
-                    <a class="action-btn" href="mailto:inwt233@163.com"><i class="fas fa-paper-plane"></i>联系我</a>
-                </div>
-            </div>
-        </div>
-        <a href="#section-about" class="scroll-indicator" title="Scroll"><i class="fas fa-chevron-down"></i></a>
-    </section>
-
-    <section id="section-about" class="light-section">
-        <div class="section-inner">
-            <div class="section-kicker reveal-up">PROFILE SNAPSHOT</div>
-            <h2 class="section-title reveal-up">从数学基础到 Agent 系统工程</h2>
-            <div class="resume-grid">
-                <article class="summary-panel reveal-up">
-                    <h3>个人总结</h3>
-                    <p>
-                        我是韩岳成，上海交通大学人工智能学院本科在读，具备扎实的数学基础与工程实践能力。深入研究 Transformer、LLM 与 Agent 架构，对大模型推理机制、多智能体系统协同及系统自进化方向具有浓厚兴趣。
+    <main>
+        <section class="hero" id="home">
+            <canvas id="agent-canvas" aria-hidden="true"></canvas>
+            <div class="page-shell hero-grid">
+                <div class="hero-copy">
+                    <div class="system-line reveal">SJTU · AI UNDERGRADUATE · SHANGHAI</div>
+                    <h1 class="hero-name reveal delay-1"><span data-ghost="韩岳成">韩岳成</span></h1>
+                    <div class="english-name reveal delay-1">Yuecheng Han</div>
+                    <p class="hero-statement reveal delay-2">
+                        对 <em>Agent 架构</em>与真实世界中的 AI 应用保持好奇。
                     </p>
-                    <div class="press-quote">
-                        <p>
-                            韩岳成是上海交通大学人工智能学院的本科生。他表示，自己一定会怀爱国之心、立报国之志，不断锤炼技术与实践能力、拓展创新视野，以“敢为天下先”的锐气和“做影响改变世界事情”的志气，争做人工智能创新的生力军。
-                        </p>
-                        <span class="press-source">2025年4月30日解放日报《总书记嘱托令上海青年心潮澎湃：用奋斗在创新热土书写青春答卷》</span>
+                    <p class="hero-summary reveal delay-2">
+                        上海交通大学人工智能学院本科在读。关注 Transformer、LLM 推理与多智能体系统，希望把数学基础、工程实践和系统视角连接起来，探索更可靠、更具适应性的智能系统。
+                    </p>
+                    <div class="hero-actions reveal delay-2">
+                        <a class="command-button primary" href="#research"><i class="fa-solid fa-arrow-down"></i>研究轨迹</a>
+                        <a class="command-button" href="https://github.com/inwt2333" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i>GitHub</a>
+                        <a class="command-button" href="mailto:inwt233@163.com"><i class="fa-regular fa-paper-plane"></i>联系我</a>
                     </div>
-                    <div class="keyword-cloud">
-                        <span>Transformer</span>
-                        <span>LLM Reasoning</span>
-                        <span>Agent Systems</span>
-                        <span>PyTorch</span>
-                        <span>Python / C++</span>
-                        <span>Multi-Agent Routing</span>
-                    </div>
-                </article>
+                </div>
 
-                <div class="reveal-up">
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <span class="metric-value">91.27</span>
-                            <p>平均学积分，当前专业排名 17/66。</p>
+                <div class="portrait-stage reveal delay-2">
+                    <div class="identity-console">
+                        <div class="identity-top">
+                            <div class="avatar-medallion">
+                                <img src="my-avatar.jpg" alt="韩岳成的个人头像">
+                            </div>
+                            <div>
+                                <div class="identity-card-name">YUECHENG <span>HAN</span></div>
+                                <div class="identity-role">AI / AGENT SYSTEMS</div>
+                                <div class="identity-school">上海交通大学 · 人工智能学院</div>
+                            </div>
                         </div>
-                        <div class="metric-card">
-                            <span class="metric-value">3.91</span>
-                            <p>本科绩点，综合评价排名 14/66。</p>
+                        <div class="score-panel">
+                            <div class="music-display" role="img" aria-label="两小节旋律的彩色动态五线谱可视化">
+                                <div class="music-staff" aria-hidden="true">
+                                    <div class="melody-phrase">
+                                        <span class="visual-note n8" style="--x:4%;--y:65.5px;--c:#42f5e9;--delay:-.2s">♩</span>
+                                        <span class="visual-note n16" style="--x:16%;--y:46.5px;--c:#d8dee2;--delay:-1.1s">♪</span>
+                                        <span class="visual-note n8" style="--x:23%;--y:37px;--c:#ff5a4f;--delay:-.6s">♩</span>
+                                        <span class="visual-note n16" style="--x:35%;--y:46.5px;--c:#42f5e9;--delay:-1.7s">♪</span>
+                                        <span class="visual-note n8" style="--x:42%;--y:65.5px;--c:#c8ff58;--delay:-.3s">♩</span>
+                                        <span class="visual-note n16" style="--x:54%;--y:46.5px;--c:#d8dee2;--delay:-1.3s">♪</span>
+                                        <span class="visual-note n8" style="--x:61%;--y:37px;--c:#42f5e9;--delay:-.8s">♩</span>
+                                        <span class="visual-note n16" style="--x:73%;--y:46.5px;--c:#ff5a4f;--delay:-1.9s">♪</span>
+                                        <span class="visual-note n16" style="--x:79%;--y:46.5px;--c:#d8dee2;--delay:-.4s">♪</span>
+                                        <span class="visual-note n16" style="--x:85%;--y:37px;--c:#42f5e9;--delay:-1.5s">♪</span>
+                                        <span class="visual-note n16" style="--x:91%;--y:27.5px;--c:#c8ff58;--delay:-.9s">♪</span>
+                                        <span class="visual-note n16" style="--x:97%;--y:18px;--c:#ff5a4f;--delay:-2.1s">♪</span>
+                                    </div>
+                                    <div class="melody-phrase">
+                                        <span class="visual-note n8" style="--x:5%;--y:27.5px;--c:#ff5a4f;--delay:-.5s">♩</span>
+                                        <span class="visual-note n16" style="--x:18%;--y:37px;--c:#42f5e9;--delay:-1.6s">♪</span>
+                                        <span class="visual-note n8" style="--x:26%;--y:46.5px;--c:#d8dee2;--delay:-.2s">♩</span>
+                                        <span class="visual-note n16" style="--x:40%;--y:65.5px;--c:#c8ff58;--delay:-1.2s">♪</span>
+                                        <span class="visual-note n8" style="--x:50%;--y:56px;--c:#42f5e9;--delay:-.7s">♩</span>
+                                        <span class="visual-note n16" style="--x:63%;--y:27.5px;--c:#ff5a4f;--delay:-1.8s">♪</span>
+                                        <span class="visual-note n8" style="--x:72%;--y:37px;--c:#d8dee2;--delay:-.4s">♩</span>
+                                        <span class="visual-note n16" style="--x:84%;--y:46.5px;--c:#42f5e9;--delay:-1.4s">♪</span>
+                                        <span class="visual-note n4" style="--x:94%;--y:37px;--c:#c8ff58;--delay:-.9s">𝅗𝅥</span>
+                                    </div>
+                                </div>
+                                <div class="frequency-row" aria-hidden="true">
+                                    <span style="--h:26%;--d:-.2s"></span><span style="--h:52%;--d:-1.1s;--c:#d8dee2"></span><span style="--h:34%;--d:-.7s;--c:#ff5a4f"></span><span style="--h:76%;--d:-1.8s"></span><span style="--h:45%;--d:-.4s;--c:#c8ff58"></span><span style="--h:88%;--d:-1.4s;--c:#ff5a4f"></span><span style="--h:58%;--d:-.9s"></span><span style="--h:38%;--d:-2.1s;--c:#d8dee2"></span><span style="--h:68%;--d:-.6s"></span><span style="--h:30%;--d:-1.6s;--c:#ff5a4f"></span><span style="--h:82%;--d:-1.2s"></span><span style="--h:48%;--d:-.1s;--c:#c8ff58"></span><span style="--h:62%;--d:-1.9s"></span><span style="--h:36%;--d:-.8s;--c:#d8dee2"></span><span style="--h:72%;--d:-1.5s;--c:#ff5a4f"></span><span style="--h:42%;--d:-.3s"></span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="metric-card">
-                            <span class="metric-value">ICML 2026</span>
-                            <p>AgentXRay 三作，聚焦 Agent 工作流重构与可解释性。</p>
-                        </div>
-                        <div class="metric-card">
-                            <span class="metric-value">MCM</span>
-                            <p>美国大学生数学建模竞赛 Meritorious Winner。</p>
-                        </div>
-                    </div>
-                    <div class="education-card">
-                        <h3>教育背景</h3>
-                        <p><strong>上海交通大学，人工智能学院（本科）</strong></p>
-                        <p>2024.8 - 至今 | 平均学积分 91.27，绩点 3.91，综合评价 14/66</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+            <div class="hero-index">SYSTEM PROFILE / 2026</div>
+        </section>
 
-    <section id="section-research">
-        <div class="section-inner">
-            <div class="section-kicker reveal-up">RESEARCH & PROJECTS</div>
-            <h2 class="section-title reveal-up">科研、项目与实践轨迹</h2>
-            <div class="timeline">
-                <article class="timeline-item reveal-up">
-                    <div class="timeline-time">ICML 2026</div>
-                    <div class="timeline-body">
-                        <h3>AgentXRay: White-Boxing Agentic Systems via Workflow Reconstruction <span class="badge">三作</span></h3>
-                        <ul>
-                            <li>提出 Agent 流程白盒化分析框架，通过重构工作流实现对复杂智能体决策链的深度解耦与透明化监控。</li>
-                            <li>负责大规模实验验证，通过实验证明该方法在提升 Agent 系统可解释性方面的有效性。</li>
-                        </ul>
-                        <a class="paper-link" href="https://arxiv.org/abs/2602.05353" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square"></i>arXiv:2602.05353</a>
-                    </div>
-                </article>
-
-                <article class="timeline-item reveal-up">
-                    <div class="timeline-time">2026.3 - 至今</div>
-                    <div class="timeline-body">
-                        <h3>S-GAR: 基于隐空间表征的异构智能体路由机制</h3>
-                        <ul>
-                            <li>针对多智能体系统中的硬编码依赖与高延迟检索痛点，提出基于隐空间表征的统一数学契约框架。</li>
-                            <li>构建轻量级 Mapper 模型实现异构资源（LLM / Tool / Skill）的毫秒级寻址，支持系统在 O(1) 复杂度下动态演化与自适应路由。</li>
-                        </ul>
-                    </div>
-                </article>
-
-                <article class="timeline-item reveal-up">
-                    <div class="timeline-time">Project</div>
-                    <div class="timeline-body">
-                        <h3>量化交易策略研究</h3>
-                        <ul>
-                            <li>研究多因子量化交易策略，使用 Python 构建数据处理与策略回测系统，进行多参数组合实验比较。</li>
-                            <li>分析策略收益率、最大回撤与夏普比率，实现交易策略的自动化验证。</li>
-                        </ul>
-                    </div>
-                </article>
-
-                <article class="timeline-item reveal-up">
-                    <div class="timeline-time">Project</div>
-                    <div class="timeline-body">
-                        <h3>Jittor 深度学习框架应用开发</h3>
-                        <ul>
-                            <li>参与 Jittor 深度学习框架下的模型开发与算子实现，熟悉深度学习框架的使用流程与计算逻辑。</li>
-                        </ul>
-                    </div>
-                </article>
-
-                <article class="timeline-item reveal-up">
-                    <div class="timeline-time">2025.7</div>
-                    <div class="timeline-body">
-                        <h3>世界人工智能大会（WAIC）</h3>
-                        <ul>
-                            <li>参与行业前沿技术交流，深入调研全球大模型应用生态与 AI 产业化发展趋势。</li>
-                        </ul>
-                    </div>
-                </article>
+        <div class="marquee" aria-hidden="true">
+            <div class="marquee-track">
+                <span>Agent Architecture</span><span>LLM Reasoning</span><span>Multi-Agent Systems</span><span>PyTorch</span><span>Classical Music</span><span>Violin / Piano</span>
+                <span>Agent Architecture</span><span>LLM Reasoning</span><span>Multi-Agent Systems</span><span>PyTorch</span><span>Classical Music</span><span>Violin / Piano</span>
             </div>
         </div>
-    </section>
 
-    <section class="light-section">
-        <div class="section-inner">
-            <div class="section-kicker reveal-up">SKILLS & HONORS</div>
-            <h2 class="section-title reveal-up">能力栈与阶段性成果</h2>
-            <div class="two-column">
-                <article class="detail-card reveal-up">
-                    <h3><i class="fas fa-brain"></i>个人能力</h3>
-                    <ul>
-                        <li><strong>人工智能与大模型：</strong>熟练掌握 Transformer 及 LLM 推理架构，具备 Agent 开发实践经验；精通 PyTorch 模型训练流程、调参及实验管理。</li>
-                        <li><strong>编程与工程：</strong>熟练使用 Python 和 C++ 进行算法实现与数据处理，熟悉 Git 版本控制工作流，能够独立进行多实验环境下的开发与调试。</li>
-                    </ul>
-                </article>
-                <article class="detail-card reveal-up">
-                    <h3><i class="fas fa-trophy"></i>竞赛获奖</h3>
-                    <ul class="award-list">
-                        <li>美国大学生数学建模竞赛 <strong>Meritorious Winner（一等奖）</strong><span>2026.2</span></li>
-                        <li>上海交通大学 <strong>三好学生</strong><span>2025.10</span></li>
-                        <li>致远优秀奖学金<span>2024.12 / 2025.12</span></li>
-                        <li>本科生优秀奖学金 C 等<span>2025.12</span></li>
-                        <li>蓝桥杯全国软件和信息技术专业人才大赛 <strong>省级二等奖</strong><span>2024.5</span></li>
-                        <li>全国中学生物理奥林匹克竞赛 <strong>省级二等奖</strong><span>2023.9</span></li>
-                    </ul>
-                </article>
+        <section class="section profile" id="profile">
+            <div class="page-shell">
+                <header class="section-head reveal">
+                    <div class="section-code">[ 01 / PROFILE ]</div>
+                    <h2 class="section-title">从数学基础到<br><span class="outline">智能系统工程</span></h2>
+                </header>
+                <div class="profile-layout">
+                    <div class="reveal">
+                        <p class="profile-lead">我相信，真正有价值的 AI 不只在于模型更大，也在于系统能否<span>理解环境、组织能力并持续演化</span>。</p>
+                        <p class="profile-copy">具备扎实的数学基础与工程实践能力，深入学习 Transformer、LLM 与 Agent 架构。对大模型推理机制、多智能体系统协同及系统自进化方向具有浓厚兴趣，并持续通过研究和项目把概念转化为可验证的系统。</p>
+                        <div class="topic-row" aria-label="关注领域">
+                            <span>TRANSFORMER</span><span>LLM REASONING</span><span>AGENT SYSTEMS</span><span>MULTI-AGENT ROUTING</span><span>PYTORCH</span><span>PYTHON / C++</span>
+                        </div>
+                    </div>
+                    <div class="reveal delay-1">
+                        <div class="profile-data">
+                            <div class="data-row"><div class="data-value">91.27</div><div class="data-label">平均学积分<br>专业排名 17 / 66</div></div>
+                            <div class="data-row"><div class="data-value">3.91</div><div class="data-label">本科绩点<br>综合评价 14 / 66</div></div>
+                            <div class="data-row"><div class="data-value">ICML</div><div class="data-label">AgentXRay 三作<br>ICML 2026</div></div>
+                            <div class="data-row"><div class="data-value">MCM</div><div class="data-label">Meritorious Winner<br>一等奖</div></div>
+                        </div>
+                        <div class="education-line">
+                            <strong>上海交通大学 · 人工智能学院</strong>
+                            <p>本科 · 2024.08 — 至今</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <footer class="site-footer">
-        Han Yuecheng / inwt2333 / Built with neon, notes, and curiosity.
-    </footer>
+        <section class="quote-band">
+            <div class="page-shell quote-layout">
+                <div class="quote-label reveal"><i class="fa-solid fa-quote-left"></i>VOICE / JIEFANG DAILY<br>2025.04.30</div>
+                <div class="quote-content reveal delay-1">
+                    <blockquote>韩岳成是上海交通大学人工智能学院的本科生。他表示，自己一定会怀爱国之心、立报国之志，不断锤炼技术与实践能力、拓展创新视野，以“敢为天下先”的锐气和“做影响改变世界事情”的志气，争做人工智能创新的生力军。</blockquote>
+                    <p class="quote-source"><strong>解放日报</strong> · 《总书记嘱托令上海青年心潮澎湃：用奋斗在创新热土书写青春答卷》</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section research" id="research">
+            <div class="page-shell">
+                <header class="section-head reveal">
+                    <div class="section-code">[ 02 / RESEARCH ]</div>
+                    <h2 class="section-title">研究、项目与<br><span class="outline">实践轨迹</span></h2>
+                </header>
+                <div class="project-list">
+                    <article class="project reveal">
+                        <div class="project-meta">ICML 2026<span class="project-type">RESEARCH · 三作</span></div>
+                        <h3 class="project-title">AgentXRay: White-Boxing Agentic Systems via Workflow Reconstruction<small>AGENT WORKFLOW / INTERPRETABILITY</small></h3>
+                        <div class="project-detail">
+                            <ul>
+                                <li>参与 Agent 流程分析框架研究，通过工作流重构帮助理解复杂智能体的决策链与运行机制。</li>
+                                <li>负责大规模实验验证，评估方法在提升 Agent 系统可解释性方面的有效性。</li>
+                            </ul>
+                            <a class="project-link" href="https://arxiv.org/abs/2602.05353" target="_blank" rel="noopener">READ ON ARXIV <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                        </div>
+                    </article>
+                    <article class="project reveal">
+                        <div class="project-meta">2026.03 — NOW<span class="project-type">RESEARCH</span></div>
+                        <h3 class="project-title">S-GAR：基于隐空间表征的异构智能体路由机制<small>ROUTING / LATENT REPRESENTATION</small></h3>
+                        <div class="project-detail">
+                            <ul>
+                                <li>针对多智能体系统中的硬编码依赖与高延迟检索问题，提出基于隐空间表征的统一数学契约框架。</li>
+                                <li>构建轻量级 Mapper 模型，实现异构资源（LLM / Tool / Skill）的毫秒级寻址与自适应路由。</li>
+                            </ul>
+                        </div>
+                    </article>
+                    <article class="project reveal">
+                        <div class="project-meta">PROJECT 01<span class="project-type">QUANTITATIVE</span></div>
+                        <h3 class="project-title">量化交易策略研究<small>BACKTESTING / DATA PIPELINE</small></h3>
+                        <div class="project-detail">
+                            <ul>
+                                <li>使用 Python 构建多因子数据处理与策略回测系统，进行多参数组合实验比较。</li>
+                                <li>分析收益率、最大回撤与夏普比率，实现交易策略的自动化验证。</li>
+                            </ul>
+                        </div>
+                    </article>
+                    <article class="project reveal">
+                        <div class="project-meta">PROJECT 02<span class="project-type">DEEP LEARNING</span></div>
+                        <h3 class="project-title">Jittor 深度学习框架应用开发<small>FRAMEWORK / OPERATORS</small></h3>
+                        <div class="project-detail">
+                            <ul><li>参与 Jittor 深度学习框架下的模型开发与算子实现，理解深度学习框架的计算逻辑与工程流程。</li></ul>
+                        </div>
+                    </article>
+                    <article class="project reveal">
+                        <div class="project-meta">2025.07<span class="project-type">INDUSTRY</span></div>
+                        <h3 class="project-title">世界人工智能大会（WAIC）<small>ECOSYSTEM / FIELD RESEARCH</small></h3>
+                        <div class="project-detail">
+                            <ul><li>参与行业前沿技术交流，调研全球大模型应用生态与 AI 产业化发展趋势。</li></ul>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section capabilities" id="honors">
+            <div class="page-shell">
+                <header class="section-head reveal">
+                    <div class="section-code">[ 03 / CAPABILITY ]</div>
+                    <h2 class="section-title">能力栈与<br><span class="outline">阶段性成果</span></h2>
+                </header>
+                <div class="capability-grid">
+                    <div>
+                        <article class="skill-block reveal">
+                            <span class="skill-number">01 / AI SYSTEMS</span>
+                            <h3>人工智能与大模型</h3>
+                            <p>掌握 Transformer 与 LLM 推理架构，具备 Agent 开发实践经验；熟悉 PyTorch 模型训练、调参与实验管理流程。</p>
+                            <div class="tech-stack"><span>PYTORCH</span><span>TRANSFORMER</span><span>LLM</span><span>AGENT</span></div>
+                        </article>
+                        <article class="skill-block reveal delay-1">
+                            <span class="skill-number">02 / ENGINEERING</span>
+                            <h3>编程与工程实践</h3>
+                            <p>熟练使用 Python 和 C++ 进行算法实现与数据处理；熟悉 Git 工作流，能够独立完成多实验环境下的开发与调试。</p>
+                            <div class="tech-stack"><span>PYTHON</span><span>C++</span><span>GIT</span><span>EXPERIMENTS</span></div>
+                        </article>
+                    </div>
+                    <div class="award-list reveal delay-1">
+                        <div class="award-item"><div class="award-date">2026.02</div><div class="award-name">美国大学生数学建模竞赛 <strong>Meritorious Winner（一等奖）</strong></div></div>
+                        <div class="award-item"><div class="award-date">2025.12</div><div class="award-name">本科生优秀奖学金 C 等</div></div>
+                        <div class="award-item"><div class="award-date">2025.12</div><div class="award-name">致远优秀奖学金</div></div>
+                        <div class="award-item"><div class="award-date">2025.10</div><div class="award-name">上海交通大学 <strong>三好学生</strong></div></div>
+                        <div class="award-item"><div class="award-date">2024.12</div><div class="award-name">致远优秀奖学金</div></div>
+                        <div class="award-item"><div class="award-date">2024.05</div><div class="award-name">蓝桥杯全国软件和信息技术专业人才大赛 <strong>省级二等奖</strong></div></div>
+                        <div class="award-item"><div class="award-date">2023.09</div><div class="award-name">全国中学生物理奥林匹克竞赛 <strong>省级二等奖</strong></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="connect" id="connect">
+            <div class="page-shell">
+                <div class="connect-head reveal">
+                    <h2 class="connect-title">保持好奇，<br><span>持续构建。</span></h2>
+                    <div class="connect-note">
+                        <p>研究之外，我也用代码整理学习路径、记录古典音乐演出，并保持对真实世界的观察。</p>
+                        <a class="phone-link" href="tel:+8613904682299"><i class="fa-solid fa-phone"></i>+86 139 0468 2299</a>
+                    </div>
+                </div>
+                <div class="link-grid reveal delay-1">
+                    <a class="big-link" href="mailto:inwt233@163.com"><span class="link-label">01 / EMAIL</span><span class="link-name">inwt233@163.com <i class="fa-regular fa-paper-plane"></i></span></a>
+                    <a class="big-link" href="https://github.com/inwt2333" target="_blank" rel="noopener"><span class="link-label">02 / CODE</span><span class="link-name">GitHub <i class="fa-solid fa-arrow-up-right-from-square"></i></span></a>
+                    <a class="big-link" href="https://inwt233.gitbook.io/ai-learning" target="_blank" rel="noopener"><span class="link-label">03 / NOTES</span><span class="link-name">AI-learning <i class="fa-solid fa-arrow-up-right-from-square"></i></span></a>
+                    <a class="big-link" href="https://inwt233.cn/Classic-Music/" target="_blank" rel="noopener"><span class="link-label">04 / MUSIC</span><span class="link-name">古典乐日历 <i class="fa-solid fa-arrow-up-right-from-square"></i></span></a>
+                </div>
+                <footer class="site-footer">
+                    <span>© 2026 YUECHENG HAN / INWT2333</span>
+                    <span>SHANGHAI · CHINA / BUILT WITH CURIOSITY</span>
+                </footer>
+            </div>
+        </section>
+    </main>
 
     <script>
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
         const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
+            entries.forEach((entry) => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
+                    entry.target.classList.add('is-visible');
                     revealObserver.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.18 });
-        document.querySelectorAll('.reveal-up').forEach(item => revealObserver.observe(item));
+        }, { threshold: 0.12, rootMargin: '0px 0px -30px' });
+        document.querySelectorAll('.reveal').forEach((element) => revealObserver.observe(element));
 
-        const texts = [
-            "Transformer & LLM Reasoning",
-            "Agent Workflow Reconstruction",
-            "Violin & Piano Lover",
-            "Python / C++ / PyTorch"
-        ];
-        let count = 0;
-        let index = 0;
-        let currentText = "";
-        let letter = "";
-        (function type() {
-            if (count === texts.length) count = 0;
-            currentText = texts[count];
-            letter = currentText.slice(0, ++index);
-            document.getElementById('typewriter').textContent = letter;
-            if (letter.length === currentText.length) {
-                count++;
-                index = 0;
-                setTimeout(type, 1900);
-            } else {
-                setTimeout(type, 95);
+        const nav = document.querySelector('.site-nav');
+        const navToggle = document.querySelector('.nav-toggle');
+        navToggle.addEventListener('click', () => {
+            const isOpen = nav.classList.toggle('open');
+            navToggle.setAttribute('aria-expanded', String(isOpen));
+            navToggle.setAttribute('aria-label', isOpen ? '关闭导航' : '打开导航');
+            navToggle.querySelector('i').className = isOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+        });
+        document.querySelectorAll('.nav-links a').forEach((link) => link.addEventListener('click', () => {
+            nav.classList.remove('open');
+            navToggle.setAttribute('aria-expanded', 'false');
+            navToggle.querySelector('i').className = 'fa-solid fa-bars';
+        }));
+
+        const sectionLinks = [...document.querySelectorAll('[data-section]')];
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    sectionLinks.forEach((link) => link.classList.toggle('active', link.dataset.section === entry.target.id));
+                }
+            });
+        }, { rootMargin: '-35% 0px -55% 0px' });
+        ['profile', 'research', 'honors'].forEach((id) => sectionObserver.observe(document.getElementById(id)));
+
+        const canvas = document.getElementById('agent-canvas');
+        const context = canvas.getContext('2d');
+        const hero = document.querySelector('.hero');
+        let nodes = [];
+        let animationFrame;
+        let pointer = { x: -1000, y: -1000 };
+
+        class Node {
+            constructor(width, height) {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.18;
+                this.vy = (Math.random() - 0.5) * 0.18;
+                this.radius = Math.random() * 1.4 + 0.7;
+                this.color = Math.random() > 0.86 ? '#ff5a4f' : '#42f5e9';
             }
-        })();
-
-        const canvas = document.getElementById("canvas-bg");
-        const ctx = canvas.getContext("2d");
-        const sectionHome = document.getElementById("section-home");
-        let particlesArray;
-        let mouse = { x: null, y: null };
-
-        function resizeCanvas() {
-            canvas.width = sectionHome.clientWidth;
-            canvas.height = sectionHome.clientHeight;
-        }
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.directionX = (Math.random() * 1) - 0.5;
-                this.directionY = (Math.random() * 1) - 0.5;
-                this.size = Math.random() * 2.2 + 0.4;
-                this.isNote = Math.random() > 0.84;
-                this.noteSymbol = Math.random() > 0.5 ? '♪' : '♫';
-                this.hue = Math.random() > 0.5 ? '#00fff9' : '#ff0080';
+            update(width, height) {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+                const dx = this.x - pointer.x;
+                const dy = this.y - pointer.y;
+                const distance = Math.hypot(dx, dy);
+                if (distance < 120 && distance > 0) {
+                    this.x += (dx / distance) * 0.45;
+                    this.y += (dy / distance) * 0.45;
+                }
             }
             draw() {
-                ctx.beginPath();
-                if (this.isNote) {
-                    ctx.font = "15px Arial";
-                    ctx.fillStyle = this.hue;
-                    ctx.fillText(this.noteSymbol, this.x, this.y);
-                } else {
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                    ctx.fillStyle = this.hue;
-                    ctx.fill();
-                }
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                context.fillStyle = this.color;
+                context.fill();
             }
-            update() {
-                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
-                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
-                if (mouse.x && mouse.y) {
-                    const dx = mouse.x - this.x;
-                    const dy = mouse.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < 92) {
-                        this.x -= dx / 34;
-                        this.y -= dy / 34;
+        }
+
+        function resizeCanvas() {
+            const ratio = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.floor(hero.clientWidth * ratio);
+            canvas.height = Math.floor(hero.clientHeight * ratio);
+            canvas.style.width = `${hero.clientWidth}px`;
+            canvas.style.height = `${hero.clientHeight}px`;
+            context.setTransform(ratio, 0, 0, ratio, 0, 0);
+            const count = Math.min(76, Math.max(36, Math.floor(hero.clientWidth / 18)));
+            nodes = Array.from({ length: count }, () => new Node(hero.clientWidth, hero.clientHeight));
+        }
+
+        function renderNetwork() {
+            const width = hero.clientWidth;
+            const height = hero.clientHeight;
+            context.clearRect(0, 0, width, height);
+            nodes.forEach((node, index) => {
+                node.update(width, height);
+                node.draw();
+                for (let next = index + 1; next < nodes.length; next++) {
+                    const other = nodes[next];
+                    const distance = Math.hypot(node.x - other.x, node.y - other.y);
+                    if (distance < 115) {
+                        context.beginPath();
+                        context.moveTo(node.x, node.y);
+                        context.lineTo(other.x, other.y);
+                        context.strokeStyle = `rgba(66, 245, 233, ${0.1 * (1 - distance / 115)})`;
+                        context.lineWidth = 0.7;
+                        context.stroke();
                     }
                 }
-                this.x += this.directionX;
-                this.y += this.directionY;
-                this.draw();
-            }
+            });
+            animationFrame = requestAnimationFrame(renderNetwork);
         }
-        function init() {
-            particlesArray = [];
-            const numberOfParticles = Math.min(150, Math.floor((canvas.height * canvas.width) / 8500));
-            for (let i = 0; i < numberOfParticles; i++) {
-                particlesArray.push(new Particle());
-            }
-        }
-        function animate() {
-            requestAnimationFrame(animate);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-            }
-            connect();
-        }
-        function connect() {
-            for (let a = 0; a < particlesArray.length; a++) {
-                for (let b = a; b < particlesArray.length; b++) {
-                    const distance = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2);
-                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
-                        const opacityValue = 1 - (distance / 20000);
-                        ctx.strokeStyle = 'rgba(0, 255, 249,' + Math.max(0, opacityValue) + ')';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = event.clientX;
-            mouse.y = event.clientY;
+
+        hero.addEventListener('pointermove', (event) => {
+            const rect = hero.getBoundingClientRect();
+            pointer = { x: event.clientX - rect.left, y: event.clientY - rect.top };
         });
-        window.addEventListener('mouseout', () => {
-            mouse.x = null;
-            mouse.y = null;
-        });
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            init();
-        });
+        hero.addEventListener('pointerleave', () => { pointer = { x: -1000, y: -1000 }; });
+        window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
-        init();
-        animate();
+        if (!reducedMotion) renderNetwork();
+        else nodes.forEach((node) => node.draw());
     </script>
 </body>
 </html>
