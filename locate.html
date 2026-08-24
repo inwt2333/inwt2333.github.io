@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>照片定位标注 · 本地工具</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --bg: #f5f5f7;
+            --card: #ffffff;
+            --ink: #1d1d1f;
+            --soft: #86868b;
+            --line: #e4e4e9;
+            --blue: #0071e3;
+            --green: #34c759;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', sans-serif;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button, input { font-family: inherit; }
+
+        .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
+
+        .head { margin-bottom: 18px; }
+        .head h1 { font-size: 1.5rem; font-weight: 700; }
+        .head p { color: var(--soft); font-size: 0.88rem; margin-top: 6px; line-height: 1.7; }
+
+        .steps {
+            background: #eef4ff;
+            border: 1px solid #d4e3fc;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 0.84rem;
+            color: #3a4a63;
+            line-height: 1.9;
+            margin-bottom: 20px;
+        }
+
+        .steps strong { color: var(--blue); }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+
+        /* ---------- 照片列表 ---------- */
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .panel-title {
+            padding: 13px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--soft);
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--line);
+            cursor: pointer;
+            transition: background 0.15s;
+            align-items: flex-start;
+        }
+
+        .item:last-child { border-bottom: 0; }
+        .item:hover { background: #fafafc; }
+        .item.selected { background: #eef4ff; }
+
+        .item img {
+            width: 64px; height: 64px;
+            object-fit: cover;
+            border-radius: 9px;
+            flex: none;
+            background: var(--bg);
+        }
+
+        .item-info { flex: 1; min-width: 0; }
+
+        .item-name {
+            font-size: 0.82rem;
+            font-weight: 600;
+            word-break: break-all;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .item-status {
+            font-size: 0.68rem;
+            color: var(--soft);
+            margin: 5px 0 7px;
+        }
+
+        .item-status.ok { color: var(--green); }
+
+        .item input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 5px 9px;
+            font-size: 0.78rem;
+            margin-top: 5px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .item input:focus { border-color: var(--blue); }
+        .item input::placeholder { color: #c5c5ca; }
+
+        .badge {
+            font-size: 0.62rem;
+            background: var(--green);
+            color: #fff;
+            border-radius: 999px;
+            padding: 1px 7px;
+            flex: none;
+        }
+
+        /* ---------- 地图 ---------- */
+        #map {
+            height: 640px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            z-index: 1;
+        }
+
+        .map-hint {
+            position: absolute;
+            top: 14px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 500;
+            background: rgba(29, 29, 31, 0.82);
+            color: #fff;
+            font-size: 0.78rem;
+            padding: 8px 16px;
+            border-radius: 999px;
+            pointer-events: none;
+            white-space: nowrap;
+            transition: opacity 0.3s;
+        }
+
+        .map-col { position: relative; }
+
+        /* ---------- 底部操作栏 ---------- */
+        .actions {
+            margin-top: 20px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .actions .note { font-size: 0.8rem; color: var(--soft); line-height: 1.7; }
+        .actions .note.warn { color: #d47b0a; font-weight: 500; }
+
+        .btn {
+            border: 0;
+            background: var(--blue);
+            color: #fff;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 11px 26px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.86; }
+
+        .state {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 60px 30px;
+            text-align: center;
+            color: var(--soft);
+            line-height: 2;
+            font-size: 0.92rem;
+        }
+
+        .state .big { font-size: 2rem; }
+
+        code {
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            padding: 1px 7px;
+            font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+            font-size: 0.85em;
+            color: var(--blue);
+        }
+
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+            #map { height: 420px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrap">
+        <div class="head">
+            <h1>照片定位标注</h1>
+            <p>这是一个<b>本地使用</b>的小工具：为没有 GPS 信息的照片（如相机拍摄）补充拍摄位置。</p>
+        </div>
+
+        <div class="steps">
+            <strong>①</strong> 在左侧选中一张照片，然后在地图上<strong>点一下拍摄位置</strong>（可拖动标记微调）；
+            <strong>②</strong> 可选：填写标题与地名；<strong>③</strong> 全部标完后点击「下载 manual.json」，保存到 <code>photos/</code> 目录并重新运行 <code>python build.py</code>。
+        </div>
+
+        <div id="app">
+            <div class="state">正在读取照片索引……</div>
+        </div>
+    </div>
+
+    <script>
+        const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+        let photos = [], missing = [];
+        let selected = -1;
+        let marker = null;
+        const assignments = {}; // file -> {lat, lng, title, location}
+
+        fetch('photos.json')
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+            .then(list => {
+                photos = list;
+                missing = photos.filter(p => p.lat == null);
+                if (!missing.length) { done(); return; }
+                render();
+            })
+            .catch(() => {
+                document.getElementById('app').innerHTML =
+                    '<div class="state">读取 <code>photos.json</code> 失败。请先运行 <code>python build.py</code>，再用本地服务（如 <code>python -m http.server</code>）打开本页。</div>';
+            });
+
+        function done() {
+            document.getElementById('app').innerHTML =
+                '<div class="state"><div class="big">🎉</div>所有照片都已有拍摄位置，无需标注。<br>返回 <a href="gallery.html">摄影集</a> 查看地图。</div>';
+        }
+
+        function render() {
+            document.getElementById('app').innerHTML = `
+                <div class="layout">
+                    <div class="panel">
+                        <div class="panel-title"><span>待标注照片</span><span id="progress"></span></div>
+                        <div id="list"></div>
+                    </div>
+                    <div class="map-col">
+                        <div class="map-hint" id="hint">选中照片后，在地图上点选拍摄位置</div>
+                        <div id="map"></div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <div class="note" id="dl-note">标注结果会与已有的 <code>photos/manual.json</code> 合并，不会丢失已有内容。</div>
+                    <button class="btn" id="dl">下载 manual.json</button>
+                </div>`;
+            renderList();
+            initMap();
+            document.getElementById('dl').addEventListener('click', download);
+        }
+
+        function renderList() {
+            const n = missing.filter(p => assignments[p.file] && assignments[p.file].lat != null).length;
+            document.getElementById('progress').textContent = `${n} / ${missing.length}`;
+            document.getElementById('list').innerHTML = missing.map((p, i) => {
+                const a = assignments[p.file] || {};
+                const ok = a.lat != null;
+                return `<div class="item ${i === selected ? 'selected' : ''}" data-i="${i}">
+                    <img src="${esc(p.thumb)}" alt="" loading="lazy">
+                    <div class="item-info">
+                        <div class="item-name">${esc(p.file)}${ok ? '<span class="badge">已标注</span>' : ''}</div>
+                        <div class="item-status ${ok ? 'ok' : ''}">${ok ? `📍 ${a.lat.toFixed(5)}, ${a.lng.toFixed(5)}` : '未标注 · 点击后在地图上选点'}</div>
+                        <input data-f="title" placeholder="标题（可选）" value="${esc(a.title || p.title || '')}">
+                        <input data-f="location" placeholder="地名，如「外滩」（可选）" value="${esc(a.location || p.location || '')}">
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.querySelectorAll('.item').forEach(el => {
+                el.addEventListener('click', e => {
+                    if (e.target.tagName === 'INPUT') { selected = +el.dataset.i; syncInputs(el); return; }
+                    select(+el.dataset.i);
+                });
+            });
+            document.querySelectorAll('.item input').forEach(input => {
+                input.addEventListener('input', e => {
+                    const i = +e.target.closest('.item').dataset.i;
+                    const p = missing[i];
+                    assignments[p.file] = assignments[p.file] || {};
+                    assignments[p.file][e.target.dataset.f] = e.target.value;
+                });
+            });
+        }
+
+        function syncInputs(el) {
+            document.querySelectorAll('.item').forEach(x => x.classList.toggle('selected', x === el));
+        }
+
+        function select(i) {
+            selected = i;
+            document.querySelectorAll('.item').forEach(x => x.classList.toggle('selected', +x.dataset.i === i));
+            const a = assignments[missing[i].file];
+            if (marker) { map.removeLayer(marker); marker = null; }
+            if (a && a.lat != null) placeMarker([a.lat, a.lng]);
+        }
+
+        function initMap() {
+            map = L.map('map').setView([35.86, 104.19], 4);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                subdomains: 'abcd',
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · &copy; <a href="https://carto.com/">CARTO</a>'
+            }).addTo(map);
+
+            map.on('click', e => {
+                if (selected < 0) return;
+                const p = missing[selected];
+                assignments[p.file] = Object.assign({ title: '', location: '' }, assignments[p.file], { lat: +e.latlng.lat.toFixed(6), lng: +e.latlng.lng.toFixed(6) });
+                placeMarker(e.latlng);
+                renderList();
+            });
+        }
+
+        function placeMarker(latlng) {
+            if (marker) map.removeLayer(marker);
+            marker = L.marker(latlng, { draggable: true }).addTo(map);
+            marker.on('dragend', () => {
+                const p = missing[selected];
+                const pos = marker.getLatLng();
+                assignments[p.file] = Object.assign({ title: '', location: '' }, assignments[p.file], { lat: +pos.lat.toFixed(6), lng: +pos.lng.toFixed(6) });
+                renderList();
+            });
+        }
+
+        async function download() {
+            const pending = missing.filter(p => !assignments[p.file] || assignments[p.file].lat == null);
+            const note = document.getElementById('dl-note');
+            if (pending.length) {
+                note.className = 'note warn';
+                note.textContent = `还有 ${pending.length} 张未标注（不影响下载，未标注的不会被写入）。`;
+            }
+            // 与已有 manual.json 合并
+            let manual = {};
+            try {
+                const r = await fetch('photos/manual.json');
+                if (r.ok) manual = await r.json();
+            } catch (e) { /* 忽略 */ }
+
+            missing.forEach(p => {
+                const a = assignments[p.file];
+                if (!a || a.lat == null) return;
+                manual[p.file] = Object.assign({}, manual[p.file], {
+                    lat: a.lat, lng: a.lng,
+                    title: a.title || manual[p.file]?.title || '',
+                    location: a.location || manual[p.file]?.location || ''
+                });
+            });
+
+            const blob = new Blob([JSON.stringify(manual, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'manual.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            note.className = 'note';
+            note.innerHTML = '已下载。请将文件放入 <code>photos/</code> 目录（覆盖旧文件），然后运行 <code>python build.py</code>。';
+        }
+    </script>
+</body>
+</html>
