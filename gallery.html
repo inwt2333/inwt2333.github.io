@@ -153,24 +153,6 @@
 
         .ph:hover img { filter: brightness(0.94); }
 
-        .ph .ph-pin {
-            position: absolute;
-            top: 10px; left: 10px;
-            background: rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(6px);
-            color: #fff;
-            border-radius: 999px;
-            padding: 4px 10px 4px 7px;
-            font-size: 0.68rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            max-width: 75%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
         @keyframes pop { to { opacity: 1; } }
 
         /* ---------- 地图视图 ---------- */
@@ -185,6 +167,7 @@
         }
 
         .ph-marker img {
+            display: block;
             width: 46px; height: 46px;
             border-radius: 50%;
             object-fit: cover;
@@ -192,15 +175,31 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
-            background-color: rgba(0, 113, 227, 0.18);
+        /* 聚合标记：显示其中一张照片 + 数量角标 */
+        .ph-cluster img {
+            display: block;
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2.5px solid #fff;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
-            background-color: rgba(0, 113, 227, 0.88);
+        .ph-cluster .ph-cluster-count {
+            position: absolute;
+            right: -2px; bottom: -2px;
+            min-width: 20px; height: 20px;
+            padding: 0 5px;
+            box-sizing: border-box;
+            background: #0071e3;
             color: #fff;
+            font-size: 0.68rem;
             font-weight: 600;
-            border-radius: 50%;
+            border-radius: 999px;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .ph-pop { text-align: center; min-width: 170px; }
@@ -439,15 +438,13 @@
         let current = -1;
 
         const $ = id => document.getElementById(id);
-        const pinSvg = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11z"/></svg>';
 
         function esc(s) {
             return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
         }
 
-        function displayName(p) { return p.title || p.file; }
-
-        function displayDate(p) { return (p.date || '').split(' ')[0]; }
+        // 拍摄时间「2026-06-05 13:16:56」→「2026-06-05 13:16」
+        function displayWhen(p) { return (p.date || '').slice(0, 16); }
 
         /* ---------- 初始化 ---------- */
         fetch('photos.json')
@@ -478,8 +475,7 @@
         function renderGrid() {
             $('grid').innerHTML = photos.map((p, i) => `
                 <figure class="ph" data-i="${i}" style="--d:${Math.min(0.5, i * 0.035)}s">
-                    <img src="${esc(p.thumb)}" alt="${esc(displayName(p))}" title="${esc(displayName(p))}" loading="lazy">
-                    ${p.lat != null ? `<span class="ph-pin">${pinSvg}${esc(p.location || '有定位')}</span>` : ''}
+                    <img src="${esc(p.thumb)}" alt="${esc(p.title)}" title="${esc(p.title)}" loading="lazy">
                 </figure>`).join('');
             $('grid').addEventListener('click', e => {
                 const fig = e.target.closest('.ph');
@@ -517,7 +513,20 @@
             cluster = L.markerClusterGroup({
                 showCoverageOnHover: false,
                 maxClusterRadius: 55,
-                spiderfyOnMaxZoom: true
+                spiderfyOnMaxZoom: true,
+                // 多张照片聚合时，用其中一张照片做圆形图标，右下角标数量
+                iconCreateFunction: c => {
+                    const first = c.getAllChildMarkers()[0];
+                    const p = first && first.photoData;
+                    const n = c.getChildCount();
+                    return L.divIcon({
+                        className: 'ph-cluster',
+                        html: (p ? `<img src="${esc(p.thumb)}" alt="">` : '')
+                            + (n > 1 ? `<span class="ph-cluster-count">${n}</span>` : ''),
+                        iconSize: [56, 56],
+                        iconAnchor: [28, 28]
+                    });
+                }
             });
 
             const pts = [];
@@ -531,11 +540,12 @@
                         iconAnchor: [23, 23]
                     })
                 });
+                marker.photoData = p;
                 marker.bindPopup(`
                     <div class="ph-pop">
-                        <img src="${esc(p.thumb)}" data-i="${i}" alt="${esc(displayName(p))}">
-                        <div class="ph-pop-title">${esc(displayName(p))}</div>
-                        <div class="ph-pop-meta">${esc([displayDate(p), p.location].filter(Boolean).join(' · '))}</div>
+                        <img src="${esc(p.thumb)}" data-i="${i}" alt="">
+                        ${p.title ? `<div class="ph-pop-title">${esc(p.title)}</div>` : ''}
+                        ${[displayWhen(p), p.location].some(Boolean) ? `<div class="ph-pop-meta">${esc([displayWhen(p), p.location].filter(Boolean).join(' · '))}</div>` : ''}
                     </div>`, { maxWidth: 220 });
                 markers[i] = marker;
                 cluster.addLayer(marker);
@@ -570,9 +580,10 @@
             current = i;
             const p = photos[i];
             $('lb-img').src = p.web;
-            $('lb-img').alt = displayName(p);
-            $('lb-title').textContent = displayName(p);
-            $('lb-meta').textContent = [displayDate(p), p.location, p.desc].filter(Boolean).join(' · ');
+            $('lb-img').alt = p.title || '';
+            $('lb-title').textContent = p.title || '';
+            $('lb-title').style.display = p.title ? '' : 'none';
+            $('lb-meta').textContent = [displayWhen(p), p.location, p.desc].filter(Boolean).join(' · ');
             $('lb-map').hidden = p.lat == null;
             $('lightbox').hidden = false;
             document.body.style.overflow = 'hidden';
