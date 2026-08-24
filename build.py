@@ -14,7 +14,7 @@ PHOTOS_JSON = 'photos.json'
 MANUAL_JSON = os.path.join(PHOTOS_DIR, 'manual.json')
 
 WEB_MAX = None      # 网页版长边像素；None = 保留原始分辨率
-WEB_QUALITY = 92    # 高保真，视觉上与原图无差别
+WEB_QUALITY = 90    # WebP 高保真，视觉上与原图无差别
 THUMB_MAX = 480     # 缩略图长边像素（仅用于网格/地图）
 THUMB_QUALITY = 80
 
@@ -121,7 +121,7 @@ def _load_json(path, default):
 
 
 def _make_sizes(img, web_path, thumb_path):
-    """生成网页版与缩略图两张 JPEG"""
+    """生成网页版与缩略图两张 WebP"""
     from PIL import ImageOps
     img = ImageOps.exif_transpose(img)
     if img.mode != 'RGB':
@@ -129,10 +129,10 @@ def _make_sizes(img, web_path, thumb_path):
     web = img.copy()
     if WEB_MAX:
         web.thumbnail((WEB_MAX, WEB_MAX))
-    web.save(web_path, 'JPEG', quality=WEB_QUALITY, optimize=True)
+    web.save(web_path, 'WEBP', quality=WEB_QUALITY, method=4)
     thumb = img.copy()
     thumb.thumbnail((THUMB_MAX, THUMB_MAX))
-    thumb.save(thumb_path, 'JPEG', quality=THUMB_QUALITY, optimize=True)
+    thumb.save(thumb_path, 'WEBP', quality=THUMB_QUALITY, method=4)
 
 
 def build_photos():
@@ -180,8 +180,8 @@ def build_photos():
         if stem in used_stems:  # 不同扩展名同名文件，附加短哈希避免覆盖
             stem = f"{stem}_{hashlib.md5(fname.encode('utf-8')).hexdigest()[:6]}"
         used_stems.add(stem)
-        web_path = os.path.join(PHOTOS_WEB, f"{stem}.jpg")
-        thumb_path = os.path.join(PHOTOS_THUMB, f"{stem}.jpg")
+        web_path = os.path.join(PHOTOS_WEB, f"{stem}.webp")
+        thumb_path = os.path.join(PHOTOS_THUMB, f"{stem}.webp")
         web_rel = web_path.replace(os.sep, '/')
         thumb_rel = thumb_path.replace(os.sep, '/')
 
