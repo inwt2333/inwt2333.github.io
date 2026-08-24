@@ -166,21 +166,13 @@
             z-index: 1;
         }
 
-        .ph-marker img {
+        /* 照片缩略图标记：背景图铺满正方形容器，天然免疫对 img 元素的样式重置 */
+        .ph-marker .ph-thumb, .ph-cluster .ph-thumb {
             display: block;
-            width: 46px; height: 46px;
+            width: 100%; height: 100%;
             border-radius: 50%;
-            object-fit: cover;
-            border: 2.5px solid #fff;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        /* 聚合标记：显示其中一张照片 + 数量角标 */
-        .ph-cluster img {
-            display: block;
-            width: 56px; height: 56px;
-            border-radius: 50%;
-            object-fit: cover;
+            background-size: cover;
+            background-position: center;
             border: 2.5px solid #fff;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
         }
@@ -203,7 +195,14 @@
         }
 
         .ph-pop { text-align: center; min-width: 170px; }
-        .ph-pop img { width: 170px; border-radius: 10px; display: block; cursor: zoom-in; }
+        .ph-pop .ph-pop-thumb {
+            display: block;
+            width: 170px; height: 128px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+            cursor: zoom-in;
+        }
         .ph-pop .ph-pop-title { font-weight: 600; font-size: 0.85rem; margin-top: 8px; }
         .ph-pop .ph-pop-meta { color: var(--soft); font-size: 0.74rem; margin-top: 3px; }
 
@@ -521,7 +520,7 @@
                     const n = c.getChildCount();
                     return L.divIcon({
                         className: 'ph-cluster',
-                        html: (p ? `<img src="${esc(p.thumb)}" alt="">` : '')
+                        html: (p ? `<span class="ph-thumb" style="background-image:url('${esc(p.thumb)}')"></span>` : '')
                             + (n > 1 ? `<span class="ph-cluster-count">${n}</span>` : ''),
                         iconSize: [56, 56],
                         iconAnchor: [28, 28]
@@ -535,7 +534,7 @@
                 const marker = L.marker([p.lat, p.lng], {
                     icon: L.divIcon({
                         className: 'ph-marker',
-                        html: `<img src="${esc(p.thumb)}" alt="">`,
+                        html: `<span class="ph-thumb" style="background-image:url('${esc(p.thumb)}')"></span>`,
                         iconSize: [46, 46],
                         iconAnchor: [23, 23]
                     })
@@ -543,7 +542,7 @@
                 marker.photoData = p;
                 marker.bindPopup(`
                     <div class="ph-pop">
-                        <img src="${esc(p.thumb)}" data-i="${i}" alt="">
+                        <span class="ph-pop-thumb" data-i="${i}" style="background-image:url('${esc(p.thumb)}')"></span>
                         ${p.title ? `<div class="ph-pop-title">${esc(p.title)}</div>` : ''}
                         ${[displayWhen(p), p.location].some(Boolean) ? `<div class="ph-pop-meta">${esc([displayWhen(p), p.location].filter(Boolean).join(' · '))}</div>` : ''}
                     </div>`, { maxWidth: 220 });
@@ -554,8 +553,8 @@
 
             map.addLayer(cluster);
             map.on('popupopen', e => {
-                const img = e.popup.getElement().querySelector('.ph-pop img');
-                if (img) img.addEventListener('click', () => openLightbox(+img.dataset.i));
+                const thumb = e.popup.getElement().querySelector('.ph-pop-thumb');
+                if (thumb) thumb.addEventListener('click', () => openLightbox(+thumb.dataset.i));
             });
 
             if (pts.length === 1) map.setView(pts[0], 13);
