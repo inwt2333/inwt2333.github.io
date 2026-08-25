@@ -30,21 +30,34 @@
 
 ## 摄影集：如何添加照片
 
+### 方式一：手机直传（推荐）
+
+电脑上运行（手机与电脑连同一 Wi-Fi）：
+
+```bash
+.venv/Scripts/python serve.py
+```
+
+按打印的提示用手机浏览器打开 `http://<电脑局域网IP>:8199/upload`，选择照片上传——照片以**原始文件**直传（EXIF 定位完整保留），传完自动构建索引，之后在电脑上 `git add -A && git commit && git push` 即可发布。手机也可以打开 `http://<IP>:8199/gallery.html` 预览当前相册。
+
+### 方式二：电脑导入
+
 1. 把照片放入 `photos/src/`（支持 JPG / PNG / HEIC；**iPhone 用数据线或 iCloud 下载导入可保留定位，微信/QQ 传输会丢失 EXIF 定位**）。
 2. 运行 `python build.py`，脚本会自动：
    - 从 EXIF 提取拍摄时间与 GPS 坐标；
    - 生成网页版（`photos/web/`，**保留原始分辨率**的高保真 JPEG，lightbox 中加载的就是它）与缩略图（`photos/thumb/`，仅用于网格与地图）；
    - 更新 `photos.json`，并在控制台列出缺定位的照片。
 3. 相机拍摄等无 GPS 的照片：本地起服务（`python -m http.server`）打开 `locate.html`，选中照片后在地图上点选位置，下载 `manual.json` 放入 `photos/`，重新运行 `python build.py`。
-4. 想给照片加标题 / 地名 / 描述，或覆盖某张照片的坐标，编辑 `photos/manual.json`：
+4. 想给照片加标题 / 地名 / 描述，或覆盖某张照片的坐标、指定相册封面，编辑 `photos/manual.json`：
 
-   ```json
-   {
-     "IMG_0001.HEIC": { "title": "外滩", "location": "上海", "lat": 31.24, "lng": 121.50, "desc": "", "date": "2025-05-01" }
-   }
-   ```
+    ```json
+    {
+      "cover": "IMG_0001.HEIC",
+      "IMG_0001.HEIC": { "title": "外滩", "location": "上海", "lat": 31.24, "lng": 121.50, "desc": "", "date": "2025-05-01" }
+    }
+    ```
 
-   字段均可省略；坐标优先级为 EXIF > manual.json > 上次索引。
+    字段均可省略；坐标优先级为 EXIF > manual.json > 上次索引；`cover` 指定封面照片（不指定则每次随机，并按屏幕方向只抽横版或竖版照片）。
 
 ### 首次准备构建环境
 

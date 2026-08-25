@@ -138,7 +138,7 @@ def _make_sizes(img, web_path, thumb_path):
 def build_photos():
     """扫描 photos/src，提取 EXIF，生成 web/thumb 与 photos.json"""
     try:
-        from PIL import Image
+        from PIL import Image, ImageOps
     except ImportError:
         print("提示：未安装 Pillow，跳过照片构建。运行: pip install pillow pillow-heif")
         return
@@ -189,6 +189,9 @@ def build_photos():
         try:
             with Image.open(src_path) as im:
                 date, lat, lng = _read_exif(im)
+                # 宽高比按转正后的方向计算，供前端等高行布局使用
+                w, h = ImageOps.exif_transpose(im).size
+                entry["ratio"] = round(w / h, 4) if h else 1.5
                 fresh = (os.path.exists(web_path) and os.path.exists(thumb_path)
                          and os.path.getmtime(web_path) >= os.path.getmtime(src_path)
                          and os.path.getmtime(thumb_path) >= os.path.getmtime(src_path))
@@ -218,11 +221,22 @@ def build_photos():
         })
         entries.append(entry)
 
-    # 保留 src 中已不存在、但上次索引里有的照片（例如换电脑克隆仓库后重新构建）
-    seen = {e['file'] for e in entries}
-    for fname, e in old_entries.items():
-        if fname not in seen:
-            entries.append(dict(e))
+    # src 中已不存在、但上次索引里有的照片：
+    # - src 有照片时视为已删除，清除条目并顺手删除其 web/thumb 产物
+    # - src 为空（例如换电脑克隆仓库后）时保留，避免误清索引
+    if files:
+        seen = {e['file'] for e in entries}
+        for fname in [f for f in old_entries if f not in seen]:
+            print(f"移除已删除的照片：{fname}")
+            for key in ('web', 'thumb'):
+                p = old_entries[fname].get(key)
+                if p and os.path.exists(p):
+                    os.remove(p)
+    else:
+        seen = {e['file'] for e in entries}
+        for fname, e in old_entries.items():
+            if fname not in seen:
+                entries.append(dict(e))
 
     entries.sort(key=lambda e: (e.get('date') or '', e['file']), reverse=True)
 
