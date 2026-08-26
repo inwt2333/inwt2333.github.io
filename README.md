@@ -6,10 +6,11 @@
 
 | 页面 | 说明 |
 |---|---|
-| `index.html` | 主页（简历） |
+| `index.html` | 主页（Inwt 铁路图导航门厅，动态显示最新随笔与照片统计） |
+| `resume/` | 简历页（**不公开**：无任何入口链接，已加 noindex 禁止搜索引擎收录，地址自留） |
 | `essays.html` | 随笔 |
 | `article.html` | 文章阅读页（Markdown + LaTeX） |
-| `gallery.html` | 摄影集（网格 / 地图双视图） |
+| `gallery.html` | 摄影集（沉浸式封面 + 章节流 + 足迹地图） |
 | `locate.html` | 照片定位标注工具（仅本地使用） |
 
 ## 随笔：如何添加文章
