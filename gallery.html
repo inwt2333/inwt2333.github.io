@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>摄影集 · 咕咕鸽</title>
-    <meta name="description" content="咕咕鸽的摄影集——按下快门的地方，都值得再去一次。">
+    <title>摄影集 · Inwt</title>
+    <meta name="description" content="Inwt 的摄影集——按下快门的地方，都值得再去一次。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -627,7 +627,7 @@
     <header class="topbar" id="topbar">
         <a class="brand" href="index.html">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 8h3l2-3h6l2 3h3v12H4V8z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="14" r="3.4" stroke="currentColor" stroke-width="1.8"/></svg>
-            咕咕鸽 · 摄影集
+            Inwt · 摄影集
         </a>
         <div class="top-right">
             <div class="segmented" role="tablist" aria-label="视图切换" id="segmented" hidden>
@@ -650,7 +650,7 @@
         <div class="cover-shade" aria-hidden="true"></div>
         <div class="cover-copy">
             <div class="cover-ghost" id="cover-ghost" aria-hidden="true">GALLERY</div>
-            <div class="cover-eyebrow">GUGUGE · PHOTOGRAPHY</div>
+            <div class="cover-eyebrow">INWT · PHOTOGRAPHY</div>
             <h1 class="cover-title">摄影集</h1>
             <p class="cover-stats" id="cover-stats"></p>
         </div>
@@ -676,7 +676,7 @@
         </div>
 
         <footer class="page-footer" id="page-footer">
-            <span class="mono">© 咕咕鸽 · Inwt</span>
+            <span class="mono">© Inwt</span>
             <span><a href="index.html">主页</a> · <a href="essays.html">随笔</a></span>
         </footer>
     </main>
@@ -728,7 +728,8 @@
         async function init() {
             let list;
             try {
-                const r = await fetch('photos.json');
+                // 时间戳绕过缓存，避免拿到含已删除照片的旧索引
+                const r = await fetch('photos.json?ts=' + Date.now());
                 if (!r.ok) throw new Error(r.status);
                 list = await r.json();
             } catch (e) {
@@ -768,18 +769,29 @@
             let pool = photos.filter(p => (p.ratio || 1.5) >= 1);
             if (!wantLandscape) pool = photos.filter(p => (p.ratio || 1.5) < 1);
             if (!pool.length) pool = photos;
-            const cover = (manual.cover && photos.find(p => p.file === manual.cover))
-                || pool[Math.floor(Math.random() * pool.length)];
+            const fixed = manual.cover && photos.find(p => p.file === manual.cover);
             $('cover').hidden = false;
-            $('cover-thumb').style.backgroundImage = `url('${esc(cover.thumb)}')`;
 
-            const full = new Image();
-            full.onload = () => {
-                $('cover-full').style.backgroundImage = `url('${esc(cover.web)}')`;
-                $('cover').classList.add('loaded');
+            // 高清图加载失败（如照片已删除但索引被缓存）时自动换下一张随机
+            const tried = new Set();
+            const tryNext = () => {
+                let cover = fixed;
+                if (!cover) {
+                    const rest = pool.filter(p => !tried.has(p.file));
+                    if (!rest.length) { $('cover').classList.add('loaded'); return; }
+                    cover = rest[Math.floor(Math.random() * rest.length)];
+                }
+                tried.add(cover.file);
+                $('cover-thumb').style.backgroundImage = `url('${esc(cover.thumb)}')`;
+                const img = new Image();
+                img.onload = () => {
+                    $('cover-full').style.backgroundImage = `url('${esc(cover.web)}')`;
+                    $('cover').classList.add('loaded');
+                };
+                img.onerror = () => { if (fixed) $('cover').classList.add('loaded'); else tryNext(); };
+                img.src = cover.web;
             };
-            full.onerror = () => $('cover').classList.add('loaded');
-            full.src = cover.web;
+            tryNext();
 
             // 统计：照片数 / 拍摄地数 / 最远跨越
             const located = photos.filter(p => p.lat != null);
