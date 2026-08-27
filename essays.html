@@ -5,9 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>随笔 · Inwt</title>
     <meta name="description" content="Inwt 的随笔——一些曾写下的小文章。">
+    <link rel="canonical" href="https://inwt233.cn/essays.html">
+    <meta name="theme-color" content="#f7f3ea">
+    <meta property="og:site_name" content="Inwt · 小站">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://inwt233.cn/essays.html">
+    <meta property="og:title" content="随笔 · Inwt">
+    <meta property="og:description" content="一些曾写下的小文章——关于城市与行走，关于人与事。">
+    <meta property="og:image" content="https://inwt233.cn/assets/og.png">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <link rel="alternate" type="application/rss+xml" title="Inwt · 随笔" href="feed.xml">
+    <!-- 字体（非阻塞：加载失败时优雅回退到系统宋体） -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap"></noscript>
     <style>
         :root {
             --paper: #f7f3ea;
@@ -226,6 +242,30 @@
         .entry-more svg { transition: transform 0.3s ease; }
         .entry:hover .entry-more svg { transform: translateX(6px); }
 
+        /* ---------- 年份分组 ---------- */
+        .year-row {
+            display: flex;
+            align-items: baseline;
+            gap: 18px;
+            padding: 46px 0 6px;
+            opacity: 0;
+            transform: translateY(14px);
+            animation: rise 0.7s ease-out forwards;
+            animation-delay: var(--d, 0s);
+        }
+
+        .year-row .year-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--seal);
+            letter-spacing: 0.08em;
+        }
+
+        .year-row .year-line { flex: 1; border-top: 1px dashed var(--line); transform: translateY(-6px); }
+
+        .year-row .year-count { font-size: 0.7rem; color: var(--ink-soft); letter-spacing: 0.16em; }
+
         /* ---------- 状态 ---------- */
         .state {
             padding: 60px 0;
@@ -279,7 +319,7 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .entry { animation: none; opacity: 1; transform: none; }
+            .entry, .year-row { animation: none; opacity: 1; transform: none; }
             .entry::after, .entry-more svg { transition: none; }
         }
     </style>
@@ -293,6 +333,7 @@
                 <a href="index.html">主页</a>
                 <a href="essays.html" aria-current="page">随笔</a>
                 <a href="gallery.html">摄影集</a>
+                <a href="about.html">关于</a>
             </nav>
         </div>
     </header>
@@ -317,7 +358,10 @@
 
         <footer class="page-footer">
             <span class="mono">© Inwt</span>
-            <a href="index.html">← 返回主页</a>
+            <span style="display:flex; gap:18px;">
+                <a href="feed.xml">RSS 订阅</a>
+                <a href="index.html">← 返回主页</a>
+            </span>
         </footer>
     </main>
 
@@ -340,17 +384,32 @@
                 count.textContent = `共 ${essays.length} 篇`;
                 count.hidden = false;
 
-                box.innerHTML = essays.map((p, i) => {
-                    const href = 'article.html?file=' + encodeURIComponent(p.file)
-                        + '&title=' + encodeURIComponent(p.title)
-                        + '&date=' + encodeURIComponent(p.date || '');
-                    return `<a class="entry" href="${href}" style="--d:${0.08 * i}s">
+                // 按年份分组（列表已按日期倒序）；优先使用构建器生成的静态页地址
+                let html = '';
+                let lastYear = '';
+                essays.forEach((p, i) => {
+                    const year = (p.date || '').slice(0, 4);
+                    if (year && year !== lastYear) {
+                        const n = essays.filter(e => (e.date || '').slice(0, 4) === year).length;
+                        html += `<div class="year-row" style="--d:${0.08 * i}s">
+                            <span class="year-num">${year}</span>
+                            <span class="year-line" aria-hidden="true"></span>
+                            <span class="year-count mono">${n} 篇</span>
+                        </div>`;
+                        lastYear = year;
+                    }
+                    const href = p.url ? p.url
+                        : 'article.html?file=' + encodeURIComponent(p.file)
+                          + '&title=' + encodeURIComponent(p.title)
+                          + '&date=' + encodeURIComponent(p.date || '');
+                    html += `<a class="entry" href="${href}" style="--d:${0.08 * i + 0.05}s">
                         <span class="entry-date">${(p.date || '').replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>
                         <h2 class="entry-title">${p.title}</h2>
                         <p class="entry-summary">${(p.summary || '').replace(/&/g, '&amp;').replace(/</g, '&lt;')}</p>
                         <span class="entry-more">阅读全文 ${arrow}</span>
                     </a>`;
-                }).join('');
+                });
+                box.innerHTML = html;
             })
             .catch(() => {
                 document.getElementById('state').innerHTML = '文章加载失败，请刷新重试。';

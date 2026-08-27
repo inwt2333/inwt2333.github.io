@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://inwt233.cn/sitemap.xml

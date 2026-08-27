@@ -5,13 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>摄影集 · Inwt</title>
     <meta name="description" content="Inwt 的摄影集——按下快门的地方，都值得再去一次。">
+    <link rel="canonical" href="https://inwt233.cn/gallery.html">
+    <meta name="theme-color" content="#0a0a0c">
+    <meta property="og:site_name" content="Inwt · 小站">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://inwt233.cn/gallery.html">
+    <meta property="og:title" content="摄影集 · Inwt">
+    <meta property="og:description" content="按下快门的地方，都值得再去一次。">
+    <meta property="og:image" content="https://inwt233.cn/assets/og.png">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <!-- 字体（非阻塞：加载失败时优雅回退系统字体） -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap"></noscript>
+    <!-- 地图组件（自托管，避免第三方 CDN 在部分地区不可用） -->
+    <link rel="stylesheet" href="assets/vendor/leaflet.css">
+    <link rel="stylesheet" href="assets/vendor/MarkerCluster.css">
+    <script src="assets/vendor/leaflet.js"></script>
+    <script src="assets/vendor/leaflet.markercluster.js"></script>
     <style>
         :root {
             --bg: #0a0a0c;
@@ -519,6 +535,8 @@
 
         .lb-title { font-size: 1.02rem; font-weight: 600; }
         .lb-meta { color: rgba(255, 255, 255, 0.55); font-size: 0.8rem; margin-top: 4px; }
+        .lb-exif { font-family: var(--mono); color: rgba(255, 255, 255, 0.4); font-size: 0.68rem; letter-spacing: 0.08em; margin-top: 5px; }
+        .lb-exif[hidden] { display: none; }
         .lb-count { font-family: var(--mono); color: rgba(255, 255, 255, 0.45); font-size: 0.78rem; letter-spacing: 0.12em; }
 
         .lb-map-btn {
@@ -636,6 +654,7 @@
             </div>
             <nav class="top-links" aria-label="页面导航">
                 <a href="essays.html">随笔</a>
+                <a href="about.html">关于</a>
                 <a href="index.html">主页</a>
             </nav>
         </div>
@@ -697,12 +716,17 @@
             <div>
                 <div class="lb-title" id="lb-title"></div>
                 <div class="lb-meta" id="lb-meta"></div>
+                <div class="lb-exif" id="lb-exif" hidden></div>
             </div>
             <div class="lb-count" id="lb-count"></div>
             <button class="lb-map-btn" id="lb-map" hidden>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
                 在地图中查看
             </button>
+            <a class="lb-map-btn" id="lb-dl" hidden download>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 20h16"/></svg>
+                下载原图
+            </a>
         </div>
     </div>
 
@@ -728,8 +752,7 @@
         async function init() {
             let list;
             try {
-                // 时间戳绕过缓存，避免拿到含已删除照片的旧索引
-                const r = await fetch('photos.json?ts=' + Date.now());
+                const r = await fetch('photos.json');
                 if (!r.ok) throw new Error(r.status);
                 list = await r.json();
             } catch (e) {
@@ -1120,8 +1143,14 @@
             $('lb-title').textContent = p.title || '';
             $('lb-title').style.display = p.title ? '' : 'none';
             $('lb-meta').textContent = [displayWhen(p), p.location, p.desc].filter(Boolean).join(' · ');
+            const exif = [p.camera, p.f, p.s, p.iso != null ? 'ISO ' + p.iso : ''].filter(Boolean).join(' · ');
+            $('lb-exif').textContent = exif;
+            $('lb-exif').hidden = !exif;
             $('lb-count').textContent = `${String(i + 1).padStart(2, '0')} / ${String(photos.length).padStart(2, '0')}`;
             $('lb-map').hidden = p.lat == null;
+            $('lb-dl').href = p.web || '';
+            $('lb-dl').setAttribute('download', (p.file || 'photo').replace(/\.[^.]+$/, '') + '.webp');
+            $('lb-dl').hidden = !p.web;
             $('lightbox').hidden = false;
             document.body.style.overflow = 'hidden';
             [i - 1, i + 1].forEach(j => {

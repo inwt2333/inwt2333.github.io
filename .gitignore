@@ -9,3 +9,4 @@ photos/src/*
 .zcode/
 
 __pycache__/
+tools/fonts-src/

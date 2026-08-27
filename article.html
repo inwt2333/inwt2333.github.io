@@ -3,281 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>正在加载文章...</title>
+    <title>正在加载文章... · Inwt</title>
+    <meta name="description" content="Inwt 的随笔——一些曾写下的小文章。">
+    <link rel="canonical" href="https://inwt233.cn/essays.html">
+    <meta name="theme-color" content="#f7f3ea">
+    <meta property="og:site_name" content="Inwt · 小站">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="随笔 · Inwt">
+    <meta property="og:description" content="一些曾写下的小文章。">
+    <meta property="og:image" content="https://inwt233.cn/assets/og.png">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 
-    <!-- 字体 -->
+    <!-- 字体（非阻塞：加载失败时优雅回退到系统宋体） -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap"></noscript>
 
-    <!-- Markdown 解析库 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-    <!-- MathJax 公式支持 -->
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true
-            },
-            options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] },
-            startup: {
-                ready: () => {
-                    MathJax.startup.defaultReady();
-                    document.dispatchEvent(new Event('mathjax-ready'));
-                }
-            }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-    <style>
-        :root {
-            --paper: #f7f3ea;
-            --paper-deep: #efe9da;
-            --ink: #26211a;
-            --ink-soft: #7a705e;
-            --line: #ddd3bf;
-            --seal: #b3432b;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background: var(--paper);
-            color: var(--ink);
-            font-family: 'Noto Serif SC', 'Songti SC', serif;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0.5;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.5 0 0 0 0 0.42 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-        }
-
-        /* ---------- 顶栏 ---------- */
-        .page-nav {
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            background: rgba(247, 243, 234, 0.86);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--line);
-        }
-
-        .page-nav-inner {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 24px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .nav-back {
-            color: var(--ink);
-            text-decoration: none;
-            font-size: 0.92rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: color 0.25s;
-        }
-
-        .nav-back:hover { color: var(--seal); }
-
-        .nav-links { display: flex; gap: 22px; }
-
-        .nav-links a {
-            color: var(--ink-soft);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.25s;
-        }
-
-        .nav-links a:hover { color: var(--seal); }
-
-        /* ---------- 正文 ---------- */
-        .article-container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 760px;
-            margin: 0 auto;
-            padding: 72px 24px 80px;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        header.article-head {
-            margin-bottom: 48px;
-            border-bottom: 1px solid var(--line);
-            padding-bottom: 28px;
-        }
-
-        .article-meta {
-            color: var(--ink-soft);
-            font-family: 'Space Mono', monospace;
-            font-size: 0.72rem;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            margin-bottom: 14px;
-        }
-
-        h1.article-title {
-            font-size: clamp(1.7rem, 5vw, 2.5rem);
-            font-weight: 900;
-            line-height: 1.5;
-            letter-spacing: 0.02em;
-        }
-
-        .markdown-body {
-            line-height: 2.05;
-            font-size: 1.04rem;
-        }
-
-        .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
-            font-weight: 600;
-            line-height: 1.6;
-            margin: 1.8em 0 0.7em;
-        }
-
-        .markdown-body h2 {
-            font-size: 1.35rem;
-            padding-left: 14px;
-            border-left: 3px solid var(--seal);
-        }
-
-        .markdown-body h3 { font-size: 1.15rem; }
-        .markdown-body h4 { font-size: 1.02rem; }
-
-        .markdown-body p { margin-bottom: 1.2em; }
-
-        .markdown-body code {
-            background-color: var(--paper-deep);
-            padding: 0.15em 0.45em;
-            border-radius: 4px;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.84em;
-            color: var(--seal);
-        }
-
-        .markdown-body pre {
-            background-color: #2c2620;
-            color: #e8e0cf;
-            padding: 18px 20px;
-            overflow: auto;
-            border-radius: 10px;
-            margin-bottom: 1.4em;
-            font-size: 0.88rem;
-            line-height: 1.7;
-        }
-
-        .markdown-body pre code {
-            background-color: transparent;
-            padding: 0;
-            color: inherit;
-        }
-
-        .markdown-body blockquote {
-            color: var(--ink-soft);
-            border-left: 3px solid var(--seal);
-            background: rgba(179, 67, 43, 0.05);
-            padding: 10px 20px;
-            margin: 0 0 1.4em;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .markdown-body blockquote p { margin-bottom: 0.4em; }
-
-        .markdown-body img {
-            max-width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 10px 28px rgba(38, 33, 26, 0.14);
-            margin: 14px 0;
-        }
-
-        .markdown-body a {
-            color: var(--seal);
-            text-decoration: none;
-            border-bottom: 1px solid rgba(179, 67, 43, 0.4);
-        }
-
-        .markdown-body a:hover { border-bottom-color: var(--seal); }
-
-        .markdown-body ul, .markdown-body ol {
-            padding-left: 1.6em;
-            margin-bottom: 1.2em;
-        }
-
-        .markdown-body li { margin-bottom: 0.35em; }
-
-        .markdown-body hr {
-            border: 0;
-            border-top: 1px solid var(--line);
-            margin: 2.2em 0;
-        }
-
-        .markdown-body table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1.4em;
-            font-size: 0.92rem;
-            line-height: 1.7;
-        }
-
-        .markdown-body th, .markdown-body td {
-            border: 1px solid var(--line);
-            padding: 8px 12px;
-            text-align: left;
-        }
-
-        .markdown-body th { background: var(--paper-deep); font-weight: 600; }
-
-        /* WordPress 导出的表格常带行内对齐 */
-        .markdown-body td[data-align="center"], .markdown-body th[data-align="center"] { text-align: center; }
-
-        .article-footer {
-            margin-top: 56px;
-            padding-top: 24px;
-            border-top: 1px solid var(--line);
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .article-footer a {
-            color: var(--ink-soft);
-            text-decoration: none;
-            font-size: 0.88rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: color 0.25s;
-        }
-
-        .article-footer a:hover { color: var(--seal); }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .article-container { animation: none; }
-        }
-    </style>
+    <!-- Markdown 解析（自托管）与文章页共享样式 -->
+    <script src="assets/vendor/marked.min.js"></script>
+    <link rel="stylesheet" href="assets/article.css">
 </head>
 <body>
+
+    <div id="progress" aria-hidden="true"></div>
 
     <header class="page-nav">
         <div class="page-nav-inner">
@@ -289,6 +42,7 @@
                 <a href="index.html">主页</a>
                 <a href="essays.html">随笔</a>
                 <a href="gallery.html">摄影集</a>
+                <a href="about.html">关于</a>
             </nav>
         </div>
     </header>
@@ -299,9 +53,16 @@
             <h1 class="article-title" id="title-placeholder">加载中...</h1>
         </header>
 
+        <details class="toc" id="toc" hidden>
+            <summary>目录 · CONTENTS</summary>
+            <div id="toc-list"></div>
+        </details>
+
         <div id="content" class="markdown-body">
             <!-- Markdown 内容将渲染在这里 -->
         </div>
+
+        <nav class="post-nav" id="post-nav" aria-label="上下篇"></nav>
 
         <footer class="article-footer">
             <a href="essays.html">
@@ -312,49 +73,6 @@
         </footer>
     </div>
 
-    <script>
-        // 1. 获取 URL 里的参数
-        const params = new URLSearchParams(window.location.search);
-        const fileName = params.get('file'); // 获取文件名
-        const title = params.get('title');   // 获取标题
-        const date = params.get('date');     // 获取日期
-
-        // 2. 填充头部信息
-        if (title) {
-            document.title = title + " · Inwt"; // 修改浏览器标签页标题
-            document.getElementById('title-placeholder').textContent = title;
-        }
-        if (date) {
-            document.getElementById('date-placeholder').textContent = date;
-        }
-
-        // 3. 加载 Markdown 文件
-        if (fileName) {
-            fetch(`posts/${encodeURIComponent(fileName)}`)
-                .then(response => {
-                    if (!response.ok) throw new Error("文件未找到");
-                    return response.text();
-                })
-                .then(text => {
-                    // 去掉开头的 YAML Front Matter (--- ... ---)
-                    const cleanMarkdown = text.replace(/^---[\s\S]*?---\s*/, '');
-
-                    // 渲染为 HTML
-                    document.getElementById('content').innerHTML = marked.parse(cleanMarkdown);
-
-                    // 渲染数学公式（MathJax 异步加载，未就绪时等 ready 事件）
-                    if (window.MathJax && window.MathJax.typesetPromise) {
-                        MathJax.typesetPromise();
-                    } else {
-                        document.addEventListener('mathjax-ready', () => MathJax.typesetPromise(), { once: true });
-                    }
-                })
-                .catch(err => {
-                    document.getElementById('content').innerHTML = `<p style="color:var(--seal); text-align:center;">文章加载失败：${err.message}</p>`;
-                });
-        } else {
-            document.getElementById('content').innerHTML = '<p style="text-align:center;">无效的文章链接。</p>';
-        }
-    </script>
+    <script src="assets/article.js" defer></script>
 </body>
 </html>

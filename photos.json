@@ -9,7 +9,12 @@
     "date": "2026-08-08 13:28:24",
     "desc": "",
     "lat": 47.357472,
-    "lng": 130.312486
+    "lng": 130.312486,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/4608s",
+    "iso": 80
   },
   {
     "file": "IMG_1495.jpeg",
@@ -21,7 +26,12 @@
     "date": "2026-07-22 05:04:08",
     "desc": "",
     "lat": 30.243533,
-    "lng": 120.128297
+    "lng": 120.128297,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/81s",
+    "iso": 200
   },
   {
     "file": "2026_07_21_16_02_33_IMG_1431.HEIC",
@@ -33,7 +43,12 @@
     "date": "2026-07-21 16:02:33",
     "desc": "",
     "lat": 30.239606,
-    "lng": 120.167878
+    "lng": 120.167878,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/60s",
+    "iso": 200
   },
   {
     "file": "2026_07_21_10_14_13_IMG_1402.HEIC",
@@ -45,7 +60,12 @@
     "date": "2026-07-21 10:14:13",
     "desc": "",
     "lat": 30.243694,
-    "lng": 120.096419
+    "lng": 120.096419,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/802s",
+    "iso": 64
   },
   {
     "file": "2026_07_08_19_45_37_IMG_0916.HEIC",
@@ -57,7 +77,12 @@
     "date": "2026-07-08 19:45:37",
     "desc": "",
     "lat": 25.769956,
-    "lng": 100.149789
+    "lng": 100.149789,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/912s",
+    "iso": 80
   },
   {
     "file": "2026_07_08_18_29_50_IMG_0902.HEIC",
@@ -69,7 +94,12 @@
     "date": "2026-07-08 18:29:50",
     "desc": "",
     "lat": 25.723506,
-    "lng": 100.1911
+    "lng": 100.1911,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/1395s",
+    "iso": 50
   },
   {
     "file": "IMG_0812.jpeg",
@@ -81,7 +111,12 @@
     "date": "2026-07-07 14:53:56",
     "desc": "",
     "lat": 24.951603,
-    "lng": 102.752931
+    "lng": 102.752931,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/9009s",
+    "iso": 64
   },
   {
     "file": "2026_06_26_18_15_13_IMG_0553.HEIC",
@@ -93,7 +128,12 @@
     "date": "2026-06-26 18:15:13",
     "desc": "",
     "lat": 31.021992,
-    "lng": 121.426047
+    "lng": 121.426047,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/409s",
+    "iso": 64
   },
   {
     "file": "2026_06_05_13_16_56_IMG_0044.HEIC",
@@ -105,7 +145,12 @@
     "date": "2026-06-05 13:16:56",
     "desc": "",
     "lat": 31.123603,
-    "lng": 121.387336
+    "lng": 121.387336,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/1481s",
+    "iso": 50
   },
   {
     "file": "2026_05_30_18_57_56_IMG_9861.HEIC",
@@ -117,7 +162,12 @@
     "date": "2026-05-30 18:57:56",
     "desc": "",
     "lat": 31.026961,
-    "lng": 121.420264
+    "lng": 121.420264,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/233s",
+    "iso": 64
   },
   {
     "file": "2026_05_10_10_45_51_IMG_9203.HEIC",
@@ -129,7 +179,12 @@
     "date": "2026-05-10 10:45:51",
     "desc": "",
     "lat": 30.238206,
-    "lng": 120.149467
+    "lng": 120.149467,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/2146s",
+    "iso": 50
   },
   {
     "file": "IMG_8549.jpeg",
@@ -141,7 +196,12 @@
     "date": "2026-04-17 15:44:29",
     "desc": "",
     "lat": 31.022153,
-    "lng": 121.425728
+    "lng": 121.425728,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/913s",
+    "iso": 64
   },
   {
     "file": "2026_04_07_19_58_02_IMG_8259.HEIC",
@@ -153,7 +213,12 @@
     "date": "2026-04-07 19:58:02",
     "desc": "",
     "lat": 29.571281,
-    "lng": 106.576942
+    "lng": 106.576942,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/33s",
+    "iso": 500
   },
   {
     "file": "IMG_8239.jpeg",
@@ -165,7 +230,12 @@
     "date": "2026-04-07 16:57:18",
     "desc": "",
     "lat": 29.563336,
-    "lng": 106.573128
+    "lng": 106.573128,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/121s",
+    "iso": 50
   },
   {
     "file": "IMG_8164.jpeg",
@@ -177,7 +247,12 @@
     "date": "2026-04-06 20:56:06",
     "desc": "",
     "lat": 29.5599,
-    "lng": 106.590728
+    "lng": 106.590728,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/50s",
+    "iso": 500
   },
   {
     "file": "2026_04_06_19_44_24_IMG_8133.HEIC",
@@ -189,7 +264,12 @@
     "date": "2026-04-06 19:44:24",
     "desc": "",
     "lat": 29.559903,
-    "lng": 106.591597
+    "lng": 106.591597,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/50s",
+    "iso": 800
   },
   {
     "file": "2026_04_06_09_58_43_IMG_8042.HEIC",
@@ -201,7 +281,12 @@
     "date": "2026-04-06 09:58:43",
     "desc": "",
     "lat": 29.564411,
-    "lng": 106.550353
+    "lng": 106.550353,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/33s",
+    "iso": 320
   },
   {
     "file": "2026_04_04_17_27_04_IMG_7916.HEIC",
@@ -213,7 +298,12 @@
     "date": "2026-04-04 17:27:04",
     "desc": "",
     "lat": 30.828269,
-    "lng": 108.367469
+    "lng": 108.367469,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/2959s",
+    "iso": 64
   },
   {
     "file": "2026_04_04_12_47_08_IMG_7892.HEIC",
@@ -225,7 +315,12 @@
     "date": "2026-04-04 12:47:08",
     "desc": "",
     "lat": 31.042494,
-    "lng": 109.570983
+    "lng": 109.570983,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/5376s",
+    "iso": 64
   },
   {
     "file": "2026_04_04_10_53_14_IMG_7865.HEIC",
@@ -237,7 +332,12 @@
     "date": "2026-04-04 10:53:14",
     "desc": "",
     "lat": 31.02905,
-    "lng": 109.620064
+    "lng": 109.620064,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/1724s",
+    "iso": 64
   },
   {
     "file": "2026_03_14_15_05_28_IMG_7053.HEIC",
@@ -249,7 +349,12 @@
     "date": "2026-03-14 15:05:28",
     "desc": "",
     "lat": 31.237867,
-    "lng": 121.492211
+    "lng": 121.492211,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/3425s",
+    "iso": 64
   },
   {
     "file": "IMG_6927.jpeg",
@@ -261,7 +366,12 @@
     "date": "2026-03-08 16:33:35",
     "desc": "",
     "lat": 31.030161,
-    "lng": 121.4329
+    "lng": 121.4329,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/299s",
+    "iso": 50
   },
   {
     "file": "2026_02_27_16_39_29_IMG_6699.HEIC",
@@ -273,7 +383,12 @@
     "date": "2026-02-27 16:39:29",
     "desc": "",
     "lat": 39.997131,
-    "lng": 116.271722
+    "lng": 116.271722,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/315s",
+    "iso": 50
   },
   {
     "file": "IMG_6683.jpeg",
@@ -285,7 +400,12 @@
     "date": "2026-02-27 16:25:34",
     "desc": "",
     "lat": 39.996544,
-    "lng": 116.266289
+    "lng": 116.266289,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/99s",
+    "iso": 64
   },
   {
     "file": "2026_02_27_12_41_12_IMG_6594.HEIC",
@@ -297,7 +417,12 @@
     "date": "2026-02-27 12:41:12",
     "desc": "",
     "lat": 39.902011,
-    "lng": 116.393525
+    "lng": 116.393525,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/1613s",
+    "iso": 50
   },
   {
     "file": "IMG_6248.jpeg",
@@ -309,7 +434,12 @@
     "date": "2026-02-21 06:12:39",
     "desc": "",
     "lat": 48.355644,
-    "lng": 134.275803
+    "lng": 134.275803,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/693s",
+    "iso": 80
   },
   {
     "file": "IMG_4958.jpeg",
@@ -321,7 +451,12 @@
     "date": "2025-12-08 16:03:34",
     "desc": "",
     "lat": 31.023031,
-    "lng": 121.423981
+    "lng": 121.423981,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/99s",
+    "iso": 160
   },
   {
     "file": "IMG_4657.jpeg",
@@ -333,7 +468,12 @@
     "date": "2025-11-29 13:34:00",
     "desc": "",
     "lat": 31.022081,
-    "lng": 121.425819
+    "lng": 121.425819,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/1597s",
+    "iso": 64
   },
   {
     "file": "2025_10_07_14_54_37_IMG_3078.HEIC",
@@ -345,7 +485,12 @@
     "date": "2025-10-07 14:54:37",
     "desc": "",
     "lat": 37.541064,
-    "lng": 122.147094
+    "lng": 122.147094,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/12500s",
+    "iso": 80
   },
   {
     "file": "IMG_2683.jpeg",
@@ -357,7 +502,12 @@
     "date": "2025-10-01 14:17:12",
     "desc": "",
     "lat": 36.667233,
-    "lng": 117.018897
+    "lng": 117.018897,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back dual wide camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/938s",
+    "iso": 80
   },
   {
     "file": "IMG_1988.jpeg",
@@ -369,7 +519,12 @@
     "date": "2025-09-08 01:21:57",
     "desc": "",
     "lat": 47.313975,
-    "lng": 130.25885
+    "lng": 130.25885,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "2s",
+    "iso": 4000
   },
   {
     "file": "IMG_1959.jpeg",
@@ -381,7 +536,12 @@
     "date": "2025-09-06 14:57:32",
     "desc": "",
     "lat": 46.766422,
-    "lng": 130.367583
+    "lng": 130.367583,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/4975s",
+    "iso": 64
   },
   {
     "file": "IMG_1927.jpeg",
@@ -393,7 +553,12 @@
     "date": "2025-09-05 13:52:12",
     "desc": "",
     "lat": 47.332119,
-    "lng": 130.279128
+    "lng": 130.279128,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/1613s",
+    "iso": 50
   },
   {
     "file": "IMG_1283.jpeg",
@@ -405,7 +570,12 @@
     "date": "2025-08-09 17:54:27",
     "desc": "",
     "lat": 45.763486,
-    "lng": 126.699919
+    "lng": 126.699919,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/2513s",
+    "iso": 64
   },
   {
     "file": "IMG_1254.jpeg",
@@ -417,7 +587,12 @@
     "date": "2025-08-08 13:19:03",
     "desc": "",
     "lat": 47.315261,
-    "lng": 130.2939
+    "lng": 130.2939,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/2146s",
+    "iso": 50
   },
   {
     "file": "IMG_1200.jpeg",
@@ -429,7 +604,12 @@
     "date": "2025-08-05 19:03:36",
     "desc": "",
     "lat": 47.318481,
-    "lng": 130.267486
+    "lng": 130.267486,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/50s",
+    "iso": 160
   },
   {
     "file": "IMG_1197.jpeg",
@@ -441,7 +621,12 @@
     "date": "2025-08-05 18:16:38",
     "desc": "",
     "lat": 47.314408,
-    "lng": 130.259261
+    "lng": 130.259261,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/301s",
+    "iso": 80
   },
   {
     "file": "IMG_0096.jpeg",
@@ -453,7 +638,12 @@
     "date": "2025-06-20 11:36:46",
     "desc": "",
     "lat": 24.663678,
-    "lng": 117.003747
+    "lng": 117.003747,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/888s",
+    "iso": 80
   },
   {
     "file": "IMG_0032.jpeg",
@@ -465,7 +655,12 @@
     "date": "2025-06-19 20:25:07",
     "desc": "",
     "lat": 24.456511,
-    "lng": 118.068656
+    "lng": 118.068656,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/19s",
+    "iso": 800
   },
   {
     "file": "IMG_9951.jpeg",
@@ -477,7 +672,12 @@
     "date": "2025-06-18 17:54:40",
     "desc": "",
     "lat": 24.462369,
-    "lng": 118.069908
+    "lng": 118.069908,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/609s",
+    "iso": 64
   },
   {
     "file": "IMG_9916.jpeg",
@@ -489,7 +689,12 @@
     "date": "2025-06-18 14:09:42",
     "desc": "",
     "lat": 24.443883,
-    "lng": 118.071869
+    "lng": 118.071869,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/7092s",
+    "iso": 64
   },
   {
     "file": "IMG_9879.jpeg",
@@ -501,7 +706,12 @@
     "date": "2025-06-18 09:56:24",
     "desc": "",
     "lat": 24.44465,
-    "lng": 118.062225
+    "lng": 118.062225,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/10417s",
+    "iso": 80
   },
   {
     "file": "IMG_8454.jpeg",
@@ -513,7 +723,12 @@
     "date": "2025-04-25 17:53:43",
     "desc": "",
     "lat": 31.023306,
-    "lng": 121.425361
+    "lng": 121.425361,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/1193s",
+    "iso": 80
   },
   {
     "file": "IMG_7962.jpeg",
@@ -525,7 +740,12 @@
     "date": "2025-04-03 19:31:55",
     "desc": "",
     "lat": 31.224819,
-    "lng": 121.537047
+    "lng": 121.537047,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/50s",
+    "iso": 160
   },
   {
     "file": "IMG_7940.jpeg",
@@ -537,7 +757,12 @@
     "date": "2025-04-03 15:46:30",
     "desc": "",
     "lat": 31.222303,
-    "lng": 121.543183
+    "lng": 121.543183,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/605s",
+    "iso": 50
   },
   {
     "file": "IMG_7801.jpeg",
@@ -549,7 +774,12 @@
     "date": "2025-03-30 08:40:17",
     "desc": "",
     "lat": 31.340356,
-    "lng": 121.369331
+    "lng": 121.369331,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/9009s",
+    "iso": 64
   },
   {
     "file": "IMG_7428.jpeg",
@@ -561,7 +791,12 @@
     "date": "2025-03-16 22:01:31",
     "desc": "",
     "lat": 31.023147,
-    "lng": 121.425361
+    "lng": 121.425361,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/33s",
+    "iso": 1000
   },
   {
     "file": "IMG_7238.jpeg",
@@ -573,7 +808,12 @@
     "date": "2025-03-08 17:46:50",
     "desc": "",
     "lat": 31.254653,
-    "lng": 121.542428
+    "lng": 121.542428,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 15.66mm f/2.8",
+    "f": "ƒ/2.8",
+    "s": "1/99s",
+    "iso": 64
   },
   {
     "file": "IMG_7047.jpeg",
@@ -585,7 +825,12 @@
     "date": "2025-03-01 18:26:01",
     "desc": "",
     "lat": 30.884206,
-    "lng": 120.425019
+    "lng": 120.425019,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/25s",
+    "iso": 800
   },
   {
     "file": "2025_03_01_14_07_12_IMG_7009.HEIC",
@@ -597,7 +842,12 @@
     "date": "2025-03-01 14:07:12",
     "desc": "",
     "lat": 30.883528,
-    "lng": 120.433692
+    "lng": 120.433692,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/2415s",
+    "iso": 64
   },
   {
     "file": "IMG_6578.jpeg",
@@ -609,7 +859,12 @@
     "date": "2025-02-12 19:09:20",
     "desc": "",
     "lat": 47.314397,
-    "lng": 130.259353
+    "lng": 130.259353,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/30s",
+    "iso": 1600
   },
   {
     "file": "IMG_1869.jpeg",
@@ -621,7 +876,12 @@
     "date": "2024-08-21 18:08:33",
     "desc": "",
     "lat": 29.55325,
-    "lng": 115.968011
+    "lng": 115.968011,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/1339s",
+    "iso": 64
   },
   {
     "file": "IMG_1504.jpeg",
@@ -633,7 +893,12 @@
     "date": "2024-08-14 19:57:18",
     "desc": "",
     "lat": 22.293175,
-    "lng": 114.170289
+    "lng": 114.170289,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/30s",
+    "iso": 1000
   },
   {
     "file": "IMG_1356.jpeg",
@@ -645,7 +910,12 @@
     "date": "2024-08-14 08:46:50",
     "desc": "",
     "lat": 22.418381,
-    "lng": 114.210106
+    "lng": 114.210106,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/3597s",
+    "iso": 80
   },
   {
     "file": "IMG_0928.jpeg",
@@ -657,7 +927,12 @@
     "date": "2024-08-07 18:38:18",
     "desc": "",
     "lat": 47.334111,
-    "lng": 130.289933
+    "lng": 130.289933,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/250s",
+    "iso": 64
   },
   {
     "file": "IMG_0055.jpeg",
@@ -669,6 +944,11 @@
     "date": "2024-06-21 19:26:49",
     "desc": "",
     "lat": 47.316422,
-    "lng": 130.246094
+    "lng": 130.246094,
+    "camera": "Apple iPhone 15 Pro Max",
+    "lens": "iPhone 15 Pro Max back triple camera 6.765mm f/1.78",
+    "f": "ƒ/1.78",
+    "s": "1/121s",
+    "iso": 80
   }
 ]

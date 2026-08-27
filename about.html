@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于 · Inwt</title>
+    <meta name="description" content="关于 Inwt 的小站：四条线路——随笔、摄影、古典乐与 AI 学习，所有线路终点都是热爱。">
+    <link rel="canonical" href="https://inwt233.cn/about.html">
+    <meta name="theme-color" content="#0a0a0c">
+    <meta property="og:site_name" content="Inwt · 小站">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://inwt233.cn/about.html">
+    <meta property="og:title" content="关于 · Inwt">
+    <meta property="og:description" content="四条线路——随笔、摄影、古典乐与 AI 学习，所有线路终点都是热爱。">
+    <meta property="og:image" content="https://inwt233.cn/assets/og.png">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/fonts/fonts.css">
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --ink: #f5f5f7;
+            --soft: #9a9aa0;
+            --grid: rgba(255, 255, 255, 0.045);
+            --panel: rgba(12, 12, 16, 0.5);
+            --panel-line: rgba(255, 255, 255, 0.1);
+            --red: #ff5a4f;
+            --cyan: #42f5e9;
+            --yellow: #ffd60a;
+            --green: #30d158;
+            --mono: 'Space Mono', ui-monospace, monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            background-image: radial-gradient(var(--grid) 1px, transparent 1px);
+            background-size: 26px 26px;
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { color: inherit; }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(10, 10, 12, 0.82);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--panel-line);
+        }
+
+        .topbar-inner {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.98rem;
+            letter-spacing: 0.08em;
+        }
+
+        .brand .mark {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            border: 3px solid var(--green);
+            background: var(--bg);
+            flex: none;
+        }
+
+        .nav { display: flex; gap: 22px; }
+
+        .nav a {
+            color: var(--soft);
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: color 0.25s;
+        }
+
+        .nav a:hover, .nav a[aria-current="page"] { color: var(--ink); }
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 0 24px 90px;
+        }
+
+        .hero { padding: 84px 0 54px; }
+
+        .eyebrow {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.5em;
+            color: var(--soft);
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 6vw, 3.1rem);
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            margin-bottom: 22px;
+        }
+
+        .hero p {
+            color: var(--soft);
+            line-height: 2.1;
+            font-size: 1.0rem;
+            max-width: 36em;
+        }
+
+        section.block { padding: 34px 0 6px; }
+
+        .block-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .block-head i {
+            width: 26px; height: 6px;
+            border-radius: 3px;
+            background: var(--c, var(--green));
+            flex: none;
+        }
+
+        .block-head h2 {
+            font-size: 1.06rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+        }
+
+        .block p {
+            color: var(--soft);
+            line-height: 2.1;
+            font-size: 0.96rem;
+            margin-bottom: 1.1em;
+        }
+
+        .block p b { color: var(--ink); font-weight: 600; }
+
+        .lines-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 14px;
+            margin: 6px 0 26px;
+        }
+
+        .line-card {
+            border: 1px solid var(--panel-line);
+            background: var(--panel);
+            border-radius: 14px;
+            padding: 18px 20px;
+            text-decoration: none;
+            transition: transform 0.25s, border-color 0.25s;
+        }
+
+        .line-card:hover { transform: translateY(-3px); border-color: rgba(255, 255, 255, 0.28); }
+
+        .line-card .lc-bar {
+            width: 22px; height: 5px;
+            border-radius: 3px;
+            background: var(--c, var(--green));
+            margin-bottom: 12px;
+        }
+
+        .line-card .lc-name { font-weight: 700; font-size: 0.96rem; letter-spacing: 0.1em; margin-bottom: 6px; }
+
+        .line-card .lc-sub { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.12em; color: var(--soft); }
+
+        footer.foot {
+            border-top: 1px solid var(--panel-line);
+            margin-top: 40px;
+            padding-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.18em;
+            color: var(--soft);
+        }
+
+        footer.foot a {
+            text-decoration: none;
+            color: var(--soft);
+            border-bottom: 1px solid var(--panel-line);
+            padding-bottom: 2px;
+            transition: color 0.25s, border-color 0.25s;
+        }
+
+        footer.foot a:hover { color: var(--ink); border-color: var(--ink); }
+
+        .rise { opacity: 0; transform: translateY(14px); animation: rise 0.7s ease forwards; }
+
+        @keyframes rise { to { opacity: 1; transform: none; } }
+
+        @media (prefers-reduced-motion: reduce) {
+            .rise { animation: none; opacity: 1; transform: none; }
+            .line-card { transition: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="index.html"><span class="mark" aria-hidden="true"></span>Inwt · 小站</a>
+            <nav class="nav" aria-label="页面导航">
+                <a href="index.html">主页</a>
+                <a href="essays.html">随笔</a>
+                <a href="gallery.html">摄影集</a>
+                <a href="about.html" aria-current="page">关于</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="shell">
+        <section class="hero rise" style="animation-delay: 0.1s">
+            <div class="eyebrow">ABOUT · 站点通告</div>
+            <h1>关于这趟列车</h1>
+            <p>这里是 Inwt 的站台。我喜欢铁路图那种感觉——每条线路都有自己的颜色和终点，
+            又总能在某座车站交汇。所以干脆把小站画成了一张铁路图：你刚才在门厅看到的一切，就是这里的一切。</p>
+        </section>
+
+        <section class="block rise" style="animation-delay: 0.25s">
+            <div class="block-head" style="--c: var(--red)"><i aria-hidden="true"></i><h2>四条线路</h2></div>
+            <div class="lines-grid">
+                <a class="line-card" style="--c: var(--red)" href="essays.html">
+                    <div class="lc-bar" aria-hidden="true"></div>
+                    <div class="lc-name">随笔线</div>
+                    <div class="lc-sub">文字与随想 · ESSAYS</div>
+                </a>
+                <a class="line-card" style="--c: var(--cyan)" href="gallery.html">
+                    <div class="lc-bar" aria-hidden="true"></div>
+                    <div class="lc-name">光影线</div>
+                    <div class="lc-sub">按下快门的地方 · GALLERY</div>
+                </a>
+                <a class="line-card" style="--c: var(--yellow)" href="https://inwt233.cn/Classic-Music/" target="_blank" rel="noopener">
+                    <div class="lc-bar" aria-hidden="true"></div>
+                    <div class="lc-name">乐律线</div>
+                    <div class="lc-sub">古典乐演出日历 · CLASSIC</div>
+                </a>
+                <a class="line-card" style="--c: var(--green)" href="https://inwt233.gitbook.io/ai-learning" target="_blank" rel="noopener">
+                    <div class="lc-bar" aria-hidden="true"></div>
+                    <div class="lc-name">学园线</div>
+                    <div class="lc-sub">AI 学习笔记 · AI·LEARN</div>
+                </a>
+            </div>
+            <p>随笔线写城市、行走、人与事；光影线收着按快门那一刻的坐标；
+            乐律线整理全国的古典乐演出；学园线通往 AI 学习笔记。所有线路的终点，都是热爱。</p>
+        </section>
+
+        <section class="block rise" style="animation-delay: 0.4s">
+            <div class="block-head" style="--c: var(--cyan)"><i aria-hidden="true"></i><h2>这站怎么修的</h2></div>
+            <p>小站是<b>纯静态页面</b>：没有框架、没有后端、没有访问统计，你的足迹不出站。
+            照片由手机直传到电脑，本地脚本读取拍摄坐标后生成 WebP 与缩略图，随 git 一起发布。</p>
+            <p>按 <b>1–4</b> 可以在门厅直接进站；门厅会随系统昼昏切换日间与夜间轨道。</p>
+        </section>
+
+        <section class="block rise" style="animation-delay: 0.55s">
+            <div class="block-head" style="--c: var(--yellow)"><i aria-hidden="true"></i><h2>换乘联络</h2></div>
+            <p>想聊聊铁路、相机、古典乐或者 AI，欢迎到 <b>GitHub</b> 找我：</p>
+            <p><a href="https://github.com/inwt2333" target="_blank" rel="noopener" style="border-bottom:1px solid var(--panel-line); text-decoration:none; padding-bottom:2px;">github.com/inwt2333</a></p>
+        </section>
+
+        <footer class="foot">
+            <span>© INWT · EST. 2024</span>
+            <span><a href="index.html">← 返回门厅</a></span>
+        </footer>
+    </main>
+
+</body>
+</html>

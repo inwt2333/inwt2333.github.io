@@ -5,19 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inwt · 小站</title>
     <meta name="description" content="Inwt 的小站：随笔、摄影集、古典乐与 AI 学习，所有线路终点都是热爱。">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="canonical" href="https://inwt233.cn/">
+    <meta name="theme-color" content="#0a0a0c" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f2f2f5" media="(prefers-color-scheme: light)">
+
+    <!-- Open Graph / Twitter Card -->
+    <meta property="og:site_name" content="Inwt · 小站">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://inwt233.cn/">
+    <meta property="og:title" content="Inwt · 小站">
+    <meta property="og:description" content="随笔、摄影集、古典乐与 AI 学习，所有线路终点都是热爱。">
+    <meta property="og:image" content="https://inwt233.cn/assets/og.png">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- 图标与订阅 -->
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <link rel="alternate" type="application/rss+xml" title="Inwt · 随笔" href="feed.xml">
+
+    <!-- 字体：本地子集，详见 tools/make_fonts.py -->
+    <link rel="stylesheet" href="assets/fonts/fonts.css">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Inwt · 小站",
+        "alternateName": "Inwt Railway",
+        "url": "https://inwt233.cn/",
+        "description": "随笔、摄影集、古典乐与 AI 学习，所有线路终点都是热爱。"
+    }
+    </script>
+
     <style>
         :root {
             --bg: #0a0a0c;
             --ink: #f5f5f7;
             --soft: #9a9aa0;
+            --grid: rgba(255, 255, 255, 0.045);
+            --glow: rgba(122, 162, 255, 0.075);
+            --blend: screen;
+            --panel: rgba(12, 12, 16, 0.55);
+            --panel-line: rgba(255, 255, 255, 0.1);
             --red: #ff5a4f;
             --cyan: #42f5e9;
             --yellow: #ffd60a;
             --green: #30d158;
             --mono: 'Space Mono', ui-monospace, monospace;
+        }
+
+        /* 白天到站：换成纸面的浅色轨道 */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg: #f2f2f5;
+                --ink: #1c1c22;
+                --soft: #6b6b74;
+                --grid: rgba(0, 0, 0, 0.06);
+                --glow: rgba(80, 112, 235, 0.1);
+                --blend: multiply;
+                --panel: rgba(255, 255, 255, 0.62);
+                --panel-line: rgba(0, 0, 0, 0.1);
+            }
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,10 +76,10 @@
 
         body {
             background: var(--bg);
-            background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+            background-image: radial-gradient(var(--grid) 1px, transparent 1px);
             background-size: 26px 26px;
             color: var(--ink);
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
         }
@@ -75,7 +125,25 @@
         /* 二次到访：跳过生长动画 */
         .revisit .line { animation: none; stroke-dashoffset: 0; }
         .revisit .halo { animation: none; stroke-dashoffset: 0; opacity: 0.07; }
-        .revisit .station, .revisit .masthead > *, .revisit .footer-hint { animation: none; opacity: 1; transform: none; }
+        .revisit .station, .revisit .masthead > *, .revisit .footer-hint,
+        .revisit .legend { animation: none; opacity: 1; transform: none; }
+
+        /* ---------- 悬停联动：聚焦所在线路，其余压暗（~= 兼容换乘站多线） ---------- */
+        .map[data-focus] .line { opacity: 0.13; }
+        .map[data-focus] .station { filter: brightness(0.55) saturate(0.5); }
+        .map[data-focus] .decor [data-line] { filter: brightness(0.6) saturate(0.45); }
+        .map[data-focus~="green"]  .line[data-line="green"],
+        .map[data-focus~="red"]    .line[data-line="red"],
+        .map[data-focus~="yellow"] .line[data-line="yellow"],
+        .map[data-focus~="cyan"]   .line[data-line="cyan"] { opacity: 1; }
+        .map[data-focus~="green"]  .station[data-line~="green"],
+        .map[data-focus~="red"]    .station[data-line~="red"],
+        .map[data-focus~="yellow"] .station[data-line~="yellow"],
+        .map[data-focus~="cyan"]   .station[data-line~="cyan"] { filter: none; }
+        .map[data-focus~="green"]  .decor [data-line~="green"],
+        .map[data-focus~="red"]    .decor [data-line~="red"],
+        .map[data-focus~="yellow"] .decor [data-line~="yellow"],
+        .map[data-focus~="cyan"]   .decor [data-line~="cyan"] { filter: none; }
 
         /* ---------- 站点 ---------- */
         .station {
@@ -86,6 +154,7 @@
             transform-box: fill-box;
             transform-origin: center;
             animation: pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) var(--d, 2s) forwards;
+            transition: filter 0.25s;
         }
 
         @keyframes pop { to { opacity: 1; transform: none; } }
@@ -97,17 +166,19 @@
         .station .st-sub { fill: var(--soft); font-weight: 400; font-size: 14px; font-family: var(--mono); letter-spacing: 0.04em; transition: fill 0.2s; }
         .station:hover .ring, .station:focus .ring { stroke-width: 7; }
         .station:hover .core, .station:focus .core { r: 11; }
-        .station:hover .st-sub { fill: #c9c9cf; }
+        .station:hover .st-sub { fill: var(--ink); }
 
         .decor {
             opacity: 0;
             animation: decorIn 0.6s ease var(--d, 2.4s) forwards;
         }
 
+        .decor [data-line] { transition: filter 0.25s; }
+
         @keyframes decorIn { to { opacity: 1; } }
 
         .decor circle { fill: var(--bg); stroke-width: 3; }
-        .decor text { fill: #63636b; font-size: 15px; font-weight: 500; font-family: 'Noto Sans SC', sans-serif; }
+        .decor text { fill: var(--soft); font-size: 15px; font-weight: 500; font-family: 'Noto Sans SC', sans-serif; }
 
         /* ---------- 标题区 ---------- */
         .masthead {
@@ -166,17 +237,59 @@
             50% { opacity: 0.35; }
         }
 
+        /* ---------- 线路图例 ---------- */
+        .legend {
+            position: fixed;
+            right: 40px;
+            bottom: 70px;
+            z-index: 5;
+            padding: 13px 18px 14px;
+            background: var(--panel);
+            border: 1px solid var(--panel-line);
+            border-radius: 14px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            font-size: 0.78rem;
+            opacity: 0;
+            animation: riseIn 0.8s ease 1.6s forwards;
+        }
+
+        .legend-head {
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            letter-spacing: 0.32em;
+            color: var(--soft);
+            margin-bottom: 9px;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 3.5px 0;
+            cursor: default;
+        }
+
+        .legend-row i {
+            flex: none;
+            width: 16px; height: 5px;
+            border-radius: 3px;
+            background: var(--c, var(--soft));
+        }
+
+        .legend-row span { color: var(--soft); font-family: var(--mono); font-size: 0.68rem; margin-left: 4px; }
+
         /* ---------- 鼠标辉光 ---------- */
         .cursor-glow {
             position: fixed;
             width: 560px;
             height: 560px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(122, 162, 255, 0.075), transparent 62%);
+            background: radial-gradient(circle, var(--glow), transparent 62%);
             pointer-events: none;
             transform: translate(-50%, -50%);
             left: -999px;
-            mix-blend-mode: screen;
+            mix-blend-mode: var(--blend);
             z-index: 4;
             opacity: 0;
             transition: opacity 0.4s;
@@ -190,6 +303,7 @@
             z-index: 5;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 0 40px;
             font-family: var(--mono);
             font-size: 0.68rem;
@@ -201,6 +315,20 @@
         }
 
         .footer-hint .enter { display: flex; align-items: center; gap: 8px; }
+
+        .footer-hint a {
+            pointer-events: auto;
+            color: var(--soft);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: color 0.25s, border-color 0.25s;
+        }
+
+        .footer-hint a:hover { color: var(--ink); border-color: var(--ink); }
+
+        @media (max-width: 900px) {
+            .legend { display: none; } /* 竖屏裁切下图例易出屏，隐藏保持地图清爽 */
+        }
 
         @media (max-width: 700px) {
             .masthead { top: 24px; left: 24px; }
@@ -215,7 +343,7 @@
             .line, .halo { animation: none; stroke-dashoffset: 0; }
             .halo { opacity: 0.07; }
             .station, .decor { animation: none; opacity: 1; transform: none; }
-            .masthead > *, .footer-hint { animation: none; opacity: 1; transform: none; }
+            .masthead > *, .footer-hint, .legend { animation: none; opacity: 1; transform: none; }
             .train { display: none; }
             .status .dot { animation: none; }
         }
@@ -226,24 +354,40 @@
     <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
 
     <svg class="map" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-label="Inwt 小站铁路导航图">
-        <!-- 线路路径由脚本按航点生成：直线 + 统一圆角转弯 -->
-        <path class="line" id="line-green" pathLength="1" style="--d: 0.15s" stroke="#30d158"/>
-        <path class="line" id="line-red"   pathLength="1" style="--d: 0.5s"  stroke="#ff5a4f"/>
-        <path class="line" id="line-yellow" pathLength="1" style="--d: 0.9s" stroke="#ffd60a"/>
-        <path class="line" id="line-cyan"  pathLength="1" style="--d: 1.3s"  stroke="#42f5e9"/>
+        <!-- 线路：标记内预置静态 d（无 JS 也可读图），脚本按同一航点重算 -->
+        <path class="line" id="line-green" data-line="green" pathLength="1" style="--d: 0.15s" stroke="#30d158"
+              d="M -100 170 L 1540 170"/>
+        <path class="line" id="line-red" data-line="red" pathLength="1" style="--d: 0.5s" stroke="#ff5a4f"
+              d="M -100 800 L 310 800 Q 340 800 361.2 778.8 L 538.8 601.2 Q 560 580 560 550 L 560 340 Q 560 310 581.2 288.8 L 598.8 271.2 Q 620 250 650 250 L 1540 250"/>
+        <path class="line" id="line-yellow" data-line="yellow" pathLength="1" style="--d: 0.9s" stroke="#ffd60a"
+              d="M 940 -60 L 940 450 Q 940 480 918.8 501.2 L 821.2 598.8 Q 800 620 770 620 L -100 620"/>
+        <path class="line" id="line-cyan" data-line="cyan" pathLength="1" style="--d: 1.3s" stroke="#42f5e9"
+              d="M -100 480 L 350 480 Q 380 480 401.2 501.2 L 598.8 698.8 Q 620 720 650 720 L 1540 720"/>
 
         <!-- 装饰站 -->
-        <g class="decor" style="--d: 2.5s">
-            <circle cx="520" cy="170" r="6" stroke="#30d158"/><text x="520" y="140" text-anchor="middle">琴房</text>
-            <circle cx="1020" cy="170" r="6" stroke="#30d158"/><text x="1020" y="140" text-anchor="middle">图书馆</text>
-            <circle cx="420" cy="720" r="6" stroke="#ff5a4f"/><text x="420" y="696" text-anchor="middle">初雪</text>
-            <circle cx="900" cy="250" r="6" stroke="#ff5a4f"/><text x="900" y="226" text-anchor="middle">晚风</text>
-            <circle cx="300" cy="620" r="6" stroke="#ffd60a"/><text x="300" y="596" text-anchor="middle">站台</text>
-            <circle cx="880" cy="720" r="6" stroke="#42f5e9"/><text x="880" y="694" text-anchor="middle">胶片</text>
+        <g class="decor" style="--d: 2.5s" aria-hidden="true">
+            <g data-line="green">
+                <circle cx="520" cy="170" r="6" stroke="#30d158"/><text x="520" y="140" text-anchor="middle">琴房</text>
+            </g>
+            <g data-line="green">
+                <circle cx="1020" cy="170" r="6" stroke="#30d158"/><text x="1020" y="140" text-anchor="middle">图书馆</text>
+            </g>
+            <g data-line="red">
+                <circle cx="420" cy="720" r="6" stroke="#ff5a4f"/><text x="420" y="696" text-anchor="middle">初雪</text>
+            </g>
+            <g data-line="red">
+                <circle cx="900" cy="250" r="6" stroke="#ff5a4f"/><text x="900" y="226" text-anchor="middle">晚风</text>
+            </g>
+            <g data-line="yellow">
+                <circle cx="300" cy="620" r="6" stroke="#ffd60a"/><text x="300" y="596" text-anchor="middle">站台</text>
+            </g>
+            <g data-line="cyan">
+                <circle cx="880" cy="720" r="6" stroke="#42f5e9"/><text x="880" y="694" text-anchor="middle">胶片</text>
+            </g>
         </g>
 
-        <!-- 站点：随笔（红线） -->
-        <a class="station" href="essays.html" aria-label="进入随笔" style="--d: 1.7s">
+        <!-- 站点：随笔（随笔线） -->
+        <a class="station st-red" data-line="red" href="essays.html" aria-label="进入随笔" style="--d: 1.7s">
             <circle class="hit" cx="560" cy="440" r="40"/>
             <circle class="ring" cx="560" cy="440" r="15" stroke="#ff5a4f"/>
             <circle class="core" cx="560" cy="440" r="8"/>
@@ -251,8 +395,8 @@
             <text class="st-sub" id="sub-essays" x="588" y="476">文字与随想</text>
         </a>
 
-        <!-- 站点：摄影集（青线） -->
-        <a class="station" href="gallery.html" aria-label="进入摄影集" style="--d: 2.9s">
+        <!-- 站点：摄影集（光影线） -->
+        <a class="station st-cyan" data-line="cyan" href="gallery.html" aria-label="进入摄影集" style="--d: 2.9s">
             <circle class="hit" cx="700" cy="720" r="40"/>
             <circle class="ring" cx="700" cy="720" r="15" stroke="#42f5e9"/>
             <circle class="core" cx="700" cy="720" r="8"/>
@@ -260,8 +404,8 @@
             <text class="st-sub" id="sub-gallery" x="700" y="760" text-anchor="middle">按下快门的地方</text>
         </a>
 
-        <!-- 站点：古典乐日历（黄线） -->
-        <a class="station" href="https://inwt233.cn/Classic-Music/" target="_blank" rel="noopener" aria-label="古典乐日历（新窗口）" style="--d: 2.1s">
+        <!-- 站点：古典乐日历（乐律线） -->
+        <a class="station st-yellow" data-line="yellow" href="https://inwt233.cn/Classic-Music/" target="_blank" rel="noopener" aria-label="古典乐日历（新窗口）" style="--d: 2.1s">
             <circle class="hit" cx="940" cy="330" r="40"/>
             <circle class="ring" cx="940" cy="330" r="15" stroke="#ffd60a"/>
             <circle class="core" cx="940" cy="330" r="8"/>
@@ -269,13 +413,22 @@
             <text class="st-sub" x="912" y="366" text-anchor="end">演出与作品</text>
         </a>
 
-        <!-- 站点：AI-Learning（绿线） -->
-        <a class="station" href="https://inwt233.gitbook.io/ai-learning" target="_blank" rel="noopener" aria-label="AI-Learning（新窗口）" style="--d: 1.4s">
+        <!-- 站点：AI-Learning（学园线） -->
+        <a class="station st-green" data-line="green" href="https://inwt233.gitbook.io/ai-learning" target="_blank" rel="noopener" aria-label="AI-Learning（新窗口）" style="--d: 1.4s">
             <circle class="hit" cx="820" cy="170" r="40"/>
             <circle class="ring" cx="820" cy="170" r="15" stroke="#30d158"/>
             <circle class="core" cx="820" cy="170" r="8"/>
             <text class="st-name" x="820" y="140" text-anchor="middle">AI-Learning</text>
             <text class="st-sub" x="820" y="210" text-anchor="middle">学习笔记</text>
+        </a>
+
+        <!-- 站点：关于（换乘站：光影线 × 乐律线） -->
+        <a class="station" data-line="cyan yellow" href="about.html" aria-label="关于本站" style="--d: 2.5s">
+            <circle class="hit" cx="520" cy="620" r="40"/>
+            <circle class="ring" cx="520" cy="620" r="15" style="stroke: var(--ink)"/>
+            <circle class="core" cx="520" cy="620" r="8"/>
+            <text class="st-name" x="520" y="586" text-anchor="middle">关于</text>
+            <text class="st-sub" x="520" y="664" text-anchor="middle">站长与线路</text>
         </a>
 
         <!-- 列车：线成之后发车 -->
@@ -287,6 +440,14 @@
         <h1>Inwt · 小站</h1>
         <div class="status"><span class="dot" aria-hidden="true"></span>线路正常运行</div>
     </header>
+
+    <aside class="legend" aria-label="线路图例">
+        <div class="legend-head">LINES · 线路</div>
+        <div class="legend-row" data-line="red"><i style="--c: var(--red)" aria-hidden="true"></i>随笔线<span>ESSAYS</span></div>
+        <div class="legend-row" data-line="cyan"><i style="--c: var(--cyan)" aria-hidden="true"></i>光影线<span>GALLERY</span></div>
+        <div class="legend-row" data-line="yellow"><i style="--c: var(--yellow)" aria-hidden="true"></i>乐律线<span>CLASSIC</span></div>
+        <div class="legend-row" data-line="green"><i style="--c: var(--green)" aria-hidden="true"></i>学园线<span>AI·LEARN</span></div>
+    </aside>
 
     <footer class="footer-hint">
         <span>© INWT</span>
@@ -365,7 +526,7 @@
                     const c = document.createElementNS(SVGNS, 'circle');
                     c.setAttribute('cx', -back);
                     c.setAttribute('r', r);
-                    c.setAttribute('fill', '#fff');
+                    c.style.fill = 'var(--ink)'; /* 昼夜换肤时列车随之变色 */
                     c.setAttribute('opacity', op);
                     g.appendChild(c);
                 });
@@ -386,6 +547,33 @@
             try { m.beginElementAt(-phase); } catch (e) { try { m.beginElement(); } catch (e2) {} }
         }), reduced || revisit ? 150 : 2800);
 
+        /* ---------- 悬停联动：站点 / 线路 / 图例聚焦所在线路 ---------- */
+        const setFocus = line => line
+            ? svg.setAttribute('data-focus', line)
+            : svg.removeAttribute('data-focus');
+        document.querySelectorAll('[data-line]').forEach(el => {
+            el.addEventListener('mouseenter', () => setFocus(el.dataset.line));
+            el.addEventListener('mouseleave', () => setFocus(null));
+        });
+        svg.addEventListener('focusin', e => {
+            const t = e.target.closest('[data-line]');
+            if (t) setFocus(t.dataset.line);
+        });
+        svg.addEventListener('focusout', () => setTimeout(() => {
+            const a = document.activeElement;
+            if (!a || !a.closest || !a.closest('[data-line]')) setFocus(null);
+        }, 0));
+
+        /* ---------- 键盘进站：1 随笔 · 2 摄影集 · 3 古典乐 · 4 AI ---------- */
+        addEventListener('keydown', e => {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            if (e.key >= '1' && e.key <= '4') {
+                const st = document.querySelectorAll('.station');
+                const target = st[+e.key - 1];
+                if (target) { e.preventDefault(); target.click(); }
+            }
+        });
+
         /* ---------- 鼠标辉光 ---------- */
         const glow = document.getElementById('cursor-glow');
         if (matchMedia('(pointer: fine)').matches && !reduced) {
@@ -397,8 +585,8 @@
             addEventListener('mouseleave', () => glow.style.opacity = 0);
         }
 
-        /* ---------- 随笔站副标签：最新一篇文章标题 ---------- */
-        fetch('posts.json?ts=' + Date.now())
+        /* ---------- 随笔线：最新一篇文章 ---------- */
+        fetch('posts.json')
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(list => {
                 const latest = list.find(p => p.category === 'essay');
@@ -406,8 +594,8 @@
             })
             .catch(() => {});
 
-        /* ---------- 摄影集站副标签：照片与足迹统计 ---------- */
-        fetch('photos.json?ts=' + Date.now())
+        /* ---------- 光影线：照片与足迹统计 ---------- */
+        fetch('photos.json')
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(ps => {
                 const m = new Set(ps.filter(p => p.lat != null).map(p => p.lat.toFixed(1) + ',' + p.lng.toFixed(1))).size;
