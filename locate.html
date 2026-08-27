@@ -250,7 +250,8 @@
         let marker = null;
         const assignments = {}; // file -> {lat, lng, title, location}
 
-        fetch('photos.json')
+        // 时间戳绕过缓存，确保拿到最新索引（刚构建的照片立即出现）
+        fetch('photos.json?ts=' + Date.now())
             .then(r => { if (!r.ok) throw new Error(); return r.json(); })
             .then(list => {
                 photos = list;
@@ -375,7 +376,7 @@
             // 与已有 manual.json 合并
             let manual = {};
             try {
-                const r = await fetch('photos/manual.json');
+                const r = await fetch('photos/manual.json?ts=' + Date.now());
                 if (r.ok) manual = await r.json();
             } catch (e) { /* 忽略 */ }
 
