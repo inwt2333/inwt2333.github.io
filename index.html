@@ -56,9 +56,9 @@
             --mono: 'Space Mono', ui-monospace, monospace;
         }
 
-        /* 白天到站：换成纸面的浅色轨道 */
+        /* 白天到站：换成纸面的浅色轨道（默认跟随系统；data-theme 为右上角按钮的手动选择） */
         @media (prefers-color-scheme: light) {
-            :root {
+            :root:not([data-theme="dark"]) {
                 --bg: #f2f2f5;
                 --ink: #1c1c22;
                 --soft: #6b6b74;
@@ -67,8 +67,41 @@
                 --blend: multiply;
                 --panel: rgba(255, 255, 255, 0.62);
                 --panel-line: rgba(0, 0, 0, 0.1);
+                --red: #e03e33;
+                --cyan: #00a89b;
+                --yellow: #c79700;
+                --green: #1f9d52;
             }
         }
+
+        :root[data-theme="light"] {
+            --bg: #f2f2f5;
+            --ink: #1c1c22;
+            --soft: #6b6b74;
+            --grid: rgba(0, 0, 0, 0.06);
+            --glow: rgba(80, 112, 235, 0.1);
+            --blend: multiply;
+            --panel: rgba(255, 255, 255, 0.62);
+            --panel-line: rgba(0, 0, 0, 0.1);
+            --red: #e03e33;
+            --cyan: #00a89b;
+            --yellow: #c79700;
+            --green: #1f9d52;
+        }
+
+        /* 线路与圆环改由变量驱动（CSS 覆盖标记里的固定描边），昼夜换肤时同步加深 */
+        #line-green { stroke: var(--green); }
+        #line-red { stroke: var(--red); }
+        #line-yellow { stroke: var(--yellow); }
+        #line-cyan { stroke: var(--cyan); }
+        .st-green .ring { stroke: var(--green); }
+        .st-red .ring { stroke: var(--red); }
+        .st-yellow .ring { stroke: var(--yellow); }
+        .st-cyan .ring { stroke: var(--cyan); }
+        .decor [data-line="green"] circle { stroke: var(--green); }
+        .decor [data-line="red"] circle { stroke: var(--red); }
+        .decor [data-line="yellow"] circle { stroke: var(--yellow); }
+        .decor [data-line="cyan"] circle { stroke: var(--cyan); }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -126,7 +159,7 @@
         .revisit .line { animation: none; stroke-dashoffset: 0; }
         .revisit .halo { animation: none; stroke-dashoffset: 0; opacity: 0.07; }
         .revisit .station, .revisit .masthead > *, .revisit .footer-hint,
-        .revisit .legend { animation: none; opacity: 1; transform: none; }
+        .revisit .legend, .revisit .theme-toggle { animation: none; opacity: 1; transform: none; }
 
         /* ---------- 悬停联动：聚焦所在线路，其余压暗（~= 兼容换乘站多线） ---------- */
         .map[data-focus] .line { opacity: 0.13; }
@@ -279,6 +312,41 @@
 
         .legend-row span { color: var(--soft); font-family: var(--mono); font-size: 0.68rem; margin-left: 4px; }
 
+        /* ---------- 昼夜换乘按钮 ---------- */
+        .theme-toggle {
+            position: fixed;
+            top: 34px;
+            right: 40px;
+            z-index: 6;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid var(--panel-line);
+            background: var(--panel);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            color: var(--soft);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.25s, border-color 0.25s;
+            opacity: 0;
+            animation: riseIn 0.8s ease 1.0s forwards;
+        }
+
+        .theme-toggle:hover { color: var(--ink); border-color: var(--soft); }
+        .theme-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+        /* 图标随生效主题切换：夜间显示太阳（点击到白天），白天显示月亮 */
+        .theme-toggle .icon-moon { display: none; }
+        :root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+        :root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
+        @media (prefers-color-scheme: light) {
+            :root:not([data-theme="dark"]) .theme-toggle .icon-sun { display: none; }
+            :root:not([data-theme="dark"]) .theme-toggle .icon-moon { display: block; }
+        }
+
         /* ---------- 鼠标辉光 ---------- */
         .cursor-glow {
             position: fixed;
@@ -332,6 +400,7 @@
 
         @media (max-width: 700px) {
             .masthead { top: 24px; left: 24px; }
+            .theme-toggle { top: 20px; right: 20px; width: 38px; height: 38px; }
             .footer-hint { padding: 0 24px; }
             .station .st-name { font-size: 31px; }
             .station .st-sub { font-size: 16px; }
@@ -343,15 +412,22 @@
             .line, .halo { animation: none; stroke-dashoffset: 0; }
             .halo { opacity: 0.07; }
             .station, .decor { animation: none; opacity: 1; transform: none; }
-            .masthead > *, .footer-hint, .legend { animation: none; opacity: 1; transform: none; }
+            .masthead > *, .footer-hint, .legend, .theme-toggle { animation: none; opacity: 1; transform: none; }
             .train { display: none; }
             .status .dot { animation: none; }
         }
     </style>
+    <script>/* 昼夜记忆：渲染前恢复上次的手动选择，避免闪屏 */
+    try { var _t = localStorage.getItem('theme'); if (_t) document.documentElement.dataset.theme = _t; } catch (e) {}</script>
 </head>
 <body>
 
     <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
+
+    <button class="theme-toggle" id="theme-toggle" aria-label="切换昼夜配色" title="切换昼夜配色">
+        <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.4"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3 7 7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 14.2A8.8 8.8 0 0 1 9.8 3.4a8.8 8.8 0 1 0 10.8 10.8z"/></svg>
+    </button>
 
     <svg class="map" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-label="Inwt 小站铁路导航图">
         <!-- 线路：标记内预置静态 d（无 JS 也可读图），脚本按同一航点重算 -->
@@ -573,14 +649,14 @@
             if (!a || !a.closest || !a.closest('[data-line]')) setFocus(null);
         }, 0));
 
-        /* ---------- 键盘进站：1 随笔 · 2 摄影集 · 3 古典乐 · 4 AI ---------- */
-        addEventListener('keydown', e => {
-            if (e.metaKey || e.ctrlKey || e.altKey) return;
-            if (e.key >= '1' && e.key <= '4') {
-                const st = document.querySelectorAll('.station');
-                const target = st[+e.key - 1];
-                if (target) { e.preventDefault(); target.click(); }
-            }
+        /* ---------- 昼夜换乘：默认跟随系统，手动选择写入 localStorage ---------- */
+        const themeToggle = document.getElementById('theme-toggle');
+        const mqLight = matchMedia('(prefers-color-scheme: light)');
+        const isLight = () => document.documentElement.dataset.theme === 'light'
+            || (mqLight.matches && document.documentElement.dataset.theme !== 'dark');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.dataset.theme = isLight() ? 'dark' : 'light';
+            try { localStorage.setItem('theme', document.documentElement.dataset.theme); } catch (e) {}
         });
 
         /* ---------- 鼠标辉光 ---------- */

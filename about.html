@@ -160,6 +160,28 @@
 
         .block p b { color: var(--ink); font-weight: 600; }
 
+        /* 胶囊标签：与线路卡同一视觉语言 */
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .chip {
+            padding: 7px 16px;
+            border: 1px solid var(--panel-line);
+            background: var(--panel);
+            border-radius: 999px;
+            color: var(--soft);
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            transition: color 0.25s, border-color 0.25s;
+        }
+
+        .chip:hover { color: var(--ink); border-color: rgba(255, 255, 255, 0.3); }
+
         .lines-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -245,7 +267,21 @@
             又总能在某座车站交汇。所以干脆把小站画成了一张铁路图：你刚才在门厅看到的一切，就是这里的一切。</p>
         </section>
 
-        <section class="block rise" style="animation-delay: 0.25s">
+        <section class="block rise" style="animation-delay: 0.22s">
+            <div class="block-head" style="--c: var(--green)"><i aria-hidden="true"></i><h2>列车长</h2></div>
+            <p>我是 <b>Inwt</b>，东北人，如今在上海读 AI。专业上关心 <b>LLM 推理</b>与 <b>Agent 系统</b>，好奇心大多花在「如何让一群智能体好好合作」这类问题上，偶尔得逞，经常碰壁。</p>
+            <p>课余是学校交响乐团的一名小提琴手，古典乐听得多，顺手把全国的演出信息整理成了门厅里的「乐律线」。喜欢在城市里走路，参加过城市定向，也和同学一起写了<a href="https://shanghai-wish-map.onrender.com/" target="_blank" rel="noopener" style="border-bottom:1px solid var(--panel-line); text-decoration:none; padding-bottom:2px;">「魔都·Explore」</a>这个小应用，专门收藏想去的地方。摄影是手机随手拍的档次，胜在真诚。</p>
+            <div class="chips" aria-label="兴趣标签">
+                <span class="chip">LLM 推理</span>
+                <span class="chip">Agent 系统</span>
+                <span class="chip">古典乐</span>
+                <span class="chip">CityWalk</span>
+                <span class="chip">手机摄影</span>
+                <span class="chip">绿皮火车</span>
+            </div>
+        </section>
+
+        <section class="block rise" style="animation-delay: 0.34s">
             <div class="block-head" style="--c: var(--red)"><i aria-hidden="true"></i><h2>四条线路</h2></div>
             <div class="lines-grid">
                 <a class="line-card" style="--c: var(--red)" href="essays.html">
@@ -273,17 +309,19 @@
             光影线收着按快门那一刻的坐标；乐律线整理全国的古典乐演出；学园线通往 AI 学习笔记。所有线路的终点，都是热爱。</p>
         </section>
 
-        <section class="block rise" style="animation-delay: 0.4s">
+        <section class="block rise" style="animation-delay: 0.46s">
             <div class="block-head" style="--c: var(--cyan)"><i aria-hidden="true"></i><h2>这站怎么修的</h2></div>
             <p>小站是<b>纯静态页面</b>：没有框架、没有后端、没有访问统计，你的足迹不出站。
             照片由手机直传到电脑，本地脚本读取拍摄坐标后生成 WebP 与缩略图，随 git 一起发布。</p>
-            <p>按 <b>1–4</b> 可以在门厅直接进站；门厅会随系统昼昏切换日间与夜间轨道。</p>
+            <p>门厅的轨道有日间与夜间两套配色，默认跟随系统，也可以用门厅右上角的按钮手动换乘。
+            字体和地图脚本也都收进仓库里，尽量不依赖外部服务——毕竟一趟能准点的车，靠的是自己的轨道。</p>
         </section>
 
-        <section class="block rise" style="animation-delay: 0.55s">
+        <section class="block rise" style="animation-delay: 0.58s">
             <div class="block-head" style="--c: var(--yellow)"><i aria-hidden="true"></i><h2>换乘联络</h2></div>
-            <p>想聊聊铁路、相机、古典乐或者 AI，欢迎到 <b>GitHub</b> 找我：</p>
-            <p><a href="https://github.com/inwt2333" target="_blank" rel="noopener" style="border-bottom:1px solid var(--panel-line); text-decoration:none; padding-bottom:2px;">github.com/inwt2333</a></p>
+            <p>无论是想聊 AI、古典乐，还是交换一座城市的走法，都欢迎来信。</p>
+            <p><b>GitHub</b> · <a href="https://github.com/inwt2333" target="_blank" rel="noopener" style="border-bottom:1px solid var(--panel-line); text-decoration:none; padding-bottom:2px;">github.com/inwt2333</a></p>
+            <p><b>邮箱</b> · <a href="mailto:inwt233@163.com" style="border-bottom:1px solid var(--panel-line); text-decoration:none; padding-bottom:2px;">inwt233@163.com</a></p>
         </section>
 
         <footer class="foot">
