@@ -11,7 +11,7 @@
 | `essays.html` | 随笔（按年份分组；链接指向静态文章页） |
 | `article.html` | 文章阅读页兜底（`?file=` 查询串模式；正式链接走 `post/<slug>/` 静态页） |
 | `post/<slug>/` | 每篇随笔的静态页（build.py 生成，SEO 友好的独立 URL，含目录/进度条/上下篇） |
-| `gallery.html` | 摄影集（沉浸式封面 + 章节流 + 足迹地图；灯箱含 EXIF 器材信息与原图下载） |
+| `gallery.html` | 摄影集（沉浸式封面 + 可按时间 / 地点分类的章节流 + 足迹地图；灯箱含 EXIF 器材信息与原图下载） |
 | `about.html` | 关于页 |
 | `404.html` | 404 页（铁路主题） |
 | `locate.html` | 照片定位标注工具（仅本地使用） |
@@ -61,16 +61,16 @@
    - 生成网页版（`photos/web/`，WebP，长边上限 2560px）与缩略图（`photos/thumb/`，仅用于网格与地图）；
    - 更新 `photos.json`，并在控制台列出缺定位的照片。
 3. 相机拍摄等无 GPS 的照片：本地起服务（`python -m http.server`）打开 `locate.html`，选中照片后在地图上点选位置，下载 `manual.json` 放入 `photos/`，重新运行 `python build.py`。
-4. 想给照片加标题 / 地名 / 描述，或覆盖某张照片的坐标、指定相册封面，编辑 `photos/manual.json`：
+4. 想给照片加标题 / 城市 / 描述，或覆盖某张照片的坐标、指定相册封面，编辑 `photos/manual.json`：
 
     ```json
     {
       "cover": "IMG_0001.HEIC",
-      "IMG_0001.HEIC": { "title": "外滩", "location": "上海", "lat": 31.24, "lng": 121.50, "desc": "", "date": "2025-05-01" }
+      "IMG_0001.HEIC": { "title": "外滩", "city": "上海市", "location": "外滩", "lat": 31.24, "lng": 121.50, "desc": "", "date": "2025-05-01" }
     }
     ```
 
-    字段均可省略；坐标优先级为 EXIF > manual.json > 上次索引；`cover` 指定封面照片（不指定则每次随机，并按屏幕方向只抽横版或竖版照片）。
+    字段均可省略；构建时会根据 GPS 与全国行政区边界自动写入地级行政区 `city`，结果缓存在 `photos.json`，以后只识别新增照片。首次涉及某省时会把 DataV.GeoAtlas 的省级边界下载到本地缓存（该数据源来自高德开放平台）；如需手动纠正，可在 `manual.json` 中填写 `city`。`location` 可继续填写“外滩”等更具体的地点，不参与城市分类。坐标优先级为 EXIF > manual.json > 上次索引；`cover` 指定封面照片（不指定则每次随机，并按屏幕方向只抽横版或竖版照片）。
 
 ### 首次准备构建环境
 

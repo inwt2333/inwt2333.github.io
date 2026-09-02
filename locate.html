@@ -234,7 +234,7 @@
 
         <div class="steps">
             <strong>①</strong> 在左侧选中一张照片，然后在地图上<strong>点一下拍摄位置</strong>（可拖动标记微调）；
-            <strong>②</strong> 可选：填写标题与地名；<strong>③</strong> 全部标完后点击「下载 manual.json」，保存到 <code>photos/</code> 目录并重新运行 <code>python build.py</code>。
+            <strong>②</strong> 可选：填写标题与城市；<strong>③</strong> 全部标完后点击「下载 manual.json」，保存到 <code>photos/</code> 目录并重新运行 <code>python build.py</code>。
         </div>
 
         <div id="app">
@@ -248,7 +248,7 @@
         let photos = [], missing = [];
         let selected = -1;
         let marker = null;
-        const assignments = {}; // file -> {lat, lng, title, location}
+        const assignments = {}; // file -> {lat, lng, title, city}
 
         // 时间戳绕过缓存，确保拿到最新索引（刚构建的照片立即出现）
         fetch('photos.json?ts=' + Date.now())
@@ -302,7 +302,7 @@
                         <div class="item-name">${esc(p.file)}${ok ? '<span class="badge">已标注</span>' : ''}</div>
                         <div class="item-status ${ok ? 'ok' : ''}">${ok ? `📍 ${a.lat.toFixed(5)}, ${a.lng.toFixed(5)}` : '未标注 · 点击后在地图上选点'}</div>
                         <input data-f="title" placeholder="标题（可选）" value="${esc(a.title || p.title || '')}">
-                        <input data-f="location" placeholder="地名，如「外滩」（可选）" value="${esc(a.location || p.location || '')}">
+                        <input data-f="city" placeholder="地级市（通常会由 GPS 自动识别）" value="${esc(a.city || p.city || '')}">
                     </div>
                 </div>`;
             }).join('');
@@ -349,7 +349,7 @@
             map.on('click', e => {
                 if (selected < 0) return;
                 const p = missing[selected];
-                assignments[p.file] = Object.assign({ title: '', location: '' }, assignments[p.file], { lat: +e.latlng.lat.toFixed(6), lng: +e.latlng.lng.toFixed(6) });
+                assignments[p.file] = Object.assign({ title: '', city: '' }, assignments[p.file], { lat: +e.latlng.lat.toFixed(6), lng: +e.latlng.lng.toFixed(6) });
                 placeMarker(e.latlng);
                 renderList();
             });
@@ -361,7 +361,7 @@
             marker.on('dragend', () => {
                 const p = missing[selected];
                 const pos = marker.getLatLng();
-                assignments[p.file] = Object.assign({ title: '', location: '' }, assignments[p.file], { lat: +pos.lat.toFixed(6), lng: +pos.lng.toFixed(6) });
+                assignments[p.file] = Object.assign({ title: '', city: '' }, assignments[p.file], { lat: +pos.lat.toFixed(6), lng: +pos.lng.toFixed(6) });
                 renderList();
             });
         }
@@ -386,7 +386,7 @@
                 manual[p.file] = Object.assign({}, manual[p.file], {
                     lat: a.lat, lng: a.lng,
                     title: a.title || manual[p.file]?.title || '',
-                    location: a.location || manual[p.file]?.location || ''
+                    city: a.city || manual[p.file]?.city || ''
                 });
             });
 

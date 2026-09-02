@@ -3,6 +3,9 @@ import json
 import re
 import shutil
 import hashlib
+import math
+import urllib.error
+import urllib.request
 from datetime import datetime
 from email.utils import format_datetime
 from xml.sax.saxutils import escape
@@ -21,6 +24,12 @@ PHOTOS_WEB = os.path.join(PHOTOS_DIR, 'web')
 PHOTOS_THUMB = os.path.join(PHOTOS_DIR, 'thumb')
 PHOTOS_JSON = 'photos.json'
 MANUAL_JSON = os.path.join(PHOTOS_DIR, 'manual.json')
+
+# 新照片有 GPS 但没有 city 时，用全国地级行政区边界做点面匹配，结果写回 photos.json。
+# 边界文件首次按省下载到本地缓存；可通过环境变量切换数据镜像，无需维护城市名单。
+ADMIN_DATA_BASE = os.environ.get('PHOTO_ADMIN_DATA_URL', 'https://geo.datav.aliyun.com/areas_v3/bound').rstrip('/')
+ADMIN_CACHE = os.path.join(PHOTOS_DIR, '.admin-cache')
+ADMIN_USER_AGENT = 'InwtPhotoGallery/1.0 (+https://inwt233.cn/)'
 
 WEB_MAX = 2560     # 网页版长边像素；屏幕阅读足够，可显著减小仓库与流量
 WEB_QUALITY = 88   # WebP 高保真，视觉上与原图无差别
@@ -412,6 +421,200 @@ def _load_json(path, default):
         return default
 
 
+def _out_of_china(lat, lng):
+    return not (72.004 <= lng <= 137.8347 and 0.8293 <= lat <= 55.8271)
+
+
+def _transform_lat(x, y):
+    value = (-100 + 2 * x + 3 * y + 0.2 * y * y + 0.1 * x * y
+             + 0.2 * math.sqrt(abs(x)))
+    value += ((20 * math.sin(6 * x * math.pi) + 20 * math.sin(2 * x * math.pi)) * 2 / 3)
+    value += ((20 * math.sin(y * math.pi) + 40 * math.sin(y / 3 * math.pi)) * 2 / 3)
+    value += ((160 * math.sin(y / 12 * math.pi) + 320 * math.sin(y * math.pi / 30)) * 2 / 3)
+    return value
+
+
+def _transform_lng(x, y):
+    value = (300 + x + 2 * y + 0.1 * x * x + 0.1 * x * y
+             + 0.1 * math.sqrt(abs(x)))
+    value += ((20 * math.sin(6 * x * math.pi) + 20 * math.sin(2 * x * math.pi)) * 2 / 3)
+    value += ((20 * math.sin(x * math.pi) + 40 * math.sin(x / 3 * math.pi)) * 2 / 3)
+    value += ((150 * math.sin(x / 12 * math.pi) + 300 * math.sin(x / 30 * math.pi)) * 2 / 3)
+    return value
+
+
+def _wgs84_to_gcj02(lat, lng):
+    """EXIF 使用 WGS84；DataV/高德边界使用 GCJ-02，匹配前先转换。"""
+    if _out_of_china(lat, lng):
+        return lat, lng
+    a, ee = 6378245.0, 0.006693421622965943
+    d_lat = _transform_lat(lng - 105.0, lat - 35.0)
+    d_lng = _transform_lng(lng - 105.0, lat - 35.0)
+    rad_lat = lat / 180.0 * math.pi
+    magic = 1 - ee * math.sin(rad_lat) ** 2
+    sqrt_magic = math.sqrt(magic)
+    d_lat = (d_lat * 180.0) / ((a * (1 - ee)) / (magic * sqrt_magic) * math.pi)
+    d_lng = (d_lng * 180.0) / (a / sqrt_magic * math.cos(rad_lat) * math.pi)
+    return lat + d_lat, lng + d_lng
+
+
+def _point_on_segment(x, y, ax, ay, bx, by):
+    cross = (x - ax) * (by - ay) - (y - ay) * (bx - ax)
+    if abs(cross) > 1e-10:
+        return False
+    return min(ax, bx) - 1e-10 <= x <= max(ax, bx) + 1e-10 and min(ay, by) - 1e-10 <= y <= max(ay, by) + 1e-10
+
+
+def _point_in_ring(x, y, ring):
+    inside = False
+    if len(ring) < 3:
+        return False
+    j = len(ring) - 1
+    for i, point in enumerate(ring):
+        xi, yi = point[:2]
+        xj, yj = ring[j][:2]
+        if _point_on_segment(x, y, xi, yi, xj, yj):
+            return True
+        if (yi > y) != (yj > y):
+            crossing = (xj - xi) * (y - yi) / (yj - yi) + xi
+            if x < crossing:
+                inside = not inside
+        j = i
+    return inside
+
+
+def _geometry_contains(geometry, lng, lat):
+    kind = geometry.get('type')
+    coordinates = geometry.get('coordinates') or []
+    polygons = [coordinates] if kind == 'Polygon' else coordinates if kind == 'MultiPolygon' else []
+    for polygon in polygons:
+        if not polygon or not _point_in_ring(lng, lat, polygon[0]):
+            continue
+        if not any(_point_in_ring(lng, lat, hole) for hole in polygon[1:]):
+            return True
+    return False
+
+
+def _download_boundary(adcode):
+    os.makedirs(ADMIN_CACHE, exist_ok=True)
+    path = os.path.join(ADMIN_CACHE, f'{adcode}_full.json')
+    if os.path.exists(path):
+        return _load_json(path, {})
+    url = f'{ADMIN_DATA_BASE}/{adcode}_full.json'
+    request = urllib.request.Request(url, headers={'User-Agent': ADMIN_USER_AGENT, 'Accept': 'application/json'})
+    with urllib.request.urlopen(request, timeout=30) as response:
+        payload = json.load(response)
+    temp = path + '.tmp'
+    with open(temp, 'w', encoding='utf-8') as f:
+        json.dump(payload, f, ensure_ascii=False, separators=(',', ':'))
+    os.replace(temp, path)
+    return payload
+
+
+def _find_feature(features, lng, lat):
+    for feature in features:
+        if _geometry_contains(feature.get('geometry') or {}, lng, lat):
+            return feature
+    return None
+
+
+def _province_is_prefecture(province_name):
+    return province_name.endswith('市') or province_name.endswith('特别行政区') or province_name in ('香港', '澳门')
+
+
+def _province_children(province, province_cache):
+    props = province.get('properties') or {}
+    adcode = str(props.get('adcode') or '').strip()
+    if not adcode:
+        return {}
+    if adcode not in province_cache:
+        province_cache[adcode] = _download_boundary(adcode)
+    return province_cache[adcode]
+
+
+def _boundary_prefecture(lat, lng, country, province_cache):
+    gcj_lat, gcj_lng = _wgs84_to_gcj02(lat, lng)
+    # DataV 边界主体采用 GCJ-02；岛屿和极窄海岸线偶有简化偏差，同时尝试原始 WGS84。
+    candidates = [(gcj_lng, gcj_lat)]
+    if abs(gcj_lng - lng) > 1e-9 or abs(gcj_lat - lat) > 1e-9:
+        candidates.append((lng, lat))
+    provinces = country.get('features') or []
+
+    # 快路径：先由省界定位，再只检查该省的地级边界。
+    for x, y in candidates:
+        province = _find_feature(provinces, x, y)
+        if not province:
+            continue
+        province_name = str(province.get('properties', {}).get('name') or '').strip()
+        if _province_is_prefecture(province_name):
+            return province_name
+        try:
+            prefecture = _find_feature(_province_children(province, province_cache).get('features') or [], x, y)
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ValueError, OSError):
+            prefecture = None
+        name = str((prefecture or {}).get('properties', {}).get('name') or '').strip()
+        if name:
+            return name
+
+    # 省级简化边界可能漏掉近海岛屿；兜底遍历各省地级边界，不依赖城市白名单。
+    for province in provinces:
+        province_name = str(province.get('properties', {}).get('name') or '').strip()
+        if _province_is_prefecture(province_name):
+            continue
+        try:
+            children = _province_children(province, province_cache).get('features') or []
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ValueError, OSError):
+            continue
+        for x, y in candidates:
+            prefecture = _find_feature(children, x, y)
+            name = str((prefecture or {}).get('properties', {}).get('name') or '').strip()
+            if name:
+                return name
+    return ''
+
+
+def _write_photos(entries):
+    with open(PHOTOS_JSON, 'w', encoding='utf-8') as f:
+        json.dump(entries, f, ensure_ascii=False, indent=2)
+
+
+def _fill_photo_cities(entries):
+    """仅匹配尚未缓存 city 的照片；每次成功后立即写盘，支持中断后续跑。"""
+    force = os.environ.get('PHOTO_REBUILD_CITIES') == '1'
+    pending = [e for e in entries if (force or not e.get('city')) and e.get('lat') is not None and e.get('lng') is not None]
+    if not pending or not ADMIN_DATA_BASE:
+        return
+    if force:
+        for entry in pending:
+            entry['city'] = ''
+
+    print(f'正在根据 GPS 与行政区边界自动识别地级市：{len(pending)} 张待处理（结果会缓存到 {PHOTOS_JSON}）')
+    try:
+        country = _download_boundary('100000')
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ValueError, OSError) as e:
+        print(f'行政区边界暂时不可用，已跳过城市识别（{e}）；下次构建会继续。')
+        return
+    province_cache = {}
+    consecutive_failures = 0
+    for i, entry in enumerate(pending, 1):
+        try:
+            city = _boundary_prefecture(entry['lat'], entry['lng'], country, province_cache)
+            if city:
+                entry['city'] = city
+                consecutive_failures = 0
+                _write_photos(entries)
+                print(f"  [{i}/{len(pending)}] {entry['file']} -> {city}")
+            else:
+                consecutive_failures += 1
+                print(f"  [{i}/{len(pending)}] {entry['file']}：未落入已知地级行政区边界")
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ValueError, OSError) as e:
+            consecutive_failures += 1
+            print(f"  [{i}/{len(pending)}] {entry['file']}：行政区边界读取失败（{e}）")
+        if consecutive_failures >= 3:
+            print('连续 3 次反查失败，已停止本轮识别；现有结果已保存，下次构建会继续。')
+            break
+
+
 def _make_sizes(img, web_path, thumb_path):
     """生成网页版与缩略图两张 WebP"""
     from PIL import ImageOps
@@ -506,6 +709,7 @@ def build_photos():
         entry.update({
             "title": m.get('title', ''),
             "location": m.get('location', ''),
+            "city": m.get('city', old_entries.get(fname, {}).get('city', '')),
             "date": m.get('date') or date or '',
             "desc": m.get('desc', ''),
             "lat": round(lat, 6) if lat is not None else None,
@@ -531,10 +735,16 @@ def build_photos():
             if fname not in seen:
                 entries.append(dict(e))
 
+    # 即使本机没有原图，也允许 manual.json 覆盖自动识别结果。
+    for entry in entries:
+        override = manual.get(entry['file'], {})
+        if isinstance(override, dict) and 'city' in override:
+            entry['city'] = str(override.get('city') or '').strip()
+
     entries.sort(key=lambda e: (e.get('date') or '', e['file']), reverse=True)
 
-    with open(PHOTOS_JSON, 'w', encoding='utf-8') as f:
-        json.dump(entries, f, ensure_ascii=False, indent=2)
+    _fill_photo_cities(entries)
+    _write_photos(entries)
 
     located = sum(1 for e in entries if e['lat'] is not None)
     print(f"照片索引构建完成！共 {len(entries)} 张（{located} 张有定位）。已更新 {PHOTOS_JSON}")

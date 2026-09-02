@@ -124,6 +124,110 @@
             color: #0a0a0c;
         }
 
+        /* ---------- 网格分类 ---------- */
+        .collection-toolbar {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 56px 24px 0;
+        }
+
+        .collection-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .collection-kicker {
+            color: var(--soft);
+            font-family: var(--mono);
+            font-size: 0.66rem;
+            letter-spacing: 0.2em;
+        }
+
+        .collection-tabs {
+            display: inline-flex;
+            gap: 24px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .collection-tabs button {
+            position: relative;
+            border: 0;
+            background: transparent;
+            color: var(--soft);
+            padding: 5px 2px 10px;
+            font-size: 0.86rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .collection-tabs button::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -1px;
+            height: 2px;
+            background: var(--ink);
+            transform: scaleX(0);
+            transition: transform 0.22s ease;
+        }
+
+        .collection-tabs button:hover,
+        .collection-tabs button.active { color: var(--ink); }
+        .collection-tabs button.active::after { transform: scaleX(1); }
+
+        .place-index {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            margin-top: 24px;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+
+        .place-index[hidden] { display: none; }
+        .place-index::-webkit-scrollbar { display: none; }
+
+        .place-chip {
+            flex: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 12px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--ink);
+            font-size: 0.78rem;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .place-chip:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .place-chip b {
+            color: var(--soft);
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            font-weight: 400;
+        }
+
+        .place-note {
+            margin-top: 14px;
+            color: var(--soft);
+            font-size: 0.7rem;
+            line-height: 1.6;
+        }
+
+        .place-note[hidden] { display: none; }
+        .place-note a { color: var(--soft); }
+        .place-note a:hover { color: var(--ink); }
+
         /* ---------- 全屏封面 ---------- */
         .cover {
             position: relative;
@@ -261,7 +365,8 @@
         /* ---------- 相册章节 ---------- */
         #album { position: relative; z-index: 1; }
 
-        .chapter { padding-bottom: 8px; }
+        .chapter { padding-bottom: 8px; scroll-margin-top: 70px; }
+        .collection-toolbar + #chapters .chapter:first-child .chapter-head { padding-top: 48px; }
 
         .chapter-head {
             position: relative;
@@ -283,6 +388,13 @@
             user-select: none;
         }
 
+        .chapter-place .chapter-year {
+            min-width: 1.25em;
+            font-family: var(--mono);
+            font-size: clamp(3.6rem, 9vw, 7rem);
+            letter-spacing: -0.08em;
+        }
+
         .chapter-meta { padding-bottom: 8px; }
 
         .chapter-month {
@@ -290,6 +402,8 @@
             font-weight: 700;
             letter-spacing: 0.3em;
         }
+
+        .chapter-place .chapter-month { letter-spacing: 0.16em; }
 
         .chapter-count {
             font-family: var(--mono);
@@ -618,6 +732,10 @@
         @media (max-width: 640px) {
             .topbar { padding: 0 14px; }
             .top-links { display: none; }
+            .collection-toolbar { padding: 40px 18px 0; }
+            .collection-heading { align-items: flex-end; }
+            .collection-tabs { gap: 20px; }
+            .collection-toolbar + #chapters .chapter:first-child .chapter-head { padding-top: 36px; }
             .chapter-head { padding: 56px 18px 18px; }
             .chapter-rule { padding: 0 18px; }
             .lb-stage { padding: 52px 12px 0; }
@@ -681,6 +799,17 @@
 
     <main id="album">
         <div id="grid-view">
+            <div class="collection-toolbar" id="collection-toolbar">
+                <div class="collection-heading">
+                    <span class="collection-kicker">GRID VIEW</span>
+                    <div class="collection-tabs" role="tablist" aria-label="网格分类方式">
+                        <button id="btn-time" class="active" role="tab" aria-selected="true">时间</button>
+                        <button id="btn-place" role="tab" aria-selected="false">地点</button>
+                    </div>
+                </div>
+                <nav class="place-index" id="place-index" aria-label="地点索引" hidden></nav>
+                <p class="place-note" id="place-note" hidden>地级市由照片 GPS 与行政区边界自动识别 · 数据来源：<a href="https://datav.aliyun.com/portal/school/atlas/area_selector" target="_blank" rel="noopener">DataV.GeoAtlas</a></p>
+            </div>
             <div id="chapters"></div>
             <div class="empty" id="grid-empty" hidden></div>
         </div>
@@ -737,6 +866,7 @@
         let replaying = false, replayToken = 0, pulse = null;
         let revealObs = null;
         let relayoutTimer = null;
+        let collectionMode = 'time';
 
         const $ = id => document.getElementById(id);
         const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -747,6 +877,10 @@
         }
 
         function displayWhen(p) { return (p.date || '').slice(0, 16); }
+
+        function placeFor(p) {
+            return String(p.city || '').trim() || (p.lat == null ? '未标注地点' : '未识别地级市');
+        }
 
         /* ---------- 入口 ---------- */
         async function init() {
@@ -776,6 +910,7 @@
 
         function showEmpty() {
             $('cover').hidden = true;
+            $('collection-toolbar').hidden = true;
             $('grid-empty').hidden = false;
             $('grid-empty').innerHTML = `
                 <div class="empty-icon">📷</div>
@@ -873,15 +1008,51 @@
         }
 
         /* ---------- 章节与等高行 ---------- */
-        function buildChapters() {
+        function buildChapters(mode = collectionMode) {
+            collectionMode = mode;
             const groups = new Map();
             photos.forEach((p, i) => {
-                const key = (p.date || '未知').slice(0, 7); // YYYY-MM
+                const key = mode === 'place' ? placeFor(p) : (p.date || '未知').slice(0, 7); // YYYY-MM
                 if (!groups.has(key)) groups.set(key, []);
                 groups.get(key).push(i);
             });
 
-            $('chapters').innerHTML = [...groups.entries()].map(([key, idx]) => {
+            let entries = [...groups.entries()];
+            if (mode === 'place') {
+                const unknown = new Set(['未识别地级市', '未标注地点']);
+                entries = entries.sort((a, b) => Number(unknown.has(a[0])) - Number(unknown.has(b[0])));
+                $('place-index').innerHTML = entries.map(([place, idx], n) =>
+                    `<a class="place-chip" href="#place-${n + 1}">${esc(place)} <b>${idx.length}</b></a>`
+                ).join('');
+                $('place-index').hidden = false;
+                $('place-note').hidden = false;
+            } else {
+                $('place-index').hidden = true;
+                $('place-note').hidden = true;
+            }
+
+            $('btn-time').classList.toggle('active', mode === 'time');
+            $('btn-place').classList.toggle('active', mode === 'place');
+            $('btn-time').setAttribute('aria-selected', String(mode === 'time'));
+            $('btn-place').setAttribute('aria-selected', String(mode === 'place'));
+
+            $('chapters').innerHTML = entries.map(([key, idx], n) => {
+                if (mode === 'place') {
+                    const years = idx.map(i => (photos[i].date || '').slice(0, 4)).filter(Boolean);
+                    const span = years.length && years[0] !== years[years.length - 1]
+                        ? `${years[years.length - 1]}—${years[0]}` : (years[0] || '时间未标注');
+                    return `<section class="chapter chapter-place" id="place-${n + 1}" data-idx="${idx.join(',')}">
+                        <div class="chapter-head">
+                            <div class="chapter-year">${String(n + 1).padStart(2, '0')}</div>
+                            <div class="chapter-meta">
+                                <h2 class="chapter-month">${esc(key)}</h2>
+                                <div class="chapter-count">${idx.length} FRAMES · ${esc(span)}</div>
+                            </div>
+                        </div>
+                        <div class="chapter-rule"></div>
+                        <div class="rows"></div>
+                    </section>`;
+                }
                 const [y, m] = key.split('-');
                 const month = +m >= 1 && +m <= 12 ? MONTHS[+m - 1] : '未标注时间';
                 return `<section class="chapter" data-idx="${idx.join(',')}">
@@ -899,17 +1070,13 @@
 
             layoutAll();
 
+            if (revealObs) revealObs.disconnect();
             revealObs = new IntersectionObserver(entries => {
                 entries.forEach(en => {
                     if (en.isIntersecting) { en.target.classList.add('in'); revealObs.unobserve(en.target); }
                 });
             }, { rootMargin: '0px 0px -4% 0px' });
             observeCells();
-
-            $('chapters').addEventListener('click', e => {
-                const cell = e.target.closest('.cell');
-                if (cell) openLightbox(+cell.dataset.i);
-            });
         }
 
         function layoutAll() {
@@ -963,6 +1130,12 @@
         function bindUI() {
             $('btn-grid').addEventListener('click', () => setMode('grid'));
             $('btn-map').addEventListener('click', () => setMode('map'));
+            $('btn-time').addEventListener('click', () => buildChapters('time'));
+            $('btn-place').addEventListener('click', () => buildChapters('place'));
+            $('chapters').addEventListener('click', e => {
+                const cell = e.target.closest('.cell');
+                if (cell) openLightbox(+cell.dataset.i);
+            });
 
             addEventListener('scroll', () => {
                 const h = document.documentElement;

@@ -1,6 +1,7 @@
 # 照片原图不入库（仓库只保存构建出的 web/thumb 与 photos.json）
 photos/src/*
 !photos/src/.gitkeep
+photos/.admin-cache/
 
 # 本地构建用的虚拟环境
 .venv/
