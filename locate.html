@@ -337,13 +337,10 @@
 
         function initMap() {
             map = L.map('map').setView([35.86, 104.19], 4);
-            // Esri Gray Canvas 底图（免 API key），底图 + 参考层（路网与地名）
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-                maxNativeZoom: 16, maxZoom: 19,
-                attribution: 'Tiles &copy; Esri, Garmin, FAO, NOAA'
-            }).addTo(map);
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
-                maxNativeZoom: 13, maxZoom: 19
+            // OpenStreetMap 标准底图：细节丰富，适合精确选点
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
 
             map.on('click', e => {

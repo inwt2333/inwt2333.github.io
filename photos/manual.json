@@ -3,49 +3,57 @@
     "lat": 25.770211,
     "lng": 100.148878,
     "title": "",
-    "location": ""
+    "location": "",
+    "date": "2026-07-09 16:14:47"
   },
   "DSC_0046.JPG": {
     "lat": 24.96835,
     "lng": 102.661391,
     "title": "",
-    "location": ""
+    "location": "",
+    "date": "2026-07-07 12:21:40"
   },
   "DSC_0027.JPG": {
     "lat": 24.967922,
     "lng": 102.658258,
     "title": "",
-    "location": ""
+    "location": "",
+    "date": "2026-07-07 11:46:45"
   },
   "DSC_9992.JPG": {
     "lat": 24.970023,
     "lng": 102.660704,
     "title": "",
-    "location": ""
+    "location": "",
+    "date": "2026-07-07 10:26:54"
   },
   "DSC_9744.JPG": {
     "lat": 30.248502,
     "lng": 120.132676,
     "title": "",
-    "location": ""
+    "location": "",
+    "date": "2026-05-10 13:11:16"
   },
   "DSC_9726.JPG": {
     "lat": 30.25347,
     "lng": 120.13413,
     "title": "",
-    "location": ""
+    "location": "",
+    "date": "2026-05-10 12:32:04"
   },
   "DSC_9649.JPG": {
     "lat": 30.254766,
     "lng": 120.157514,
     "title": "",
-    "location": ""
+    "location": "",
+    "date": "2026-05-10 09:45:02"
   },
   "DSC_9633.JPG": {
     "lat": 30.261977,
     "lng": 120.152739,
     "title": "",
-    "location": ""
+    "location": "",
+    "date": "2026-05-10 09:32:44"
   },
   "IMG_4501.JPG": {
     "lat": 30.540788,
@@ -76,5 +84,17 @@
     "lng": 112.930892,
     "title": "",
     "location": ""
+  },
+  "dji_export_20260908_photo_0027.jpeg": {
+    "lat": 37.646585,
+    "lng": 93.68351,
+    "title": "",
+    "city": ""
+  },
+  "dji_export_20260904_photo_0037.jpeg": {
+    "lat": 39.163068,
+    "lng": 100.831146,
+    "title": "",
+    "city": ""
   }
 }
