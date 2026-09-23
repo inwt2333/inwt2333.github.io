@@ -1,0 +1,36 @@
+/* Shared station-identity details used by the long-form pages. */
+:root {
+    --site-accent: #30d158;
+    --site-accent-soft: rgba(48, 209, 88, 0.14);
+}
+
+.site-mark {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 9px;
+    border: 2px solid var(--site-accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px var(--site-accent-soft);
+    vertical-align: 1px;
+}
+
+.site-nav-link { position: relative; }
+.site-nav-link::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -7px;
+    left: 0;
+    height: 2px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 180ms ease;
+}
+.site-nav-link:hover::after,
+.site-nav-link[aria-current="page"]::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+@media (prefers-reduced-motion: reduce) { .site-nav-link::after { transition: none; } }

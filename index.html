@@ -27,6 +27,7 @@
 
     <!-- 字体：本地子集，详见 tools/make_fonts.py -->
     <link rel="stylesheet" href="assets/fonts/fonts.css">
+    <link rel="stylesheet" href="assets/site.css">
 
     <script type="application/ld+json">
     {
@@ -274,7 +275,7 @@
         .legend {
             position: fixed;
             right: 40px;
-            bottom: 70px;
+            top: 18px;
             z-index: 5;
             padding: 13px 18px 14px;
             background: var(--panel);
@@ -311,6 +312,43 @@
         }
 
         .legend-row span { color: var(--soft); font-family: var(--mono); font-size: 0.68rem; margin-left: 4px; }
+
+        /* ---------- 今日站台 ---------- */
+        .platform-panel {
+            position: fixed;
+            right: 40px;
+            bottom: 70px;
+            z-index: 5;
+            width: 286px;
+            padding: 14px 16px 15px;
+            border: 1px solid var(--panel-line);
+            border-radius: 14px;
+            background: var(--panel);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            animation: riseIn 0.8s ease 1.45s forwards;
+        }
+
+        .platform-kicker {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: var(--soft);
+            font: 0.62rem var(--mono);
+            letter-spacing: 0.12em;
+        }
+        .platform-kicker span { margin-left: auto; letter-spacing: 0.08em; }
+        .platform-main { display: grid; gap: 10px; }
+        .platform-item { display: grid; grid-template-columns: 4px minmax(0, 1fr); gap: 10px; align-items: stretch; text-decoration: none; color: var(--ink); }
+        .platform-item:hover .platform-title { color: var(--green); }
+        .platform-line { width: 4px; min-height: 34px; border-radius: 4px; background: var(--c); }
+        .platform-copy { min-width: 0; }
+        .platform-label, .platform-title { display: block; }
+        .platform-label { color: var(--soft); font: 0.6rem var(--mono); letter-spacing: 0.06em; }
+        .platform-title { overflow: hidden; margin-top: 4px; text-overflow: ellipsis; white-space: nowrap; font-size: 0.84rem; font-weight: 700; line-height: 1.35; transition: color 180ms ease; }
 
         /* ---------- 昼夜换乘按钮 ---------- */
         .theme-toggle {
@@ -396,13 +434,14 @@
 
         @media (max-width: 900px) {
             .legend { display: none; } /* 竖屏裁切下图例易出屏，隐藏保持地图清爽 */
+            .platform-panel { display: none; }
         }
 
         @media (max-width: 700px) {
             .masthead { top: 24px; left: 24px; }
             .theme-toggle { top: 20px; right: 20px; width: 38px; height: 38px; }
             .footer-hint { padding: 0 24px; }
-            .station .st-name { font-size: 31px; }
+            .station .st-name { font-size: 24px; }
             .station .st-sub { font-size: 16px; }
             .decor { display: none; } /* 竖屏裁切下装饰站易出屏，隐藏保持地图清爽 */
             .cursor-glow { display: none; }
@@ -412,7 +451,7 @@
             .line, .halo { animation: none; stroke-dashoffset: 0; }
             .halo { opacity: 0.07; }
             .station, .decor { animation: none; opacity: 1; transform: none; }
-            .masthead > *, .footer-hint, .legend, .theme-toggle { animation: none; opacity: 1; transform: none; }
+            .masthead > *, .footer-hint, .legend, .theme-toggle, .platform-panel { animation: none; opacity: 1; transform: none; }
             .train { display: none; }
             .status .dot { animation: none; }
         }
@@ -526,7 +565,7 @@
         <div class="status"><span class="dot" aria-hidden="true"></span>线路正常运行</div>
     </header>
 
-    <aside class="legend" aria-label="线路图例">
+    <aside class="legend" aria-label="线路图例" hidden>
         <div class="legend-head">LINES · 线路</div>
         <div class="legend-row" data-line="red"><i style="--c: var(--red)" aria-hidden="true"></i>随笔线<span>ESSAYS</span></div>
         <div class="legend-row" data-line="cyan"><i style="--c: var(--cyan)" aria-hidden="true"></i>光影线<span>GALLERY</span></div>
@@ -534,9 +573,23 @@
         <div class="legend-row" data-line="green"><i style="--c: var(--green)" aria-hidden="true"></i>学园线<span>AI·LEARN</span></div>
     </aside>
 
+    <aside class="platform-panel" id="platform-panel" aria-label="今日站台">
+        <div class="platform-kicker">STATION BOARD · 站台播报<span id="platform-updated">实时</span></div>
+        <div class="platform-main">
+            <a class="platform-item" id="platform-latest" href="essays.html">
+                <i class="platform-line" style="--c: var(--red)" aria-hidden="true"></i>
+                <span class="platform-copy"><span class="platform-label">随笔线 · 最新发车</span><span class="platform-title">最新动态暂不可用</span></span>
+            </a>
+            <a class="platform-item" id="platform-gallery" href="gallery.html">
+                <i class="platform-line" style="--c: var(--cyan)" aria-hidden="true"></i>
+                <span class="platform-copy"><span class="platform-label">光影线 · 最近记录</span><span class="platform-title">正在读取照片索引</span></span>
+            </a>
+        </div>
+    </aside>
+
     <footer class="footer-hint">
         <span>© INWT</span>
-        <span>EST. 2024</span>
+        <span>EST. 2026</span>
     </footer>
 
     <script>
@@ -675,9 +728,17 @@
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(list => {
                 const latest = list.find(p => p.category === 'essay');
-                if (latest) document.getElementById('sub-essays').textContent = '最新 · ' + latest.title;
+                if (latest) {
+                    document.getElementById('sub-essays').textContent = '最新 · ' + latest.title;
+                    const item = document.getElementById('platform-latest');
+                    item.href = latest.url || 'essays.html';
+                    item.querySelector('.platform-title').textContent = latest.title;
+                    document.getElementById('platform-updated').textContent = latest.date ? '更新 ' + latest.date : '已更新';
+                }
             })
-            .catch(() => {});
+            .catch(() => {
+                document.getElementById('platform-latest').querySelector('.platform-title').textContent = '最新动态暂不可用';
+            });
 
         /* ---------- 光影线：照片与足迹统计 ---------- */
         fetch('photos.json')
@@ -685,8 +746,11 @@
             .then(ps => {
                 const m = new Set(ps.filter(p => p.lat != null).map(p => p.lat.toFixed(1) + ',' + p.lng.toFixed(1))).size;
                 document.getElementById('sub-gallery').textContent = `${ps.length} 张照片 · ${m} 处足迹`;
+                document.getElementById('platform-gallery').querySelector('.platform-title').textContent = `${ps.length} 张照片 · ${m} 处足迹`;
             })
-            .catch(() => {});
+            .catch(() => {
+                document.getElementById('platform-gallery').querySelector('.platform-title').textContent = '照片索引暂不可用';
+            });
     </script>
 </body>
 </html>
