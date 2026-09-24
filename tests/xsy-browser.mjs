@@ -181,7 +181,22 @@ async function run(width, reduced) {
       assert($('[data-curling-score-prefix]').textContent === '投掷前比分：', 'reset score');
     } else {
       const launchPoint = { x: laneRect.left + laneRect.width / 2, y: stoneRect.top + stoneRect.height / 2 };
-      const pullPoint = { x: launchPoint.x + laneRect.width * .08, y: laneRect.bottom - stoneRect.height };
+      const setupTarget = [...doc.querySelectorAll('[data-curling-static-stone]')]
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+        })
+        .sort((left, right) => (right.y - left.y) || (Math.abs(left.x - launchPoint.x) - Math.abs(right.x - launchPoint.x)))[0];
+      const targetVector = { x: setupTarget.x - launchPoint.x, y: setupTarget.y - launchPoint.y };
+      const targetDistance = Math.hypot(targetVector.x, targetVector.y);
+      const pullDistance = laneRect.width / 3 * .55;
+      const pullPoint = {
+        x: Math.max(laneRect.left + stoneRect.width / 2, Math.min(laneRect.right - stoneRect.width / 2,
+          launchPoint.x - targetVector.x / targetDistance * pullDistance)),
+        y: Math.max(launchPoint.y, Math.min(laneRect.bottom - stoneRect.height / 2,
+          launchPoint.y - targetVector.y / targetDistance * pullDistance)),
+      };
+      assert(pullPoint.y > launchPoint.y, 'targeted pull did not stay below the delivery stone');
       const pointer = (type, point) => lane.dispatchEvent(new win.PointerEvent(type, {
         bubbles: true,
         button: 0,
