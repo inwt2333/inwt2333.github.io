@@ -968,6 +968,7 @@ export function openSlapGame(trigger) {
         if (event.target === arena) registerMiss();
       };
       const onArenaKeydown = (event) => {
+        if (event.target !== arena) return;
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           registerMiss();
