@@ -293,6 +293,71 @@ export const interactionOutputs = {
   ],
 };
 
+let activeDialog = null;
+
+function dialogElements() {
+  const dialog = document.querySelector('#exhibit-dialog');
+  if (!dialog) return null;
+  return {
+    dialog,
+    title: dialog.querySelector('#exhibit-dialog-title'),
+    content: dialog.querySelector('[data-dialog-content]'),
+    close: dialog.querySelector('[data-dialog-close]'),
+    backdrop: dialog.querySelector('[data-dialog-backdrop]'),
+  };
+}
+
+function handleDialogEscape(event) {
+  if (event.key === 'Escape') closeDialog();
+}
+
+export function openDialog({ title, kind, trigger, render }) {
+  if (typeof document === 'undefined') return;
+  if (activeDialog) closeDialog({ restoreFocus: false });
+
+  const elements = dialogElements();
+  if (!elements) return;
+
+  activeDialog = {
+    trigger,
+    kind,
+    cleanup: null,
+    previousOverflow: document.body.style.overflow,
+    elements,
+  };
+
+  elements.dialog.dataset.kind = kind;
+  elements.title.textContent = title;
+  elements.content.replaceChildren();
+  const cleanup = render?.(elements.content);
+  activeDialog.cleanup = typeof cleanup === 'function' ? cleanup : null;
+
+  document.body.style.overflow = 'hidden';
+  elements.dialog.hidden = false;
+  document.addEventListener('keydown', handleDialogEscape);
+  elements.close.addEventListener('click', closeDialog);
+  elements.backdrop.addEventListener('click', closeDialog);
+  elements.close.focus();
+}
+
+export function closeDialog({ restoreFocus = true } = {}) {
+  if (!activeDialog) return;
+
+  const { trigger, cleanup, previousOverflow, elements } = activeDialog;
+  activeDialog = null;
+  if (cleanup) cleanup();
+  elements.content.replaceChildren();
+  elements.title.textContent = '';
+  delete elements.dialog.dataset.kind;
+  elements.dialog.hidden = true;
+  document.body.style.overflow = previousOverflow;
+  document.removeEventListener('keydown', handleDialogEscape);
+  elements.close.removeEventListener('click', closeDialog);
+  elements.backdrop.removeEventListener('click', closeDialog);
+
+  if (restoreFocus && trigger && typeof trigger.focus === 'function') trigger.focus();
+}
+
 function activateCard(card) {
   const effect = card.dataset.effect;
   const choices = interactionOutputs[effect] ?? ['已收藏。'];

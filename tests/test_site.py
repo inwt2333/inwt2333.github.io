@@ -43,3 +43,11 @@ def test_xsy_page_is_private_and_loads_its_collection_module():
 def test_xsy_page_has_no_public_site_entry():
     assert "/xsy" not in (ROOT / "index.html").read_text(encoding="utf-8")
     assert "/xsy" not in (ROOT / "sitemap.xml").read_text(encoding="utf-8")
+
+
+def test_xsy_has_one_accessible_exhibit_dialog():
+    html = (ROOT / "xsy" / "index.html").read_text(encoding="utf-8")
+    assert 'id="exhibit-dialog"' in html
+    assert 'role="dialog"' in html
+    assert 'aria-modal="true"' in html
+    assert 'id="exhibit-dialog-title"' in html

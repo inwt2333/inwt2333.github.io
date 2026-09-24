@@ -40,5 +40,14 @@
     <p>策展：不愿透露姓名的观察员</p>
     <p>库存数字由页面自动清点</p>
   </footer>
+
+  <div id="exhibit-dialog" class="exhibit-dialog" role="dialog" aria-modal="true" aria-labelledby="exhibit-dialog-title" hidden>
+    <div class="exhibit-dialog__backdrop" data-dialog-backdrop></div>
+    <section class="exhibit-dialog__panel" role="document">
+      <button class="exhibit-dialog__close" type="button" data-dialog-close aria-label="关闭">×</button>
+      <h2 id="exhibit-dialog-title" class="exhibit-dialog__title"></h2>
+      <div class="exhibit-dialog__content" data-dialog-content></div>
+    </section>
+  </div>
 </body>
 </html>
