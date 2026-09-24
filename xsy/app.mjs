@@ -307,8 +307,39 @@ function dialogElements() {
   };
 }
 
-function handleDialogEscape(event) {
-  if (event.key === 'Escape') closeDialog();
+function dialogFocusableElements(dialog) {
+  return [...dialog.querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )].filter((element) => !element.hidden && element.offsetParent !== null);
+}
+
+function handleDialogKeydown(event) {
+  if (!activeDialog) return;
+  if (event.key === 'Escape') {
+    closeDialog();
+    return;
+  }
+  if (event.key !== 'Tab') return;
+
+  const focusable = dialogFocusableElements(activeDialog.elements.dialog);
+  if (!focusable.length) {
+    event.preventDefault();
+    activeDialog.elements.close.focus();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (!activeDialog.elements.dialog.contains(document.activeElement)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  } else if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
 export function openDialog({ title, kind, trigger, render }) {
@@ -334,7 +365,7 @@ export function openDialog({ title, kind, trigger, render }) {
 
   document.body.style.overflow = 'hidden';
   elements.dialog.hidden = false;
-  document.addEventListener('keydown', handleDialogEscape);
+  document.addEventListener('keydown', handleDialogKeydown);
   elements.close.addEventListener('click', closeDialog);
   elements.backdrop.addEventListener('click', closeDialog);
   elements.close.focus();
@@ -351,7 +382,7 @@ export function closeDialog({ restoreFocus = true } = {}) {
   delete elements.dialog.dataset.kind;
   elements.dialog.hidden = true;
   document.body.style.overflow = previousOverflow;
-  document.removeEventListener('keydown', handleDialogEscape);
+  document.removeEventListener('keydown', handleDialogKeydown);
   elements.close.removeEventListener('click', closeDialog);
   elements.backdrop.removeEventListener('click', closeDialog);
 
