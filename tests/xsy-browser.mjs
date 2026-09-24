@@ -135,7 +135,7 @@ async function run(width, reduced) {
     await wait(40);
     const lane = $('[data-curling-lane]');
     const laneRect = lane.getBoundingClientRect();
-    assert(Math.abs(laneRect.width / laneRect.height - 4) < .01, 'game lane ratio stretched');
+    assert(Math.abs(laneRect.width / laneRect.height - 3 / 5) < .01, 'game lane ratio stretched');
     const dialog = $('#exhibit-dialog');
     const dialogRect = dialog.getBoundingClientRect();
     assert(laneRect.left >= dialogRect.left && laneRect.right <= dialogRect.right
@@ -143,17 +143,34 @@ async function run(width, reduced) {
     assert(dialog.scrollWidth <= dialog.clientWidth && dialog.scrollHeight <= dialog.clientHeight, 'dialog content overflows');
     const stoneRect = $('[data-curling-stone]').getBoundingClientRect();
     assert(stoneRect.top >= laneRect.top && stoneRect.bottom <= laneRect.bottom, 'delivery stone escapes the sheet');
+    assert(laneRect.bottom - stoneRect.bottom > laneRect.height * .12, 'delivery stone too close to lower edge');
     click('[data-curling-mode="score"]');
     assert($('[data-curling-setup]').hidden === false, 'score setup hidden');
-    assert($('[data-curling-static-stone]'), 'score mode did not lay out static stones');
+    const setupStone = $('[data-curling-static-stone]');
+    assert(setupStone, 'score mode did not lay out static stones');
+    const setupRect = setupStone.getBoundingClientRect();
+    assert(Math.abs(setupRect.width - stoneRect.width) < 1, `setup and delivery stones use different pixel diameters (${setupRect.width}/${stoneRect.width})`);
+    const houseRect = $('[data-curling-target]').getBoundingClientRect();
+    assert(houseRect.width >= setupRect.width * 4, 'house is not visibly larger than a stone');
     assert($('[data-curling-score]').textContent.startsWith('红 '), 'before score missing');
-    $('[data-curling-red-count]').value = '0';
-    $('[data-curling-blue-count]').value = '0';
+    $('[data-curling-red-count]').value = '7';
+    $('[data-curling-blue-count]').value = '8';
     click('[data-curling-relayout]');
-    assert(! $('[data-curling-static-stone]'), 're-layout retained stale stones');
+    const beforeCollision = [...doc.querySelectorAll('[data-curling-static-stone]')].map((element) => `${element.style.left}/${element.style.top}`);
+    assert(beforeCollision.length === 15, 're-layout did not provide collision stones');
+    $('[data-curling-strength]').value = '100';
     click('[data-curling-launch]');
     if (reduced) {
       assert(!$('[data-curling-reset]').disabled, 'reduced throw did not settle immediately');
+      const afterCollision = [...doc.querySelectorAll('[data-curling-static-stone]')].map((element) => `${element.style.left}/${element.style.top}`);
+      assert(afterCollision.some((position, index) => position !== beforeCollision[index]), 'collision did not move any setup stone');
+      await wait(40);
+      const settledPositions = [...doc.querySelectorAll('[data-curling-stone], [data-curling-static-stone]')]
+        .map((element) => `${element.style.left}/${element.style.top}`);
+      await wait(40);
+      assert([...doc.querySelectorAll('[data-curling-stone], [data-curling-static-stone]')]
+        .map((element) => `${element.style.left}/${element.style.top}`).join('|') === settledPositions.join('|'),
+      'round resolved before every rendered stone settled');
       assert($('[data-curling-score-prefix]').textContent === '投掷后比分：', 'after score missing');
       click('[data-curling-reset]');
       assert($('[data-curling-score-prefix]').textContent === '投掷前比分：', 'reset score');

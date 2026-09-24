@@ -5,7 +5,13 @@ import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
   CURLING_SCORE_RATIOS,
+  CURLING_GAME_LANE_HEIGHT,
   CURLING_GAME_LANE_RATIO,
+  CURLING_GAME_LANE_WIDTH,
+  CURLING_HOUSE_RADIUS,
+  CURLING_STONE_RADIUS,
+  CURLING_STOP_SPEED,
+  advanceCurlingMatch,
   advanceCurlingThrow,
   advanceCurlingPhysics,
   availableBeetleSlots,
@@ -14,6 +20,8 @@ import {
   curlingLaneGeometry,
   clampCurlingSetupCounts,
   createCurlingSetup,
+  resolveCurlingStoneCollisions,
+  settleCurlingMatch,
   scoreCurlingEnd,
   settleCurlingThrow,
   curlingResult,
@@ -94,6 +102,61 @@ test('pointer curling velocity scales with pull distance without keyboard streng
   assert.equal(keyboard.y, -240 * 0.72 * 0.12);
 });
 
+test('vertical curling input keeps left and right directions on the x axis', () => {
+  // A regression that swaps keyboard axes or maps diagonal pulls to the wrong side would break this.
+  const leftKeyboard = keyboardCurlingVelocity(-0.5, 0.8, 5);
+  const rightKeyboard = keyboardCurlingVelocity(0.5, 0.8, 5);
+  const stone = { x: 1.5, y: 3.9 };
+  const pullRight = pointerCurlingVelocity(stone, { x: 1.9, y: 4.4 });
+  const pullLeft = pointerCurlingVelocity(stone, { x: 1.1, y: 4.4 });
+
+  assert.ok(leftKeyboard.x < 0 && rightKeyboard.x > 0);
+  assert.ok(leftKeyboard.y < 0 && rightKeyboard.y < 0);
+  assert.ok(pullRight.x < 0 && pullLeft.x > 0);
+  assert.ok(pullRight.y < 0 && pullLeft.y < 0);
+});
+
+test('curling collision gives a front stone momentum and separates equal stones', () => {
+  // A regression that leaves setup stones static or allows overlap would break this.
+  const result = resolveCurlingStoneCollisions(
+    { team: 'red', x: 1.5, y: 2.08, velocity: { x: 0, y: -0.4 } },
+    [{ team: 'blue', x: 1.5, y: 1.88, velocity: { x: 0, y: 0 } }],
+  );
+
+  assert.ok(result.delivered.velocity.y > -0.4, 'delivered stone retained all front-collision momentum');
+  assert.ok(result.stones[0].velocity.y < 0, 'front stone did not receive upward momentum');
+  assert.ok(Math.hypot(
+    result.delivered.x - result.stones[0].x,
+    result.delivered.y - result.stones[0].y,
+  ) >= CURLING_STONE_RADIUS * 2);
+});
+
+test('a curling round stays active while a struck setup stone is still moving', () => {
+  // A regression that ends based only on the delivered stone or a wall-clock cutoff would break this.
+  const next = advanceCurlingMatch({
+    delivered: { team: 'red', x: 1.5, y: 2.08, velocity: { x: 0, y: -0.4 } },
+    stones: [{ team: 'blue', x: 1.5, y: 1.88, velocity: { x: 0, y: 0 } }],
+  }, { width: 3, height: 5, radius: CURLING_STONE_RADIUS });
+
+  assert.equal(next.finished, false);
+  assert.ok(next.stones[0].velocity.y < -CURLING_STOP_SPEED);
+});
+
+test('settling a curling match stops and separates every moving stone', () => {
+  // A regression that settles only the delivered stone or leaves a collision overlap would break this.
+  const settled = settleCurlingMatch({
+    delivered: { team: 'red', x: 1.5, y: 2.08, velocity: { x: 0, y: -0.4 } },
+    stones: [{ team: 'blue', x: 1.5, y: 1.88, velocity: { x: 0, y: 0 } }],
+  }, { width: 3, height: 5, radius: CURLING_STONE_RADIUS }, 1_200);
+  const allStones = [settled.delivered, ...settled.stones];
+
+  assert.ok(allStones.every((stone) => Math.hypot(stone.velocity.x, stone.velocity.y) < CURLING_STOP_SPEED));
+  assert.ok(Math.hypot(
+    settled.delivered.x - settled.stones[0].x,
+    settled.delivered.y - settled.stones[0].y,
+  ) >= CURLING_STONE_RADIUS * 2);
+});
+
 test('curling ring ratios match score boundaries', () => {
   assert.deepEqual(CURLING_SCORE_RATIOS, { three: 0.32, two: 0.65, one: 1 });
   assert.equal(scoreCurling(CURLING_SCORE_RATIOS.three), 3);
@@ -125,9 +188,9 @@ test('curling match scoring leaves a blank end tied', () => {
 test('curling match scoring awards every closer red stone before blue', () => {
   // A regression that awarded only one point or ignored a second closer stone would break this.
   assert.deepEqual(scoreCurlingEnd([
-    { team: 'red', x: 0.88, y: 0.5 },
-    { team: 'red', x: 1.0, y: 0.5 },
-    { team: 'blue', x: 1.2, y: 0.5 },
+    { team: 'red', x: 1.5, y: 1.1 },
+    { team: 'red', x: 1.65, y: 1.1 },
+    { team: 'blue', x: 1.82, y: 1.1 },
   ]), {
     red: 2,
     blue: 0,
@@ -139,10 +202,10 @@ test('curling match scoring awards every closer red stone before blue', () => {
 test('curling match scoring excludes outside stones and stops at the opponent', () => {
   // A regression that counts out-of-house stones or stones beyond the closest opponent would break this.
   assert.deepEqual(scoreCurlingEnd([
-    { team: 'red', x: 0.88, y: 0.5 },
-    { team: 'red', x: 1.2, y: 0.5 },
-    { team: 'blue', x: 1.0, y: 0.5 },
-    { team: 'blue', x: 1.8, y: 0.5 },
+    { team: 'red', x: 1.5, y: 1.1 },
+    { team: 'red', x: 1.9, y: 1.1 },
+    { team: 'blue', x: 1.68, y: 1.1 },
+    { team: 'blue', x: 2.3, y: 1.1 },
   ]), {
     red: 1,
     blue: 0,
@@ -162,6 +225,7 @@ test('curling match layout clamps setup counts and creates a deterministic legal
   const second = createCurlingSetup({ redCount: 7, blueCount: 8, random });
   assert.deepEqual(first, second);
   assert.equal(first.length, 15);
+  assert.ok(first.every((stone) => stone.y >= 0.5 && stone.y <= 2.2), 'setup escaped the house and guard area');
   for (let left = 0; left < first.length; left += 1) {
     for (let right = left + 1; right < first.length; right += 1) {
       assert.ok(Math.hypot(first[left].x - first[right].x, first[left].y - first[right].y) >= 0.07);
@@ -169,9 +233,12 @@ test('curling match layout clamps setup counts and creates a deterministic legal
   }
 });
 
-test('curling game lane preserves the screen-fit four-to-one proportion', () => {
-  // A regression that restores the former long lane ratio or stretches the game lane would break this.
-  assert.equal(CURLING_GAME_LANE_RATIO, 4);
+test('curling game lane preserves the screen-fit three-by-five vertical proportion', () => {
+  // A regression that restores a horizontal lane or stretches the game lane would break this.
+  assert.equal(CURLING_GAME_LANE_RATIO, 3 / 5);
+  assert.equal(CURLING_GAME_LANE_WIDTH, 3);
+  assert.equal(CURLING_GAME_LANE_HEIGHT, 5);
+  assert.ok(CURLING_HOUSE_RADIUS >= CURLING_STONE_RADIUS * 4);
 });
 
 test('reduced-motion settling matches incremental curling termination', () => {

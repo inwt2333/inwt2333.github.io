@@ -595,8 +595,10 @@ footer {
 
 .curling-game__lane {
   position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 1;
+  width: min(100%, 22.2svh, 216px);
+  height: auto;
+  aspect-ratio: 3 / 5;
+  margin-inline: auto;
   overflow: hidden;
   border: 3px solid var(--ink);
   background:
@@ -657,18 +659,16 @@ footer {
 
 .curling-stone {
   position: absolute;
-  left: 50%;
-  left: 76%;
-  top: 50%;
   z-index: 2;
   display: grid;
   place-items: center;
-  width: min(36px, 70%);
-  height: min(36px, 70%);
+  width: var(--curling-stone-diameter, 24px);
+  height: var(--curling-stone-diameter, 24px);
   border: 2px solid var(--ink);
   border-radius: 50%;
+  box-sizing: border-box;
   background: var(--paper);
-  font-size: min(1.45rem, 4vw);
+  font-size: min(1rem, calc(var(--curling-stone-diameter, 24px) * .55));
   line-height: 1;
   transform: translate(-50%, -50%);
   user-select: none;
@@ -681,9 +681,9 @@ footer {
   border: 2px solid var(--ink);
   border-radius: 50%;
   box-sizing: border-box;
+  width: var(--curling-stone-diameter, 24px);
+  height: var(--curling-stone-diameter, 24px);
   box-shadow: 1px 1px 0 var(--ink);
-  min-width: 4px;
-  min-height: 4px;
   transform: translate(-50%, -50%);
 }
 
@@ -723,7 +723,7 @@ footer {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
   align-items: end;
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 8px;
 }
 
 .curling-game__modes,
@@ -732,7 +732,7 @@ footer {
   flex-wrap: wrap;
   align-items: end;
   gap: 10px;
-  margin: 0 0 14px;
+  margin: 0 0 8px;
 }
 
 .curling-game__modes button,
@@ -751,6 +751,8 @@ footer {
 .curling-game__setup label { display: grid; gap: 4px; font-size: .78rem; font-weight: 900; }
 .curling-game__setup input { width: 5em; min-height: 30px; border: 2px solid var(--ink); font: inherit; }
 .curling-game__setup[hidden] { display: none; }
+
+.exhibit-dialog[data-kind="curling"] .exhibit-dialog__content { overflow: hidden; }
 
 .curling-game__controls label {
   display: grid;
@@ -920,6 +922,14 @@ footer {
 }
 
 @media (max-width: 620px) {
+  .exhibit-dialog[data-kind="curling"] .exhibit-dialog__title {
+    padding: 14px 50px 10px 14px;
+    font-size: 1.3rem;
+  }
+  .exhibit-dialog[data-kind="curling"] .exhibit-dialog__content { padding: 12px; }
+  .curling-game__instructions { margin-bottom: 8px; font-size: .82rem; }
+  .curling-game__readout { margin-top: 8px; font-size: .7rem; }
+  .curling-game__result { min-height: 1.25em; margin-top: 6px; font-size: .92rem; }
   .curling-game__controls { grid-template-columns: 1fr 1fr; }
   .curling-game__launch,
   .curling-game__reset { width: 100%; }

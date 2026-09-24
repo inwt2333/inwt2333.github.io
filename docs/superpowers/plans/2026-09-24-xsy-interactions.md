@@ -503,11 +503,13 @@ git commit -m "fix: polish xsy interactive exhibits"
 - Preserves the existing practice mode, Pointer Events, keyboard controls, and dialog cleanup.
 - Produces pure `scoreCurlingEnd(stones)` behavior using World Curling scoring: only stones in or touching the house count, and the closest team scores one point for each stone closer than the opponent's closest stone.
 - Produces configurable red/blue setup counts, deterministic legal non-overlapping layouts when supplied a random source, and before/after score text.
-- Produces a fixed 4:1 screen-fit logical game-lane ratio that is only scaled, never stretched; the horizontal delivery origin leaves a useful pull range.
+- Produces a fixed 3:5 screen-fit vertical logical game-lane ratio that is only scaled, never stretched; the lower delivery origin leaves a useful pull range.
+- Uses one logical stone radius for the delivered and setup stones, a house at least four stone diameters wide, and a unified vertical pointer/keyboard convention: negative/positive direction is left/right and every throw has upward velocity.
+- Advances every stone through collision physics and scores only after every stone is below the stop speed and no collision overlap remains; a safety limit settles the whole match before scoring.
 
 - [ ] **Step 1: Add pure scoring, layout, and sheet-ratio tests**
 
-Add hand-derived fixtures that cover a blank end, multiple points for one team, stones outside the house, an opponent stone splitting the count, clamped setup counts, non-overlap, and a game lane whose rendered dimensions preserve `4 / 1` across desktop and mobile widths. Add a browser assertion that the slap target exposes the literal `🍑`.
+Add hand-derived fixtures that cover a blank end, multiple points for one team, stones outside the house, an opponent stone splitting the count, clamped setup counts, non-overlap, collision momentum transfer, multi-stone settling, and a game lane whose rendered dimensions preserve `3 / 5` across desktop and mobile widths. Add a browser assertion that the slap target exposes the literal `🍑`.
 
 - [ ] **Step 2: Run focused tests and verify red**
 

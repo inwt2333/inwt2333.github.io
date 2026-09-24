@@ -36,14 +36,14 @@ export const CURLING_SCORE_RATIOS = Object.freeze({ three: 0.32, two: 0.65, one:
 export const CURLING_HOUSE_RADIUS_RATIO = 0.2;
 export const CURLING_TARGET_Y_RATIO = 0.22;
 export const CURLING_STOP_SPEED = 0.08;
-export const CURLING_GAME_LANE_WIDTH = 4;
-export const CURLING_GAME_LANE_HEIGHT = 1;
+export const CURLING_GAME_LANE_WIDTH = 3;
+export const CURLING_GAME_LANE_HEIGHT = 5;
 export const CURLING_GAME_LANE_RATIO = CURLING_GAME_LANE_WIDTH / CURLING_GAME_LANE_HEIGHT;
-export const CURLING_STONE_RADIUS = 0.035;
-export const CURLING_HOUSE_RADIUS = 0.16;
+export const CURLING_STONE_RADIUS = 0.12;
+export const CURLING_HOUSE_RADIUS = 0.62;
 export const CURLING_HOUSE_CENTER = Object.freeze({
-  x: CURLING_GAME_LANE_WIDTH * CURLING_TARGET_Y_RATIO,
-  y: CURLING_GAME_LANE_HEIGHT / 2,
+  x: CURLING_GAME_LANE_WIDTH / 2,
+  y: 1.1,
 });
 
 export function nextNightState(isActive) {
@@ -112,28 +112,59 @@ export function createCurlingSetup({ redCount = 0, blueCount = 0, random = Math.
   ) >= CURLING_STONE_RADIUS * 2);
   const addCandidate = (candidate, team) => {
     if (!isLegal(candidate)) return false;
-    stones.push({ ...candidate, team, static: true });
+    stones.push({ ...candidate, team, velocity: { x: 0, y: 0 } });
     return true;
   };
 
-  for (const team of teams) {
-    let added = false;
-    for (let attempt = 0; attempt < 120 && !added; attempt += 1) {
-      added = addCandidate({
-        x: CURLING_STONE_RADIUS + random() * (CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS * 2),
-        y: CURLING_STONE_RADIUS + random() * (CURLING_GAME_LANE_HEIGHT - CURLING_STONE_RADIUS * 2),
-      }, team);
-    }
-    for (let row = 0; row < 4 && !added; row += 1) {
-      for (let column = 0; column < 16 && !added; column += 1) {
-        added = addCandidate({
-          x: 0.12 + column * 0.25,
-          y: 0.12 + row * 0.2,
-        }, team);
-      }
-    }
+  const columns = [1.5, 1.15, 1.85, 0.8, 2.2];
+  for (const [index, team] of teams.entries()) {
+    const column = columns[index % columns.length];
+    const row = Math.floor(index / columns.length);
+    const offsetX = (random() - .5) * .08;
+    const offsetY = (random() - .5) * .08;
+    addCandidate({ x: column + offsetX, y: .75 + row * .5 + offsetY }, team);
   }
   return stones;
+}
+
+export function resolveCurlingStoneCollisions(delivered, stones) {
+  const nextDelivered = { ...delivered, velocity: { ...delivered.velocity } };
+  const nextStones = stones.map((stone) => ({ ...stone, velocity: { ...stone.velocity } }));
+
+  for (const stone of nextStones) {
+    const dx = nextDelivered.x - stone.x;
+    const dy = nextDelivered.y - stone.y;
+    const distance = Math.hypot(dx, dy);
+    const minimumDistance = CURLING_STONE_RADIUS * 2;
+    if (distance >= minimumDistance) continue;
+
+    const normal = distance > 0 ? { x: dx / distance, y: dy / distance } : { x: 0, y: 1 };
+    const overlap = minimumDistance - distance;
+    nextDelivered.x += normal.x * overlap / 2;
+    nextDelivered.y += normal.y * overlap / 2;
+    stone.x -= normal.x * overlap / 2;
+    stone.y -= normal.y * overlap / 2;
+
+    const relativeVelocity = {
+      x: nextDelivered.velocity.x - stone.velocity.x,
+      y: nextDelivered.velocity.y - stone.velocity.y,
+    };
+    const approachSpeed = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
+    if (approachSpeed < 0) {
+      nextDelivered.velocity.x -= approachSpeed * normal.x;
+      nextDelivered.velocity.y -= approachSpeed * normal.y;
+      stone.velocity.x += approachSpeed * normal.x;
+      stone.velocity.y += approachSpeed * normal.y;
+    }
+  }
+  return { delivered: nextDelivered, stones: nextStones };
+}
+
+export function hasCurlingStoneOverlap(delivered, stones) {
+  return stones.some((stone) => Math.hypot(
+    delivered.x - stone.x,
+    delivered.y - stone.y,
+  ) < CURLING_STONE_RADIUS * 2 - 1e-9);
 }
 
 export function curlingResult(score) {
@@ -200,10 +231,48 @@ export function advanceCurlingThrow(state, bounds) {
   };
 }
 
+export function advanceCurlingMatch(state, bounds) {
+  const initialCollision = resolveCurlingStoneCollisions(state.delivered, state.stones);
+  const deliveredPhysics = advanceCurlingPhysics(
+    initialCollision.delivered,
+    initialCollision.delivered.velocity,
+    bounds,
+    state.delivered.velocity.x < 0 ? -1 : 1,
+  );
+  const movedStones = initialCollision.stones.map((stone) => {
+    const physics = advanceCurlingPhysics(
+      stone,
+      stone.velocity,
+      bounds,
+      stone.velocity.x < 0 ? -1 : 1,
+    );
+    return { ...stone, ...physics.position, velocity: physics.velocity };
+  });
+  const collision = resolveCurlingStoneCollisions(
+    { ...initialCollision.delivered, ...deliveredPhysics.position, velocity: deliveredPhysics.velocity },
+    movedStones,
+  );
+  const allStones = [collision.delivered, ...collision.stones];
+  return {
+    ...collision,
+    finished: allStones.every((stone) => Math.hypot(stone.velocity.x, stone.velocity.y) < CURLING_STOP_SPEED)
+      && !hasCurlingStoneOverlap(collision.delivered, collision.stones),
+  };
+}
+
 export function settleCurlingThrow(state, bounds, maxSteps) {
   let next = state;
   for (let step = 0; step < maxSteps && !next.finished; step += 1) {
     next = advanceCurlingThrow(next, bounds);
+  }
+  return { ...next, finished: true };
+}
+
+export function settleCurlingMatch(state, bounds, maxSteps) {
+  let next = state;
+  for (let step = 0; step < maxSteps; step += 1) {
+    next = advanceCurlingMatch(next, bounds);
+    if (next.finished) return next;
   }
   return { ...next, finished: true };
 }
@@ -213,7 +282,7 @@ export function pointerCurlingVelocity(stone, pull) {
   const y = stone.y - pull.y;
   const distance = Math.hypot(x, y);
   const magnitude = distance * 0.18;
-  const angle = distance > 1 ? Math.atan2(y, x) : -Math.PI / 2;
+  const angle = distance > 0.001 ? Math.atan2(y, x) : -Math.PI / 2;
   return {
     x: Math.cos(angle) * magnitude,
     y: Math.sin(angle) * magnitude,
