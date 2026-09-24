@@ -62,6 +62,33 @@ export function curlingResult(score) {
   }[score] ?? '壶很自由，大本营很孤独。';
 }
 
+export function advanceCurlingPhysics(position, velocity, bounds, curlDirection = 1) {
+  const nextPosition = {
+    x: position.x + velocity.x,
+    y: position.y + velocity.y,
+  };
+  const nextVelocity = { ...velocity };
+  const radius = bounds.radius;
+  const minX = radius;
+  const maxX = bounds.width - radius;
+  const minY = radius;
+  const maxY = bounds.height - radius;
+
+  if (nextPosition.x <= minX || nextPosition.x >= maxX) {
+    nextPosition.x = Math.max(minX, Math.min(maxX, nextPosition.x));
+    nextVelocity.x *= -0.58;
+  }
+  if (nextPosition.y <= minY || nextPosition.y >= maxY) {
+    nextPosition.y = Math.max(minY, Math.min(maxY, nextPosition.y));
+    nextVelocity.y *= -0.58;
+  }
+
+  const speed = Math.hypot(nextVelocity.x, nextVelocity.y);
+  nextVelocity.x = (nextVelocity.x + curlDirection * 0.0009 * speed) * 0.965;
+  nextVelocity.y *= 0.965;
+  return { position: nextPosition, velocity: nextVelocity, speed };
+}
+
 export function createSlapGame(durationMs, startedAt) {
   return {
     score: 0,

@@ -1,6 +1,7 @@
 import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
+  advanceCurlingPhysics,
   availableBeetleSlots,
   curlingResult,
   nextIndex,
@@ -467,7 +468,6 @@ const CURLING_START_Y = 0.84;
 const CURLING_TARGET_Y = 0.22;
 const CURLING_HOUSE_RADIUS = 0.2;
 const CURLING_STONE_RADIUS = 18;
-const CURLING_FRICTION = 0.965;
 const CURLING_STOP_SPEED = 0.08;
 const CURLING_MAX_DURATION = 4000;
 
@@ -530,6 +530,7 @@ export function openCurlingGame(trigger) {
       let position = { x: 0, y: 0 };
       let velocity = { x: 0, y: 0 };
       let frame = null;
+      let initializationFrame = null;
       let startedAt = 0;
       let pointerId = null;
       let dragging = false;
@@ -553,6 +554,12 @@ export function openCurlingGame(trigger) {
 
       const resetPosition = () => {
         const rect = laneMetrics();
+        if (!rect.width || !rect.height) {
+          laneRect = null;
+          stone.style.left = '50%';
+          stone.style.top = `${CURLING_START_Y * 100}%`;
+          return;
+        }
         position = { x: rect.width / 2, y: rect.height * CURLING_START_Y };
         updateStone();
         aim.hidden = true;
@@ -594,32 +601,27 @@ export function openCurlingGame(trigger) {
         reset.focus();
       };
 
+      const advancePhysics = () => {
+        const rect = laneRect || laneMetrics();
+        const physics = advanceCurlingPhysics(
+          position,
+          velocity,
+          { width: rect.width, height: rect.height, radius: CURLING_STONE_RADIUS },
+          curlDirection,
+        );
+        position = physics.position;
+        velocity = physics.velocity;
+        updateStone();
+        return physics.speed;
+      };
+
       const animate = (timestamp) => {
         if (phase !== 'flying') return;
         if (timestamp - startedAt >= CURLING_MAX_DURATION) {
           endThrow();
           return;
         }
-        position.x += velocity.x;
-        position.y += velocity.y;
-        const rect = laneRect || laneMetrics();
-        const minX = CURLING_STONE_RADIUS;
-        const maxX = rect.width - CURLING_STONE_RADIUS;
-        const minY = CURLING_STONE_RADIUS;
-        const maxY = rect.height - CURLING_STONE_RADIUS;
-        if (position.x <= minX || position.x >= maxX) {
-          position.x = Math.max(minX, Math.min(maxX, position.x));
-          velocity.x *= -0.58;
-        }
-        if (position.y <= minY || position.y >= maxY) {
-          position.y = Math.max(minY, Math.min(maxY, position.y));
-          velocity.y *= -0.58;
-        }
-        const speed = Math.hypot(velocity.x, velocity.y);
-        velocity.x += curlDirection * 0.0009 * speed;
-        velocity.x *= CURLING_FRICTION;
-        velocity.y *= CURLING_FRICTION;
-        updateStone();
+        const speed = advancePhysics();
         if (speed < CURLING_STOP_SPEED) {
           endThrow();
           return;
@@ -654,8 +656,12 @@ export function openCurlingGame(trigger) {
         reset.disabled = true;
         aim.hidden = true;
         if (reducedMotion) {
-          position.x += velocity.x * 5;
-          position.y += velocity.y * 5;
+          const maxSteps = Math.ceil(CURLING_MAX_DURATION / 16);
+          for (let step = 0; step < maxSteps && Math.hypot(velocity.x, velocity.y) >= CURLING_STOP_SPEED; step += 1) {
+            advancePhysics();
+          }
+          position.x = Math.max(CURLING_STONE_RADIUS, Math.min(rect.width - CURLING_STONE_RADIUS, position.x));
+          position.y = Math.max(CURLING_STONE_RADIUS, Math.min(rect.height - CURLING_STONE_RADIUS, position.y));
           updateStone();
           endThrow();
           return;
@@ -719,6 +725,10 @@ export function openCurlingGame(trigger) {
           cancelCurlingFrame(frame);
           frame = null;
         }
+        if (initializationFrame) {
+          cancelCurlingFrame(initializationFrame);
+          initializationFrame = null;
+        }
         phase = 'idle';
         velocity = { x: 0, y: 0 };
         dragging = false;
@@ -765,9 +775,14 @@ export function openCurlingGame(trigger) {
       strength.addEventListener('input', onSliderInput);
       resetGame();
       reset.disabled = true;
+      initializationFrame = curlingFrame(() => {
+        initializationFrame = null;
+        if (phase === 'idle') resetPosition();
+      });
 
       return () => {
         if (frame) cancelCurlingFrame(frame);
+        if (initializationFrame) cancelCurlingFrame(initializationFrame);
         if (pointerId !== null) lane.releasePointerCapture?.(pointerId);
         lane.removeEventListener('pointerdown', onPointerDown);
         lane.removeEventListener('pointermove', onPointerMove);

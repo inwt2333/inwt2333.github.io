@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
+  advanceCurlingPhysics,
   availableBeetleSlots,
   curlingResult,
   createSlapGame,
@@ -55,6 +56,20 @@ test('curling result copy matches each score', () => {
   assert.equal(curlingResult(2), '稳稳进营，塑料壶沉默了。');
   assert.equal(curlingResult(1), '擦边得分，冰面替你圆场。');
   assert.equal(curlingResult(0), '壶很自由，大本营很孤独。');
+});
+
+test('curling physics clamps the stone and applies friction with curl', () => {
+  const next = advanceCurlingPhysics(
+    { x: 20, y: 60 },
+    { x: -4, y: -2 },
+    { width: 240, height: 180, radius: 18 },
+    -1,
+  );
+
+  assert.deepEqual(next.position, { x: 18, y: 58 });
+  assert.equal(next.speed, Math.hypot(4 * 0.58, -2));
+  assert.ok(next.velocity.x > 0);
+  assert.equal(next.velocity.y, -2 * 0.965);
 });
 
 test('slap hits increase score and combo only before the deadline', () => {
