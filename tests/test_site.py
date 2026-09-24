@@ -30,3 +30,16 @@ def test_mobile_station_labels_do_not_expand_and_footer_year_is_current():
     assert ".station .st-name { font-size: 24px; }" in html
     assert "EST. 2026" in html
     assert "EST. 2024" not in html
+
+
+def test_xsy_page_is_private_and_loads_its_collection_module():
+    html = (ROOT / "xsy" / "index.html").read_text(encoding="utf-8")
+    assert '<meta name="robots" content="noindex, nofollow">' in html
+    assert '<script type="module" src="app.mjs"></script>' in html
+    assert 'data-favorite-count' in html
+    assert 'data-favorites' in html
+
+
+def test_xsy_page_has_no_public_site_entry():
+    assert "/xsy" not in (ROOT / "index.html").read_text(encoding="utf-8")
+    assert "/xsy" not in (ROOT / "sitemap.xml").read_text(encoding="utf-8")
