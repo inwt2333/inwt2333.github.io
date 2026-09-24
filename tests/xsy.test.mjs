@@ -46,19 +46,42 @@ test('public references use verified https destinations', () => {
     'yan-ge',
     'chafer',
     'stone-kettle',
+    'hanyuecheng-butt',
     'ma-nan',
+    'campus-bus',
     'yorushika',
   ]);
   assert.equal(linked['yan-ge'][0].url, 'https://grahamyan.github.io/');
   assert.equal(linked['ma-nan'][0].url, 'https://ma.sjtu.edu.cn/info/1196/3174.htm');
+  assert.equal(linked['campus-bus'][0].url, 'https://campuslife.sjtu.edu.cn/ui/bus');
   assert.equal(linked.yorushika[0].url, 'https://music.163.com/#/artist?id=12390232');
 
   for (const links of Object.values(linked)) {
     for (const link of links) {
-      assert.match(link.url, /^https:\/\//);
+      assert.ok(link.url === '/' || /^https:\/\//.test(link.url));
       assert.ok(link.label.length > 0);
     }
   }
+});
+
+test('new profile and timetable destinations are exact', () => {
+  const byId = Object.fromEntries(favorites.map((item) => [item.id, item]));
+
+  assert.deepEqual(byId['hanyuecheng-butt'].links, [
+    { label: '韩岳成主页', url: '/' },
+  ]);
+  assert.deepEqual(byId['campus-bus'].links, [
+    { label: '校园巴士时刻表', url: 'https://campuslife.sjtu.edu.cn/ui/bus' },
+  ]);
+  assert.equal(byId['ma-nan'].links[0].label, '马楠交大主页');
+});
+
+test('interactive cards expose the requested secondary actions', () => {
+  const byId = Object.fromEntries(favorites.map((item) => [item.id, item]));
+
+  assert.deepEqual(byId['stone-kettle'].extras, [{ label: '投一壶', action: 'curling' }]);
+  assert.deepEqual(byId['hanyuecheng-butt'].extras, [{ label: '打屁股', action: 'slap' }]);
+  assert.deepEqual(byId.yorushika.extras, [{ label: '翻开一句歌词', action: 'lyrics' }]);
 });
 
 test('every favorite cycles through twelve unique interaction messages', () => {

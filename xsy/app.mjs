@@ -37,6 +37,7 @@ export const favorites = [
     blurb: '塑料壶请在门外稍候。真正的重量感，需要一条冰道来证明。',
     action: '出壶',
     effect: 'curling',
+    extras: [{ label: '投一壶', action: 'curling' }],
     links: [
       { label: '冰壶百科', url: 'https://zh.wikipedia.org/wiki/%E5%86%B0%E5%A3%BA' },
     ],
@@ -50,6 +51,10 @@ export const favorites = [
     blurb: '出于学术伦理，本藏品仅提供高度抽象的示意，不接受现场考证。',
     action: '盖章封存',
     effect: 'classified',
+    extras: [{ label: '打屁股', action: 'slap' }],
+    links: [
+      { label: '韩岳成主页', url: '/' },
+    ],
   },
   {
     id: 'ma-nan',
@@ -61,7 +66,7 @@ export const favorites = [
     action: '接受批注',
     effect: 'history',
     links: [
-      { label: '交大教师主页', url: 'https://ma.sjtu.edu.cn/info/1196/3174.htm' },
+      { label: '马楠交大主页', url: 'https://ma.sjtu.edu.cn/info/1196/3174.htm' },
     ],
   },
   {
@@ -83,6 +88,9 @@ export const favorites = [
     blurb: '它来时像奇迹，它走时像论文截止日期。车门一关，缘分清零。',
     action: '刷新到站',
     effect: 'bus',
+    links: [
+      { label: '校园巴士时刻表', url: 'https://campuslife.sjtu.edu.cn/ui/bus' },
+    ],
   },
   {
     id: 'faculty-canteen',
@@ -107,6 +115,7 @@ export const favorites = [
       { label: '网易云音乐', url: 'https://music.163.com/#/artist?id=12390232' },
       { label: '官方网站', url: 'https://yorushika.com/' },
     ],
+    extras: [{ label: '翻开一句歌词', action: 'lyrics' }],
   },
 ];
 
@@ -128,8 +137,17 @@ const escapeHtml = (value) => String(value)
 function cardMarkup(item, index) {
   const links = item.links?.length
     ? `<nav class="favorite__links" aria-label="${escapeHtml(item.name)}的相关资料">
-        ${item.links.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noreferrer">${escapeHtml(link.label)} <span aria-hidden="true">↗</span></a>`).join('')}
+        ${item.links.map((link) => {
+          const externalAttrs = /^https?:\/\//.test(link.url) ? ' target="_blank" rel="noreferrer"' : '';
+          return `<a href="${escapeHtml(link.url)}"${externalAttrs}>${escapeHtml(link.label)} <span aria-hidden="true">↗</span></a>`;
+        }).join('')}
       </nav>`
+    : '';
+  const extras = item.extras?.map(({ label, action }) =>
+    `<button class="favorite__extra" type="button" data-extra-action="${escapeHtml(action)}">${escapeHtml(label)}</button>`
+  ).join('') ?? '';
+  const resources = links || extras
+    ? `<div class="favorite__resources">${links}${extras}</div>`
     : '';
 
   return `
@@ -140,7 +158,7 @@ function cardMarkup(item, index) {
       <h2>${escapeHtml(item.name)}</h2>
       <p class="favorite__verdict">${escapeHtml(item.verdict)}</p>
       <p class="favorite__blurb">${escapeHtml(item.blurb)}</p>
-      ${links}
+      ${resources}
       <button class="favorite__action" type="button">${escapeHtml(item.action)}</button>
       <output class="favorite__output" aria-live="polite"></output>
     </article>`;
