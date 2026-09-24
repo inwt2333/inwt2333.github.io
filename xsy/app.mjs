@@ -1,9 +1,13 @@
 import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
+  CURLING_SHEET_WIDTH,
+  CURLING_SHEET_HEIGHT,
+  CURLING_STONE_RADIUS,
   advanceCurlingThrow,
   availableBeetleSlots,
-  curlingLaneGeometry,
+  createCurlingSetup,
+  scoreCurlingEnd,
   curlingResult,
   nextIndex,
   nextNightState,
@@ -473,8 +477,7 @@ export function openLyrics(trigger) {
   });
 }
 
-const CURLING_START_Y = 0.84;
-const CURLING_STONE_RADIUS = 18;
+const CURLING_START_X = 0.76;
 const CURLING_MAX_DURATION = 4000;
 const CURLING_MAX_STEPS = Math.ceil(CURLING_MAX_DURATION / (1000 / 60));
 
@@ -496,20 +499,29 @@ function cancelCurlingFrame(frame) {
 
 export function openCurlingGame(trigger) {
   openDialog({
-    title: '投一壶 · 石头壶训练场',
+    title: '投一壶 · 石头壶冰道',
     kind: 'curling',
     trigger,
     render(content) {
       content.innerHTML = `
         <div class="curling-game" data-curling-game>
-          <p class="curling-game__instructions">拖动冰壶向下蓄力，松开后让它滑向大本营。也可以用键盘设置方向和力度再投壶。</p>
+          <p class="curling-game__instructions">向右拖动冰壶蓄力，松开后让它从右向左滑向大本营。也可以用键盘设置方向和力度再投壶。</p>
+          <div class="curling-game__modes" role="group" aria-label="冰壶玩法模式">
+            <button type="button" data-curling-mode="practice" aria-pressed="true">练习模式</button>
+            <button type="button" data-curling-mode="score" aria-pressed="false">比分模式</button>
+          </div>
+          <div class="curling-game__setup" data-curling-setup hidden>
+            <label>已有红壶 <input data-curling-red-count type="number" min="0" max="7" value="2"></label>
+            <label>已有蓝壶 <input data-curling-blue-count type="number" min="0" max="8" value="2"></label>
+            <button type="button" data-curling-relayout>重新布局</button>
+          </div>
           <div class="curling-game__lane" data-curling-lane tabindex="0" role="application" aria-label="冰壶投掷冰道">
             <div class="curling-house" data-curling-target aria-hidden="true"><span></span></div>
             <div class="curling-aim" data-curling-aim aria-hidden="true"></div>
             <div class="curling-stone" data-curling-stone aria-label="石头壶" role="img">🥌</div>
           </div>
           <div class="curling-game__readout" aria-live="polite">
-            <span>本轮得分：<strong data-curling-score>—</strong></span>
+            <span><span data-curling-score-prefix>本轮得分：</span><strong data-curling-score>—</strong></span>
             <span data-curling-status>准备投壶</span>
           </div>
           <p class="curling-game__result" data-curling-result aria-live="assertive"></p>
@@ -526,6 +538,7 @@ export function openCurlingGame(trigger) {
       const aim = content.querySelector('[data-curling-aim]');
       const target = content.querySelector('[data-curling-target]');
       const score = content.querySelector('[data-curling-score]');
+      const scorePrefix = content.querySelector('[data-curling-score-prefix]');
       const result = content.querySelector('[data-curling-result]');
       const status = content.querySelector('[data-curling-status]');
       const launch = content.querySelector('[data-curling-launch]');
@@ -534,6 +547,11 @@ export function openCurlingGame(trigger) {
       const strength = content.querySelector('[data-curling-strength]');
       const directionValue = content.querySelector('[data-curling-direction-value]');
       const strengthValue = content.querySelector('[data-curling-strength-value]');
+      const setup = content.querySelector('[data-curling-setup]');
+      const redCount = content.querySelector('[data-curling-red-count]');
+      const blueCount = content.querySelector('[data-curling-blue-count]');
+      const relayout = content.querySelector('[data-curling-relayout]');
+      const modeButtons = [...content.querySelectorAll('[data-curling-mode]')];
 
       let position = { x: 0, y: 0 };
       let velocity = { x: 0, y: 0 };
@@ -546,6 +564,8 @@ export function openCurlingGame(trigger) {
       let pullPoint = null;
       let laneRect = null;
       let curlDirection = 1;
+      let mode = 'practice';
+      let setupStones = [];
 
       const reducedMotion = prefersReducedMotion();
 
@@ -557,32 +577,76 @@ export function openCurlingGame(trigger) {
           width: lane.clientWidth,
           height: lane.clientHeight,
         };
-        if (rect.width && rect.height) {
-          const geometry = curlingLaneGeometry(rect.width, rect.height);
-          target.style.setProperty('--curling-house-left', `${geometry.targetX}px`);
-          target.style.setProperty('--curling-house-top', `${geometry.targetY}px`);
-          target.style.setProperty('--curling-house-diameter', `${geometry.outerDiameter}px`);
-          target.style.setProperty('--curling-two-ring-diameter', `${geometry.twoDiameter}px`);
-          target.style.setProperty('--curling-three-ring-diameter', `${geometry.threeDiameter}px`);
-        }
+        if (rect.width && rect.height) renderHouse(rect);
         laneRect = rect;
         return rect;
       };
 
+      const logicalToRendered = (point, rect = laneRect || laneMetrics()) => ({
+        x: point.x / CURLING_SHEET_WIDTH * rect.width,
+        y: point.y / CURLING_SHEET_HEIGHT * rect.height,
+      });
+
+      const renderedToLogical = (point, rect = laneRect || laneMetrics()) => ({
+        x: point.x / rect.width * CURLING_SHEET_WIDTH,
+        y: point.y / rect.height * CURLING_SHEET_HEIGHT,
+      });
+
+      const renderHouse = (rect) => {
+        const geometry = { outerDiameter: 3.66, twoDiameter: 2.379, threeDiameter: 1.1712 };
+        const center = logicalToRendered({ x: CURLING_SHEET_WIDTH * 0.22, y: CURLING_SHEET_HEIGHT / 2 }, rect);
+        const scale = rect.width / CURLING_SHEET_WIDTH;
+        target.style.setProperty('--curling-house-left', `${center.x}px`);
+        target.style.setProperty('--curling-house-top', `${center.y}px`);
+        target.style.setProperty('--curling-house-diameter', `${geometry.outerDiameter * scale}px`);
+        target.style.setProperty('--curling-two-ring-diameter', `${geometry.twoDiameter * scale}px`);
+        target.style.setProperty('--curling-three-ring-diameter', `${geometry.threeDiameter * scale}px`);
+      };
+
       const updateStone = () => {
-        stone.style.left = `${position.x}px`;
-        stone.style.top = `${position.y}px`;
+        const rendered = logicalToRendered(position);
+        stone.style.left = `${rendered.x}px`;
+        stone.style.top = `${rendered.y}px`;
+      };
+
+      const renderSetupStones = () => {
+        for (const existingStone of lane.querySelectorAll('[data-curling-static-stone]')) existingStone.remove();
+        const rect = laneRect || laneMetrics();
+        for (const existingStone of setupStones) {
+          const rendered = logicalToRendered(existingStone, rect);
+          const element = document.createElement('span');
+          element.className = `curling-static-stone curling-static-stone--${existingStone.team}`;
+          element.dataset.curlingStaticStone = existingStone.team;
+          element.setAttribute('aria-label', existingStone.team === 'red' ? '已有红壶' : '已有蓝壶');
+          element.setAttribute('role', 'img');
+          element.style.left = `${rendered.x}px`;
+          element.style.top = `${rendered.y}px`;
+          element.style.width = `${CURLING_STONE_RADIUS * 2 / CURLING_SHEET_WIDTH * rect.width}px`;
+          element.style.height = element.style.width;
+          lane.append(element);
+        }
+      };
+
+      const setScoreReadout = (afterThrow = false) => {
+        if (mode === 'practice') {
+          scorePrefix.textContent = '本轮得分：';
+          score.textContent = '—';
+          return;
+        }
+        const end = scoreCurlingEnd(afterThrow ? [...setupStones, { team: 'red', ...position }] : setupStones);
+        scorePrefix.textContent = `${afterThrow ? '投掷后比分' : '投掷前比分'}：`;
+        score.textContent = `红 ${end.red} · 蓝 ${end.blue}`;
       };
 
       const resetPosition = () => {
         const rect = laneMetrics();
         if (!rect.width || !rect.height) {
           laneRect = null;
-          stone.style.left = '50%';
-          stone.style.top = `${CURLING_START_Y * 100}%`;
+          stone.style.left = `${CURLING_START_X * 100}%`;
+          stone.style.top = '50%';
           return;
         }
-        position = { x: rect.width / 2, y: rect.height * CURLING_START_Y };
+        position = { x: CURLING_SHEET_WIDTH * CURLING_START_X, y: CURLING_SHEET_HEIGHT / 2 };
         updateStone();
         aim.hidden = true;
       };
@@ -592,12 +656,14 @@ export function openCurlingGame(trigger) {
           aim.hidden = true;
           return;
         }
-        const dx = pullPoint.x - position.x;
-        const dy = pullPoint.y - position.y;
+        const renderedPosition = logicalToRendered(position);
+        const renderedPull = logicalToRendered(pullPoint);
+        const dx = renderedPull.x - renderedPosition.x;
+        const dy = renderedPull.y - renderedPosition.y;
         const length = Math.hypot(dx, dy);
         aim.hidden = length < 2;
-        aim.style.left = `${position.x}px`;
-        aim.style.top = `${position.y}px`;
+        aim.style.left = `${renderedPosition.x}px`;
+        aim.style.top = `${renderedPosition.y}px`;
         aim.style.width = `${length}px`;
         aim.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
       };
@@ -610,15 +676,22 @@ export function openCurlingGame(trigger) {
           frame = null;
         }
         const rect = laneRect || laneMetrics();
-        const geometry = curlingLaneGeometry(rect.width, rect.height);
+        const geometry = { targetX: CURLING_SHEET_WIDTH * 0.22, targetY: CURLING_SHEET_HEIGHT / 2, houseRadius: 1.83 };
         const distanceRatio = Math.hypot(
           position.x - geometry.targetX,
           position.y - geometry.targetY,
         ) / geometry.houseRadius;
         const roundScore = scoreCurling(distanceRatio);
-        score.textContent = String(roundScore);
-        result.textContent = curlingResult(roundScore);
-        status.textContent = `投掷结束 · 距离圆心 ${(distanceRatio).toFixed(2)} 圈`;
+        if (mode === 'practice') {
+          score.textContent = String(roundScore);
+          result.textContent = curlingResult(roundScore);
+          status.textContent = `投掷结束 · 距离圆心 ${(distanceRatio).toFixed(2)} 圈`;
+        } else {
+          setScoreReadout(true);
+          const end = scoreCurlingEnd([...setupStones, { team: 'red', ...position }]);
+          result.textContent = end.points ? `${end.scoringTeam === 'red' ? '红队' : '蓝队'}本局 ${end.points} 分。` : '本局无人得分。';
+          status.textContent = '投掷结束 · 已按大本营内最近壶计分';
+        }
         launch.disabled = true;
         reset.disabled = false;
         reset.focus();
@@ -628,7 +701,7 @@ export function openCurlingGame(trigger) {
         const rect = laneRect || laneMetrics();
         const next = advanceCurlingThrow(
           { position, velocity, curlDirection },
-          { width: rect.width, height: rect.height, radius: CURLING_STONE_RADIUS },
+          { width: CURLING_SHEET_WIDTH, height: CURLING_SHEET_HEIGHT, radius: CURLING_STONE_RADIUS },
         );
         position = next.position;
         velocity = next.velocity;
@@ -665,7 +738,7 @@ export function openCurlingGame(trigger) {
         if (reducedMotion) {
           const settled = settleCurlingThrow(
             { position, velocity, curlDirection },
-            { width: rect.width, height: rect.height, radius: CURLING_STONE_RADIUS },
+            { width: CURLING_SHEET_WIDTH, height: CURLING_SHEET_HEIGHT, radius: CURLING_STONE_RADIUS },
             CURLING_MAX_STEPS,
           );
           position = settled.position;
@@ -679,14 +752,13 @@ export function openCurlingGame(trigger) {
 
       const pointerPosition = (event) => {
         const rect = laneRect || laneMetrics();
-        return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+        return renderedToLogical({ x: event.clientX - rect.left, y: event.clientY - rect.top }, rect);
       };
 
       const onPointerDown = (event) => {
         if (phase !== 'idle' || event.button !== 0) return;
         const point = pointerPosition(event);
-        const rect = laneRect || laneMetrics();
-        if (point.y < rect.height * 0.65) return;
+        if (point.x < CURLING_SHEET_WIDTH * 0.55) return;
         dragging = true;
         pointerId = event.pointerId;
         pullPoint = point;
@@ -701,8 +773,8 @@ export function openCurlingGame(trigger) {
         const rect = laneRect || laneMetrics();
         const point = pointerPosition(event);
         pullPoint = {
-          x: Math.max(12, Math.min(rect.width - 12, point.x)),
-          y: Math.max(rect.height * 0.65, Math.min(rect.height - 12, point.y)),
+          x: Math.max(CURLING_SHEET_WIDTH * 0.55, Math.min(CURLING_SHEET_WIDTH - CURLING_STONE_RADIUS, point.x)),
+          y: Math.max(CURLING_STONE_RADIUS, Math.min(CURLING_SHEET_HEIGHT - CURLING_STONE_RADIUS, point.y)),
         };
         updateAim();
         event.preventDefault();
@@ -742,12 +814,17 @@ export function openCurlingGame(trigger) {
         dragging = false;
         pointerId = null;
         pullPoint = null;
-        score.textContent = '—';
+        if (mode === 'practice') score.textContent = '—';
         result.textContent = '';
         status.textContent = '准备投壶';
         launch.disabled = false;
         reset.disabled = true;
         resetPosition();
+        if (mode === 'score') {
+          renderSetupStones();
+          setScoreReadout(false);
+          status.textContent = '投掷前 · 静态壶已就位';
+        }
       };
 
       const launchFromKeyboard = () => {
@@ -755,7 +832,25 @@ export function openCurlingGame(trigger) {
         const rect = laneMetrics();
         const strengthRatio = Number(strength.value) / 100;
         const directionRatio = Number(direction.value) / 100;
-        beginThrow(keyboardCurlingVelocity(directionRatio, strengthRatio, rect.height));
+        const keyboardVelocity = keyboardCurlingVelocity(directionRatio, strengthRatio, CURLING_SHEET_WIDTH);
+        beginThrow({ x: keyboardVelocity.y, y: keyboardVelocity.x });
+      };
+
+      const updateSetup = () => {
+        setupStones = createCurlingSetup({ redCount: redCount.value, blueCount: blueCount.value });
+        resetGame();
+      };
+
+      const setMode = (nextMode) => {
+        mode = nextMode;
+        setup.hidden = mode !== 'score';
+        for (const button of modeButtons) button.setAttribute('aria-pressed', String(button.dataset.curlingMode === mode));
+        if (mode === 'score') updateSetup();
+        else {
+          setupStones = [];
+          renderSetupStones();
+          resetGame();
+        }
       };
 
       const onSliderInput = () => {
@@ -776,6 +871,10 @@ export function openCurlingGame(trigger) {
       lane.addEventListener('keydown', onLaneKeydown);
       launch.addEventListener('click', launchFromKeyboard);
       reset.addEventListener('click', resetGame);
+      relayout.addEventListener('click', updateSetup);
+      redCount.addEventListener('change', updateSetup);
+      blueCount.addEventListener('change', updateSetup);
+      for (const button of modeButtons) button.addEventListener('click', () => setMode(button.dataset.curlingMode));
       direction.addEventListener('input', onSliderInput);
       strength.addEventListener('input', onSliderInput);
       resetGame();
@@ -796,6 +895,9 @@ export function openCurlingGame(trigger) {
         lane.removeEventListener('keydown', onLaneKeydown);
         launch.removeEventListener('click', launchFromKeyboard);
         reset.removeEventListener('click', resetGame);
+        relayout.removeEventListener('click', updateSetup);
+        redCount.removeEventListener('change', updateSetup);
+        blueCount.removeEventListener('change', updateSetup);
         direction.removeEventListener('input', onSliderInput);
         strength.removeEventListener('input', onSliderInput);
       };
@@ -820,7 +922,7 @@ export function openSlapGame(trigger) {
             <span>连击 <strong data-slap-combo>0</strong></span>
           </div>
           <div class="slap-game__arena" data-slap-arena tabindex="0" role="region" aria-label="抽象桃子拍击区域，按 Enter 或空格可判定未命中">
-            <button class="slap-game__target" data-slap-target type="button" aria-label="抽象桃子目标"><span class="slap-game__peach" aria-hidden="true"></span></button>
+            <button class="slap-game__target" data-slap-target type="button" aria-label="抽象桃子目标">🍑</button>
           </div>
           <p class="slap-game__status" data-slap-status aria-live="polite">点击桃子开始，键盘可聚焦目标后按 Enter 或空格。</p>
           <div class="slap-game__finish" data-slap-finish hidden>

@@ -36,6 +36,15 @@ export const CURLING_SCORE_RATIOS = Object.freeze({ three: 0.32, two: 0.65, one:
 export const CURLING_HOUSE_RADIUS_RATIO = 0.2;
 export const CURLING_TARGET_Y_RATIO = 0.22;
 export const CURLING_STOP_SPEED = 0.08;
+export const CURLING_SHEET_WIDTH = 45.72;
+export const CURLING_SHEET_HEIGHT = 4.75;
+export const CURLING_SHEET_RATIO = CURLING_SHEET_WIDTH / CURLING_SHEET_HEIGHT;
+export const CURLING_STONE_RADIUS = 0.145;
+export const CURLING_HOUSE_RADIUS = 1.83;
+export const CURLING_HOUSE_CENTER = Object.freeze({
+  x: CURLING_SHEET_WIDTH * CURLING_TARGET_Y_RATIO,
+  y: CURLING_SHEET_HEIGHT / 2,
+});
 
 export function nextNightState(isActive) {
   const active = !isActive;
@@ -55,6 +64,76 @@ export function scoreCurling(distanceRatio) {
   if (distanceRatio <= CURLING_SCORE_RATIOS.two) return 2;
   if (distanceRatio <= CURLING_SCORE_RATIOS.one) return 1;
   return 0;
+}
+
+export function clampCurlingSetupCounts(redCount, blueCount) {
+  const clamp = (count, maximum) => Math.max(0, Math.min(maximum, Math.round(Number(count) || 0)));
+  return { red: clamp(redCount, 7), blue: clamp(blueCount, 8) };
+}
+
+export function scoreCurlingEnd(stones) {
+  const inHouse = stones
+    .filter(({ team, x, y }) => (team === 'red' || team === 'blue')
+      && Number.isFinite(x) && Number.isFinite(y)
+      && Math.hypot(x - CURLING_HOUSE_CENTER.x, y - CURLING_HOUSE_CENTER.y)
+        <= CURLING_HOUSE_RADIUS + CURLING_STONE_RADIUS)
+    .map((stone) => ({
+      ...stone,
+      distance: Math.hypot(stone.x - CURLING_HOUSE_CENTER.x, stone.y - CURLING_HOUSE_CENTER.y),
+    }))
+    .sort((left, right) => left.distance - right.distance);
+
+  if (!inHouse.length || (inHouse[1] && inHouse[0].distance === inHouse[1].distance)) {
+    return { red: 0, blue: 0, scoringTeam: null, points: 0 };
+  }
+
+  const scoringTeam = inHouse[0].team;
+  const opposingStone = inHouse.find((stone) => stone.team !== scoringTeam);
+  const points = inHouse.filter((stone) => stone.team === scoringTeam
+    && (!opposingStone || stone.distance < opposingStone.distance)).length;
+  return {
+    red: scoringTeam === 'red' ? points : 0,
+    blue: scoringTeam === 'blue' ? points : 0,
+    scoringTeam,
+    points,
+  };
+}
+
+export function createCurlingSetup({ redCount = 0, blueCount = 0, random = Math.random } = {}) {
+  const counts = clampCurlingSetupCounts(redCount, blueCount);
+  const teams = [
+    ...Array.from({ length: counts.red }, () => 'red'),
+    ...Array.from({ length: counts.blue }, () => 'blue'),
+  ];
+  const stones = [];
+  const isLegal = (candidate) => stones.every((stone) => Math.hypot(
+    candidate.x - stone.x,
+    candidate.y - stone.y,
+  ) >= CURLING_STONE_RADIUS * 2);
+  const addCandidate = (candidate, team) => {
+    if (!isLegal(candidate)) return false;
+    stones.push({ ...candidate, team, static: true });
+    return true;
+  };
+
+  for (const team of teams) {
+    let added = false;
+    for (let attempt = 0; attempt < 120 && !added; attempt += 1) {
+      added = addCandidate({
+        x: CURLING_STONE_RADIUS + random() * (CURLING_SHEET_WIDTH - CURLING_STONE_RADIUS * 2),
+        y: CURLING_STONE_RADIUS + random() * (CURLING_SHEET_HEIGHT - CURLING_STONE_RADIUS * 2),
+      }, team);
+    }
+    for (let row = 0; row < 16 && !added; row += 1) {
+      for (let column = 0; column < 8 && !added; column += 1) {
+        added = addCandidate({
+          x: CURLING_STONE_RADIUS + column * 0.6,
+          y: CURLING_STONE_RADIUS + row * 2.6,
+        }, team);
+      }
+    }
+  }
+  return stones;
 }
 
 export function curlingResult(score) {

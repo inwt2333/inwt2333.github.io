@@ -489,3 +489,48 @@ If verification required changes, add a failing regression test first, implement
 git add xsy tests
 git commit -m "fix: polish xsy interactive exhibits"
 ```
+
+### Task 9: Standard-Proportion Curling Match Mode and Peach Target
+
+**Files:**
+- Modify: `xsy/interactions.mjs`
+- Modify: `xsy/app.mjs`
+- Modify: `xsy/style.css`
+- Modify: `tests/xsy-interactions.test.mjs`
+- Modify: `tests/xsy-browser.mjs`
+
+**Interfaces:**
+- Preserves the existing practice mode, Pointer Events, keyboard controls, and dialog cleanup.
+- Produces pure `scoreCurlingEnd(stones)` behavior using World Curling scoring: only stones in or touching the house count, and the closest team scores one point for each stone closer than the opponent's closest stone.
+- Produces configurable red/blue setup counts, deterministic legal non-overlapping layouts when supplied a random source, and before/after score text.
+- Produces a fixed 45.72 m by 4.75 m logical sheet ratio that is only scaled, never stretched; the delivery origin is moved farther from the bottom edge.
+
+- [ ] **Step 1: Add pure scoring, layout, and sheet-ratio tests**
+
+Add hand-derived fixtures that cover a blank end, multiple points for one team, stones outside the house, an opponent stone splitting the count, clamped setup counts, non-overlap, and a sheet whose rendered dimensions preserve `45.72 / 4.75` across desktop and mobile widths. Add a browser assertion that the slap target exposes the literal `🍑`.
+
+- [ ] **Step 2: Run focused tests and verify red**
+
+Run: `node --test tests/xsy-interactions.test.mjs`
+
+Expected: FAIL because match scoring/layout exports do not exist.
+
+- [ ] **Step 3: Implement match mode and peach target**
+
+Add “练习模式 / 比分模式” controls. In score mode, let the user set existing red stones from 0–7 and blue stones from 0–8, regenerate a collision-free setup, show the score before the throw, and add the delivered red stone to compute the score after it settles. Existing setup stones remain static in this scoring-focused mode. Keep practice score/copy unchanged.
+
+Render the sheet using one fixed logical coordinate system and scale it uniformly. Keep the house, stones, pointer coordinate conversion, and keyboard velocity in that coordinate system. Move the delivery origin far enough above the lower boundary to allow a useful pull range. Replace the slap target's CSS-drawn symbol with the literal peach emoji `🍑` and remove obsolete pseudo-element drawing.
+
+- [ ] **Step 4: Browser-verify both modes**
+
+At desktop and 390 px widths, confirm the sheet ratio does not change, pointer/keyboard throws terminate, setup counts can be changed, before/after scoring updates, reset/re-layout works, the start stone is visibly separated from the lower edge, and the peach emoji is centered and keyboard-operable. Repeat the relevant checks with reduced motion and night mode.
+
+- [ ] **Step 5: Run tests and commit**
+
+```bash
+node --test tests/xsy.test.mjs tests/xsy-interactions.test.mjs
+python -m pytest -q
+git diff --check -- xsy tests docs/superpowers
+git add xsy tests docs/superpowers .superpowers/sdd/2026-09-24-xsy-interactions
+git commit -m "feat: expand xsy curling match mode"
+```

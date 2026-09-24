@@ -109,6 +109,7 @@ async function run(width, reduced) {
   await check('night peach focus contrast against its arena', () => {
     click('[data-extra-action="slap"]');
     const target = $('[data-slap-target]');
+    assert(target.textContent === '🍑', 'slap target is not the literal peach emoji');
     target.focus();
     // Focus outline uses --ink; compare against the fixed white arena surface.
     const ink = win.getComputedStyle(target).getPropertyValue('--ink').trim();
@@ -132,11 +133,30 @@ async function run(width, reduced) {
   await check('curling throw/reset and closing cancels animation', async () => {
     click('[data-extra-action="curling"]');
     await wait(40);
+    const lane = $('[data-curling-lane]');
+    const laneRect = lane.getBoundingClientRect();
+    assert(Math.abs(laneRect.width / laneRect.height - 45.72 / 4.75) < .01, 'sheet ratio stretched');
+    const dialog = $('#exhibit-dialog');
+    const dialogRect = dialog.getBoundingClientRect();
+    assert(laneRect.left >= dialogRect.left && laneRect.right <= dialogRect.right
+      && laneRect.top >= dialogRect.top && laneRect.bottom <= dialogRect.bottom, 'sheet does not fit inside dialog viewport');
+    assert(dialog.scrollWidth <= dialog.clientWidth && dialog.scrollHeight <= dialog.clientHeight, 'dialog content overflows');
+    const stoneRect = $('[data-curling-stone]').getBoundingClientRect();
+    assert(stoneRect.top >= laneRect.top && stoneRect.bottom <= laneRect.bottom, 'delivery stone escapes the sheet');
+    click('[data-curling-mode="score"]');
+    assert($('[data-curling-setup]').hidden === false, 'score setup hidden');
+    assert($('[data-curling-static-stone]'), 'score mode did not lay out static stones');
+    assert($('[data-curling-score]').textContent.startsWith('红 '), 'before score missing');
+    $('[data-curling-red-count]').value = '0';
+    $('[data-curling-blue-count]').value = '0';
+    click('[data-curling-relayout]');
+    assert(! $('[data-curling-static-stone]'), 're-layout retained stale stones');
     click('[data-curling-launch]');
     if (reduced) {
       assert(!$('[data-curling-reset]').disabled, 'reduced throw did not settle immediately');
+      assert($('[data-curling-score-prefix]').textContent === '投掷后比分：', 'after score missing');
       click('[data-curling-reset]');
-      assert($('[data-curling-score]').textContent === '—', 'reset score');
+      assert($('[data-curling-score-prefix]').textContent === '投掷前比分：', 'reset score');
     }
     click('[data-dialog-backdrop]');
     clean();

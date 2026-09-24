@@ -596,7 +596,7 @@ footer {
 .curling-game__lane {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 45.72 / 4.75;
   overflow: hidden;
   border: 3px solid var(--ink);
   background:
@@ -658,20 +658,37 @@ footer {
 .curling-stone {
   position: absolute;
   left: 50%;
-  top: 84%;
+  left: 76%;
+  top: 50%;
   z-index: 2;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: min(36px, 70%);
+  height: min(36px, 70%);
   border: 2px solid var(--ink);
   border-radius: 50%;
   background: var(--paper);
-  font-size: 1.45rem;
+  font-size: min(1.45rem, 4vw);
   line-height: 1;
   transform: translate(-50%, -50%);
   user-select: none;
 }
+
+.curling-static-stone {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  box-sizing: border-box;
+  box-shadow: 1px 1px 0 var(--ink);
+  min-width: 4px;
+  min-height: 4px;
+  transform: translate(-50%, -50%);
+}
+
+.curling-static-stone--red { background: var(--red); }
+.curling-static-stone--blue { background: var(--blue); }
 
 .curling-aim {
   position: absolute;
@@ -708,6 +725,32 @@ footer {
   gap: 12px;
   margin-top: 18px;
 }
+
+.curling-game__modes,
+.curling-game__setup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+
+.curling-game__modes button,
+.curling-game__setup button {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  background: var(--paper);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.curling-game__modes button[aria-pressed="true"] { color: var(--paper); background: var(--ink); }
+.curling-game__setup label { display: grid; gap: 4px; font-size: .78rem; font-weight: 900; }
+.curling-game__setup input { width: 5em; min-height: 30px; border: 2px solid var(--ink); font: inherit; }
+.curling-game__setup[hidden] { display: none; }
 
 .curling-game__controls label {
   display: grid;
@@ -806,6 +849,8 @@ footer {
   border-radius: 48% 52% 45% 46%;
   background: transparent;
   cursor: pointer;
+  font-size: 4.7rem;
+  line-height: 1;
   transform: translate(-50%, -50%);
   transition: left 180ms ease-out, top 180ms ease-out;
 }
@@ -817,40 +862,7 @@ footer {
 
 .slap-game__target:disabled { cursor: not-allowed; opacity: .42; }
 
-.slap-game__peach {
-  position: relative;
-  display: block;
-  width: 82%;
-  height: 82%;
-  border: 3px solid var(--ink);
-  border-radius: 50% 50% 47% 47%;
-  background: #ff8fc7;
-  box-shadow: 4px 4px 0 var(--ink);
-  transform: rotate(-5deg);
-}
-
-.slap-game__peach::before,
-.slap-game__peach::after {
-  content: '';
-  position: absolute;
-  top: 12%;
-  width: 52%;
-  height: 76%;
-  border: 3px solid var(--ink);
-  background: #ffb1d6;
-}
-
-.slap-game__peach::before {
-  left: -12%;
-  border-radius: 55% 45% 50% 48%;
-}
-
-.slap-game__peach::after {
-  right: -12%;
-  border-radius: 45% 55% 48% 50%;
-}
-
-.slap-game__target:active .slap-game__peach { transform: rotate(-5deg) scale(.86); }
+.slap-game__target:active { transform: translate(-50%, -50%) scale(.86); }
 
 .slap-game__marker {
   position: absolute;

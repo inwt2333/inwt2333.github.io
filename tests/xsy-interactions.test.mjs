@@ -5,12 +5,16 @@ import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
   CURLING_SCORE_RATIOS,
+  CURLING_SHEET_RATIO,
   advanceCurlingThrow,
   advanceCurlingPhysics,
   availableBeetleSlots,
   keyboardCurlingVelocity,
   pointerCurlingVelocity,
   curlingLaneGeometry,
+  clampCurlingSetupCounts,
+  createCurlingSetup,
+  scoreCurlingEnd,
   settleCurlingThrow,
   curlingResult,
   createSlapGame,
@@ -106,6 +110,68 @@ test('curling lane geometry uses scoring coordinates for every ring edge', () =>
     twoDiameter: 58.5,
     threeDiameter: 28.8,
   });
+});
+
+test('curling match scoring leaves a blank end tied', () => {
+  // A regression that scored a team with no stones in the house would break this.
+  assert.deepEqual(scoreCurlingEnd([]), {
+    red: 0,
+    blue: 0,
+    scoringTeam: null,
+    points: 0,
+  });
+});
+
+test('curling match scoring awards every closer red stone before blue', () => {
+  // A regression that awarded only one point or ignored a second closer stone would break this.
+  assert.deepEqual(scoreCurlingEnd([
+    { team: 'red', x: 10.0584, y: 2.375 },
+    { team: 'red', x: 10.0584, y: 2.9 },
+    { team: 'blue', x: 10.0584, y: 3.2 },
+  ]), {
+    red: 2,
+    blue: 0,
+    scoringTeam: 'red',
+    points: 2,
+  });
+});
+
+test('curling match scoring excludes outside stones and stops at the opponent', () => {
+  // A regression that counts out-of-house stones or stones beyond the closest opponent would break this.
+  assert.deepEqual(scoreCurlingEnd([
+    { team: 'red', x: 10.0584, y: 2.375 },
+    { team: 'red', x: 10.0584, y: 3.475 },
+    { team: 'blue', x: 10.0584, y: 2.775 },
+    { team: 'blue', x: 10.0584, y: 4.3 },
+  ]), {
+    red: 1,
+    blue: 0,
+    scoringTeam: 'red',
+    points: 1,
+  });
+});
+
+test('curling match layout clamps setup counts and creates a deterministic legal layout', () => {
+  // A regression that allowed too many stones or overlapping stones would break this.
+  assert.deepEqual(clampCurlingSetupCounts(-2, 12), { red: 0, blue: 8 });
+  const randomValues = [0.03, 0.71, 0.19, 0.84, 0.42, 0.58];
+  let index = 0;
+  const random = () => randomValues[index++ % randomValues.length];
+  const first = createCurlingSetup({ redCount: 7, blueCount: 8, random });
+  index = 0;
+  const second = createCurlingSetup({ redCount: 7, blueCount: 8, random });
+  assert.deepEqual(first, second);
+  assert.equal(first.length, 15);
+  for (let left = 0; left < first.length; left += 1) {
+    for (let right = left + 1; right < first.length; right += 1) {
+      assert.ok(Math.hypot(first[left].x - first[right].x, first[left].y - first[right].y) >= 0.29);
+    }
+  }
+});
+
+test('curling sheet preserves the official 45.72 metre by 4.75 metre proportion', () => {
+  // A regression that stretched the logical sheet would break this.
+  assert.equal(CURLING_SHEET_RATIO, 45.72 / 4.75);
 });
 
 test('reduced-motion settling matches incremental curling termination', () => {
