@@ -32,6 +32,8 @@ export const LYRIC_FRAGMENTS = [
 ];
 
 export const MAX_BEETLES = 18;
+export const CURLING_SCORE_RATIOS = Object.freeze({ three: 0.32, two: 0.65, one: 1 });
+export const CURLING_HOUSE_RADIUS_RATIO = 0.2;
 
 export function nextNightState(isActive) {
   const active = !isActive;
@@ -47,9 +49,9 @@ export function nextIndex(index, length) {
 }
 
 export function scoreCurling(distanceRatio) {
-  if (distanceRatio <= 0.32) return 3;
-  if (distanceRatio <= 0.65) return 2;
-  if (distanceRatio <= 1) return 1;
+  if (distanceRatio <= CURLING_SCORE_RATIOS.three) return 3;
+  if (distanceRatio <= CURLING_SCORE_RATIOS.two) return 2;
+  if (distanceRatio <= CURLING_SCORE_RATIOS.one) return 1;
   return 0;
 }
 
@@ -87,6 +89,26 @@ export function advanceCurlingPhysics(position, velocity, bounds, curlDirection 
   nextVelocity.x = (nextVelocity.x + curlDirection * 0.0009 * speed) * 0.965;
   nextVelocity.y *= 0.965;
   return { position: nextPosition, velocity: nextVelocity, speed };
+}
+
+export function pointerCurlingVelocity(stone, pull) {
+  const x = stone.x - pull.x;
+  const y = stone.y - pull.y;
+  const distance = Math.hypot(x, y);
+  const magnitude = distance * 0.18;
+  const angle = distance > 1 ? Math.atan2(y, x) : -Math.PI / 2;
+  return {
+    x: Math.cos(angle) * magnitude,
+    y: Math.sin(angle) * magnitude,
+  };
+}
+
+export function keyboardCurlingVelocity(directionRatio, strengthRatio, laneHeight) {
+  const magnitude = laneHeight * strengthRatio * 0.12;
+  return {
+    x: directionRatio * magnitude,
+    y: -magnitude,
+  };
 }
 
 export function createSlapGame(durationMs, startedAt) {

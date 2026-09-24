@@ -613,33 +613,44 @@ footer {
   position: absolute;
   left: 50%;
   top: 22%;
-  width: 28%;
-  aspect-ratio: 1;
+  width: var(--curling-house-diameter, 40%);
+  height: var(--curling-house-diameter, 40%);
   border: 2px solid var(--ink);
   border-radius: 50%;
   background: #f7fbfa;
+  box-sizing: border-box;
   transform: translate(-50%, -50%);
 }
 
 .curling-house::before,
-.curling-house::after,
-.curling-house span {
+.curling-house::after {
   content: '';
   position: absolute;
-  inset: 15%;
+  left: 50%;
+  top: 50%;
+  width: var(--curling-two-ring-diameter, 65%);
+  height: var(--curling-two-ring-diameter, 65%);
   border: 2px solid var(--blue);
   border-radius: 50%;
+  box-sizing: border-box;
+  transform: translate(-50%, -50%);
 }
 
 .curling-house::after {
-  inset: 30%;
+  width: var(--curling-three-ring-diameter, 32%);
+  height: var(--curling-three-ring-diameter, 32%);
   border-color: var(--red);
 }
 
 .curling-house span {
-  inset: 45%;
-  border: 0;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8%;
+  aspect-ratio: 1;
+  border-radius: 50%;
   background: var(--red);
+  transform: translate(-50%, -50%);
 }
 
 .curling-stone {

@@ -1,11 +1,15 @@
 import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
+  CURLING_HOUSE_RADIUS_RATIO,
+  CURLING_SCORE_RATIOS,
   advanceCurlingPhysics,
   availableBeetleSlots,
   curlingResult,
   nextIndex,
   nextNightState,
+  keyboardCurlingVelocity,
+  pointerCurlingVelocity,
   scoreCurling,
 } from './interactions.mjs';
 
@@ -466,7 +470,6 @@ export function openLyrics(trigger) {
 
 const CURLING_START_Y = 0.84;
 const CURLING_TARGET_Y = 0.22;
-const CURLING_HOUSE_RADIUS = 0.2;
 const CURLING_STONE_RADIUS = 18;
 const CURLING_STOP_SPEED = 0.08;
 const CURLING_MAX_DURATION = 4000;
@@ -517,6 +520,7 @@ export function openCurlingGame(trigger) {
       const lane = content.querySelector('[data-curling-lane]');
       const stone = content.querySelector('[data-curling-stone]');
       const aim = content.querySelector('[data-curling-aim]');
+      const target = content.querySelector('[data-curling-target]');
       const score = content.querySelector('[data-curling-score]');
       const result = content.querySelector('[data-curling-result]');
       const status = content.querySelector('[data-curling-status]');
@@ -543,6 +547,12 @@ export function openCurlingGame(trigger) {
 
       const laneMetrics = () => {
         const rect = lane.getBoundingClientRect();
+        if (rect.width && rect.height) {
+          const houseRadius = rect.height * CURLING_HOUSE_RADIUS_RATIO;
+          target.style.setProperty('--curling-house-diameter', `${houseRadius * 2}px`);
+          target.style.setProperty('--curling-two-ring-diameter', `${CURLING_SCORE_RATIOS.two * 100}%`);
+          target.style.setProperty('--curling-three-ring-diameter', `${CURLING_SCORE_RATIOS.three * 100}%`);
+        }
         laneRect = rect;
         return rect;
       };
@@ -590,7 +600,7 @@ export function openCurlingGame(trigger) {
         const rect = laneRect || laneMetrics();
         const targetX = rect.width / 2;
         const targetY = rect.height * CURLING_TARGET_Y;
-        const houseRadius = rect.height * CURLING_HOUSE_RADIUS;
+        const houseRadius = rect.height * CURLING_HOUSE_RADIUS_RATIO;
         const distanceRatio = Math.hypot(position.x - targetX, position.y - targetY) / houseRadius;
         const roundScore = scoreCurling(distanceRatio);
         score.textContent = String(roundScore);
@@ -629,23 +639,10 @@ export function openCurlingGame(trigger) {
         frame = curlingFrame(animate);
       };
 
-      const beginThrow = ({ x, y }) => {
+      const beginThrow = (nextVelocity) => {
         if (phase === 'flying') return;
         const rect = laneMetrics();
-        const pull = {
-          x: Math.max(12, Math.min(rect.width - 12, x)),
-          y: Math.max(rect.height * 0.65, Math.min(rect.height - 12, y)),
-        };
-        const pullX = position.x - pull.x;
-        const pullY = position.y - pull.y;
-        const pointerMagnitude = Math.hypot(pullX, pullY);
-        const fallbackStrength = Number(strength.value) / 100;
-        const magnitude = Math.max(pointerMagnitude * 0.18, rect.height * fallbackStrength * 0.12);
-        const angle = pointerMagnitude > 1 ? Math.atan2(pullY, pullX) : -Math.PI / 2;
-        velocity = {
-          x: Math.cos(angle) * magnitude,
-          y: Math.sin(angle) * magnitude,
-        };
+        velocity = nextVelocity;
         curlDirection = velocity.x < 0 ? -1 : 1;
         phase = 'flying';
         startedAt = performance.now();
@@ -705,7 +702,7 @@ export function openCurlingGame(trigger) {
         dragging = false;
         lane.releasePointerCapture?.(pointerId);
         pointerId = null;
-        beginThrow(pullPoint || { x: position.x, y: position.y + 1 });
+        beginThrow(pointerCurlingVelocity(position, pullPoint || position));
         pullPoint = null;
         aim.hidden = true;
       };
@@ -747,10 +744,7 @@ export function openCurlingGame(trigger) {
         const rect = laneMetrics();
         const strengthRatio = Number(strength.value) / 100;
         const directionRatio = Number(direction.value) / 100;
-        beginThrow({
-          x: position.x - directionRatio * rect.width * 0.22,
-          y: position.y + rect.height * strengthRatio * 0.14,
-        });
+        beginThrow(keyboardCurlingVelocity(directionRatio, strengthRatio, rect.height));
       };
 
       const onSliderInput = () => {

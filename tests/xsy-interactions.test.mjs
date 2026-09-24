@@ -4,8 +4,11 @@ import assert from 'node:assert/strict';
 import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
+  CURLING_SCORE_RATIOS,
   advanceCurlingPhysics,
   availableBeetleSlots,
+  keyboardCurlingVelocity,
+  pointerCurlingVelocity,
   curlingResult,
   createSlapGame,
   finishSlapGame,
@@ -70,6 +73,24 @@ test('curling physics clamps the stone and applies friction with curl', () => {
   assert.equal(next.speed, Math.hypot(4 * 0.58, -2));
   assert.ok(next.velocity.x > 0);
   assert.equal(next.velocity.y, -2 * 0.965);
+});
+
+test('pointer curling velocity scales with pull distance without keyboard strength', () => {
+  const stone = { x: 120, y: 200 };
+  const shortPull = pointerCurlingVelocity(stone, { x: 120, y: 220 });
+  const longPull = pointerCurlingVelocity(stone, { x: 120, y: 300 });
+  const keyboard = keyboardCurlingVelocity(0, 0.72, 240);
+
+  assert.ok(Math.abs(longPull.y) > Math.abs(shortPull.y));
+  assert.ok(Math.abs(shortPull.x) < 1e-10);
+  assert.equal(keyboard.y, -240 * 0.72 * 0.12);
+});
+
+test('curling ring ratios match score boundaries', () => {
+  assert.deepEqual(CURLING_SCORE_RATIOS, { three: 0.32, two: 0.65, one: 1 });
+  assert.equal(scoreCurling(CURLING_SCORE_RATIOS.three), 3);
+  assert.equal(scoreCurling(CURLING_SCORE_RATIOS.two), 2);
+  assert.equal(scoreCurling(CURLING_SCORE_RATIOS.one), 1);
 });
 
 test('slap hits increase score and combo only before the deadline', () => {
