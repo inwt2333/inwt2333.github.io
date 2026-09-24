@@ -1,16 +1,16 @@
 import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
-  CURLING_HOUSE_RADIUS_RATIO,
-  CURLING_SCORE_RATIOS,
-  advanceCurlingPhysics,
+  advanceCurlingThrow,
   availableBeetleSlots,
+  curlingLaneGeometry,
   curlingResult,
   nextIndex,
   nextNightState,
   keyboardCurlingVelocity,
   pointerCurlingVelocity,
   scoreCurling,
+  settleCurlingThrow,
 } from './interactions.mjs';
 
 export const favorites = [
@@ -469,10 +469,9 @@ export function openLyrics(trigger) {
 }
 
 const CURLING_START_Y = 0.84;
-const CURLING_TARGET_Y = 0.22;
 const CURLING_STONE_RADIUS = 18;
-const CURLING_STOP_SPEED = 0.08;
 const CURLING_MAX_DURATION = 4000;
+const CURLING_MAX_STEPS = Math.ceil(CURLING_MAX_DURATION / (1000 / 60));
 
 function curlingFrame(callback) {
   if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
@@ -546,12 +545,20 @@ export function openCurlingGame(trigger) {
       const reducedMotion = prefersReducedMotion();
 
       const laneMetrics = () => {
-        const rect = lane.getBoundingClientRect();
+        const borderRect = lane.getBoundingClientRect();
+        const rect = {
+          left: borderRect.left + lane.clientLeft,
+          top: borderRect.top + lane.clientTop,
+          width: lane.clientWidth,
+          height: lane.clientHeight,
+        };
         if (rect.width && rect.height) {
-          const houseRadius = rect.height * CURLING_HOUSE_RADIUS_RATIO;
-          target.style.setProperty('--curling-house-diameter', `${houseRadius * 2}px`);
-          target.style.setProperty('--curling-two-ring-diameter', `${CURLING_SCORE_RATIOS.two * 100}%`);
-          target.style.setProperty('--curling-three-ring-diameter', `${CURLING_SCORE_RATIOS.three * 100}%`);
+          const geometry = curlingLaneGeometry(rect.width, rect.height);
+          target.style.setProperty('--curling-house-left', `${geometry.targetX}px`);
+          target.style.setProperty('--curling-house-top', `${geometry.targetY}px`);
+          target.style.setProperty('--curling-house-diameter', `${geometry.outerDiameter}px`);
+          target.style.setProperty('--curling-two-ring-diameter', `${geometry.twoDiameter}px`);
+          target.style.setProperty('--curling-three-ring-diameter', `${geometry.threeDiameter}px`);
         }
         laneRect = rect;
         return rect;
@@ -598,10 +605,11 @@ export function openCurlingGame(trigger) {
           frame = null;
         }
         const rect = laneRect || laneMetrics();
-        const targetX = rect.width / 2;
-        const targetY = rect.height * CURLING_TARGET_Y;
-        const houseRadius = rect.height * CURLING_HOUSE_RADIUS_RATIO;
-        const distanceRatio = Math.hypot(position.x - targetX, position.y - targetY) / houseRadius;
+        const geometry = curlingLaneGeometry(rect.width, rect.height);
+        const distanceRatio = Math.hypot(
+          position.x - geometry.targetX,
+          position.y - geometry.targetY,
+        ) / geometry.houseRadius;
         const roundScore = scoreCurling(distanceRatio);
         score.textContent = String(roundScore);
         result.textContent = curlingResult(roundScore);
@@ -613,16 +621,14 @@ export function openCurlingGame(trigger) {
 
       const advancePhysics = () => {
         const rect = laneRect || laneMetrics();
-        const physics = advanceCurlingPhysics(
-          position,
-          velocity,
+        const next = advanceCurlingThrow(
+          { position, velocity, curlDirection },
           { width: rect.width, height: rect.height, radius: CURLING_STONE_RADIUS },
-          curlDirection,
         );
-        position = physics.position;
-        velocity = physics.velocity;
+        position = next.position;
+        velocity = next.velocity;
         updateStone();
-        return physics.speed;
+        return next.finished;
       };
 
       const animate = (timestamp) => {
@@ -631,8 +637,7 @@ export function openCurlingGame(trigger) {
           endThrow();
           return;
         }
-        const speed = advancePhysics();
-        if (speed < CURLING_STOP_SPEED) {
+        if (advancePhysics()) {
           endThrow();
           return;
         }
@@ -653,12 +658,13 @@ export function openCurlingGame(trigger) {
         reset.disabled = true;
         aim.hidden = true;
         if (reducedMotion) {
-          const maxSteps = Math.ceil(CURLING_MAX_DURATION / 16);
-          for (let step = 0; step < maxSteps && Math.hypot(velocity.x, velocity.y) >= CURLING_STOP_SPEED; step += 1) {
-            advancePhysics();
-          }
-          position.x = Math.max(CURLING_STONE_RADIUS, Math.min(rect.width - CURLING_STONE_RADIUS, position.x));
-          position.y = Math.max(CURLING_STONE_RADIUS, Math.min(rect.height - CURLING_STONE_RADIUS, position.y));
+          const settled = settleCurlingThrow(
+            { position, velocity, curlDirection },
+            { width: rect.width, height: rect.height, radius: CURLING_STONE_RADIUS },
+            CURLING_MAX_STEPS,
+          );
+          position = settled.position;
+          velocity = settled.velocity;
           updateStone();
           endThrow();
           return;

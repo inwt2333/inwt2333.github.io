@@ -34,6 +34,8 @@ export const LYRIC_FRAGMENTS = [
 export const MAX_BEETLES = 18;
 export const CURLING_SCORE_RATIOS = Object.freeze({ three: 0.32, two: 0.65, one: 1 });
 export const CURLING_HOUSE_RADIUS_RATIO = 0.2;
+export const CURLING_TARGET_Y_RATIO = 0.22;
+export const CURLING_STOP_SPEED = 0.08;
 
 export function nextNightState(isActive) {
   const active = !isActive;
@@ -89,6 +91,42 @@ export function advanceCurlingPhysics(position, velocity, bounds, curlDirection 
   nextVelocity.x = (nextVelocity.x + curlDirection * 0.0009 * speed) * 0.965;
   nextVelocity.y *= 0.965;
   return { position: nextPosition, velocity: nextVelocity, speed };
+}
+
+export function curlingLaneGeometry(width, height) {
+  const houseRadius = height * CURLING_HOUSE_RADIUS_RATIO;
+  return {
+    targetX: width / 2,
+    targetY: height * CURLING_TARGET_Y_RATIO,
+    houseRadius,
+    outerDiameter: houseRadius * 2,
+    twoDiameter: houseRadius * 2 * CURLING_SCORE_RATIOS.two,
+    threeDiameter: houseRadius * 2 * CURLING_SCORE_RATIOS.three,
+  };
+}
+
+export function advanceCurlingThrow(state, bounds) {
+  const physics = advanceCurlingPhysics(
+    state.position,
+    state.velocity,
+    bounds,
+    state.curlDirection,
+  );
+  return {
+    ...state,
+    position: physics.position,
+    velocity: physics.velocity,
+    speed: physics.speed,
+    finished: physics.speed < CURLING_STOP_SPEED,
+  };
+}
+
+export function settleCurlingThrow(state, bounds, maxSteps) {
+  let next = state;
+  for (let step = 0; step < maxSteps && !next.finished; step += 1) {
+    next = advanceCurlingThrow(next, bounds);
+  }
+  return { ...next, finished: true };
 }
 
 export function pointerCurlingVelocity(stone, pull) {

@@ -611,8 +611,8 @@ footer {
 
 .curling-house {
   position: absolute;
-  left: 50%;
-  top: 22%;
+  left: var(--curling-house-left, 50%);
+  top: var(--curling-house-top, 22%);
   width: var(--curling-house-diameter, 40%);
   height: var(--curling-house-diameter, 40%);
   border: 2px solid var(--ink);

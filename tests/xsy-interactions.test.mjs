@@ -5,10 +5,13 @@ import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
   CURLING_SCORE_RATIOS,
+  advanceCurlingThrow,
   advanceCurlingPhysics,
   availableBeetleSlots,
   keyboardCurlingVelocity,
   pointerCurlingVelocity,
+  curlingLaneGeometry,
+  settleCurlingThrow,
   curlingResult,
   createSlapGame,
   finishSlapGame,
@@ -91,6 +94,36 @@ test('curling ring ratios match score boundaries', () => {
   assert.equal(scoreCurling(CURLING_SCORE_RATIOS.three), 3);
   assert.equal(scoreCurling(CURLING_SCORE_RATIOS.two), 2);
   assert.equal(scoreCurling(CURLING_SCORE_RATIOS.one), 1);
+});
+
+test('curling lane geometry uses scoring coordinates for every ring edge', () => {
+  assert.deepEqual(curlingLaneGeometry(300, 225), {
+    targetX: 150,
+    targetY: 49.5,
+    houseRadius: 45,
+    outerDiameter: 90,
+    twoDiameter: 58.5,
+    threeDiameter: 28.8,
+  });
+});
+
+test('reduced-motion settling matches incremental curling termination', () => {
+  const bounds = { width: 300, height: 225, radius: 18 };
+  const start = { position: { x: 150, y: 189 }, velocity: { x: 0, y: -18.801 * 0.18 }, curlDirection: 1 };
+  let incremental = start;
+  for (let step = 0; step < 240 && !incremental.finished; step += 1) {
+    incremental = advanceCurlingThrow(incremental, bounds);
+  }
+  const reduced = settleCurlingThrow(start, bounds, 240);
+  const geometry = curlingLaneGeometry(bounds.width, bounds.height);
+  const score = (state) => scoreCurling(Math.hypot(
+    state.position.x - geometry.targetX,
+    state.position.y - geometry.targetY,
+  ) / geometry.houseRadius);
+
+  assert.equal(score(incremental), 1);
+  assert.deepEqual(reduced, incremental);
+  assert.equal(score(reduced), score(incremental));
 });
 
 test('slap hits increase score and combo only before the deadline', () => {
