@@ -503,11 +503,11 @@ git commit -m "fix: polish xsy interactive exhibits"
 - Preserves the existing practice mode, Pointer Events, keyboard controls, and dialog cleanup.
 - Produces pure `scoreCurlingEnd(stones)` behavior using World Curling scoring: only stones in or touching the house count, and the closest team scores one point for each stone closer than the opponent's closest stone.
 - Produces configurable red/blue setup counts, deterministic legal non-overlapping layouts when supplied a random source, and before/after score text.
-- Produces a fixed 45.72 m by 4.75 m logical sheet ratio that is only scaled, never stretched; the delivery origin is moved farther from the bottom edge.
+- Produces a fixed 4:1 screen-fit logical game-lane ratio that is only scaled, never stretched; the horizontal delivery origin leaves a useful pull range.
 
 - [ ] **Step 1: Add pure scoring, layout, and sheet-ratio tests**
 
-Add hand-derived fixtures that cover a blank end, multiple points for one team, stones outside the house, an opponent stone splitting the count, clamped setup counts, non-overlap, and a sheet whose rendered dimensions preserve `45.72 / 4.75` across desktop and mobile widths. Add a browser assertion that the slap target exposes the literal `🍑`.
+Add hand-derived fixtures that cover a blank end, multiple points for one team, stones outside the house, an opponent stone splitting the count, clamped setup counts, non-overlap, and a game lane whose rendered dimensions preserve `4 / 1` across desktop and mobile widths. Add a browser assertion that the slap target exposes the literal `🍑`.
 
 - [ ] **Step 2: Run focused tests and verify red**
 

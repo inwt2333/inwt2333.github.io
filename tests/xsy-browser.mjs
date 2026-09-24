@@ -135,7 +135,7 @@ async function run(width, reduced) {
     await wait(40);
     const lane = $('[data-curling-lane]');
     const laneRect = lane.getBoundingClientRect();
-    assert(Math.abs(laneRect.width / laneRect.height - 45.72 / 4.75) < .01, 'sheet ratio stretched');
+    assert(Math.abs(laneRect.width / laneRect.height - 4) < .01, 'game lane ratio stretched');
     const dialog = $('#exhibit-dialog');
     const dialogRect = dialog.getBoundingClientRect();
     assert(laneRect.left >= dialogRect.left && laneRect.right <= dialogRect.right

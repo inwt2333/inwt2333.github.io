@@ -36,14 +36,14 @@ export const CURLING_SCORE_RATIOS = Object.freeze({ three: 0.32, two: 0.65, one:
 export const CURLING_HOUSE_RADIUS_RATIO = 0.2;
 export const CURLING_TARGET_Y_RATIO = 0.22;
 export const CURLING_STOP_SPEED = 0.08;
-export const CURLING_SHEET_WIDTH = 45.72;
-export const CURLING_SHEET_HEIGHT = 4.75;
-export const CURLING_SHEET_RATIO = CURLING_SHEET_WIDTH / CURLING_SHEET_HEIGHT;
-export const CURLING_STONE_RADIUS = 0.145;
-export const CURLING_HOUSE_RADIUS = 1.83;
+export const CURLING_GAME_LANE_WIDTH = 4;
+export const CURLING_GAME_LANE_HEIGHT = 1;
+export const CURLING_GAME_LANE_RATIO = CURLING_GAME_LANE_WIDTH / CURLING_GAME_LANE_HEIGHT;
+export const CURLING_STONE_RADIUS = 0.035;
+export const CURLING_HOUSE_RADIUS = 0.16;
 export const CURLING_HOUSE_CENTER = Object.freeze({
-  x: CURLING_SHEET_WIDTH * CURLING_TARGET_Y_RATIO,
-  y: CURLING_SHEET_HEIGHT / 2,
+  x: CURLING_GAME_LANE_WIDTH * CURLING_TARGET_Y_RATIO,
+  y: CURLING_GAME_LANE_HEIGHT / 2,
 });
 
 export function nextNightState(isActive) {
@@ -120,15 +120,15 @@ export function createCurlingSetup({ redCount = 0, blueCount = 0, random = Math.
     let added = false;
     for (let attempt = 0; attempt < 120 && !added; attempt += 1) {
       added = addCandidate({
-        x: CURLING_STONE_RADIUS + random() * (CURLING_SHEET_WIDTH - CURLING_STONE_RADIUS * 2),
-        y: CURLING_STONE_RADIUS + random() * (CURLING_SHEET_HEIGHT - CURLING_STONE_RADIUS * 2),
+        x: CURLING_STONE_RADIUS + random() * (CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS * 2),
+        y: CURLING_STONE_RADIUS + random() * (CURLING_GAME_LANE_HEIGHT - CURLING_STONE_RADIUS * 2),
       }, team);
     }
-    for (let row = 0; row < 16 && !added; row += 1) {
-      for (let column = 0; column < 8 && !added; column += 1) {
+    for (let row = 0; row < 4 && !added; row += 1) {
+      for (let column = 0; column < 16 && !added; column += 1) {
         added = addCandidate({
-          x: CURLING_STONE_RADIUS + column * 0.6,
-          y: CURLING_STONE_RADIUS + row * 2.6,
+          x: 0.12 + column * 0.25,
+          y: 0.12 + row * 0.2,
         }, team);
       }
     }

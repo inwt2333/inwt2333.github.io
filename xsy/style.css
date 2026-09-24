@@ -596,7 +596,7 @@ footer {
 .curling-game__lane {
   position: relative;
   width: 100%;
-  aspect-ratio: 45.72 / 4.75;
+  aspect-ratio: 4 / 1;
   overflow: hidden;
   border: 3px solid var(--ink);
   background:

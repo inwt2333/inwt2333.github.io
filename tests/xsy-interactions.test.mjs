@@ -5,7 +5,7 @@ import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
   CURLING_SCORE_RATIOS,
-  CURLING_SHEET_RATIO,
+  CURLING_GAME_LANE_RATIO,
   advanceCurlingThrow,
   advanceCurlingPhysics,
   availableBeetleSlots,
@@ -125,9 +125,9 @@ test('curling match scoring leaves a blank end tied', () => {
 test('curling match scoring awards every closer red stone before blue', () => {
   // A regression that awarded only one point or ignored a second closer stone would break this.
   assert.deepEqual(scoreCurlingEnd([
-    { team: 'red', x: 10.0584, y: 2.375 },
-    { team: 'red', x: 10.0584, y: 2.9 },
-    { team: 'blue', x: 10.0584, y: 3.2 },
+    { team: 'red', x: 0.88, y: 0.5 },
+    { team: 'red', x: 1.0, y: 0.5 },
+    { team: 'blue', x: 1.2, y: 0.5 },
   ]), {
     red: 2,
     blue: 0,
@@ -139,10 +139,10 @@ test('curling match scoring awards every closer red stone before blue', () => {
 test('curling match scoring excludes outside stones and stops at the opponent', () => {
   // A regression that counts out-of-house stones or stones beyond the closest opponent would break this.
   assert.deepEqual(scoreCurlingEnd([
-    { team: 'red', x: 10.0584, y: 2.375 },
-    { team: 'red', x: 10.0584, y: 3.475 },
-    { team: 'blue', x: 10.0584, y: 2.775 },
-    { team: 'blue', x: 10.0584, y: 4.3 },
+    { team: 'red', x: 0.88, y: 0.5 },
+    { team: 'red', x: 1.2, y: 0.5 },
+    { team: 'blue', x: 1.0, y: 0.5 },
+    { team: 'blue', x: 1.8, y: 0.5 },
   ]), {
     red: 1,
     blue: 0,
@@ -164,14 +164,14 @@ test('curling match layout clamps setup counts and creates a deterministic legal
   assert.equal(first.length, 15);
   for (let left = 0; left < first.length; left += 1) {
     for (let right = left + 1; right < first.length; right += 1) {
-      assert.ok(Math.hypot(first[left].x - first[right].x, first[left].y - first[right].y) >= 0.29);
+      assert.ok(Math.hypot(first[left].x - first[right].x, first[left].y - first[right].y) >= 0.07);
     }
   }
 });
 
-test('curling sheet preserves the official 45.72 metre by 4.75 metre proportion', () => {
-  // A regression that stretched the logical sheet would break this.
-  assert.equal(CURLING_SHEET_RATIO, 45.72 / 4.75);
+test('curling game lane preserves the screen-fit four-to-one proportion', () => {
+  // A regression that restores the former long lane ratio or stretches the game lane would break this.
+  assert.equal(CURLING_GAME_LANE_RATIO, 4);
 });
 
 test('reduced-motion settling matches incremental curling termination', () => {
