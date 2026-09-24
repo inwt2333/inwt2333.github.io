@@ -131,8 +131,11 @@ async function run(width, reduced) {
     clean();
   });
   await check('curling throw/reset and closing cancels animation', async () => {
-    click('[data-extra-action="curling"]');
-    await wait(40);
+    let curlingOpened = false;
+    try {
+      click('[data-extra-action="curling"]');
+      curlingOpened = true;
+      await wait(40);
     const lane = $('[data-curling-lane]');
     const laneRect = lane.getBoundingClientRect();
     assert(Math.abs(laneRect.width / laneRect.height - 3 / 5) < .01, 'game lane ratio stretched');
@@ -189,14 +192,16 @@ async function run(width, reduced) {
       pointer('pointerdown', launchPoint);
       pointer('pointermove', pullPoint);
       pointer('pointerup', pullPoint);
-      for (let elapsed = 0; elapsed < 5_000 && $('[data-curling-reset]').disabled; elapsed += 50) await wait(50);
+      for (let elapsed = 0; elapsed < 16_000 && $('[data-curling-reset]').disabled; elapsed += 50) await wait(50);
       assert(!$('[data-curling-reset]').disabled, 'pointer throw did not settle within the bounded wait');
       const afterCollision = [...doc.querySelectorAll('[data-curling-static-stone]')].map((element) => `${element.style.left}/${element.style.top}`);
       assert(afterCollision.some((position, index) => position !== beforeCollision[index]), 'pointer collision did not move any setup stone');
       assert($('[data-curling-score-prefix]').textContent === '投掷后比分：', 'normal-motion after score missing');
     }
-    click('[data-dialog-backdrop]');
-    clean();
+    } finally {
+      if (curlingOpened && !$('#exhibit-dialog').hidden) click('[data-dialog-backdrop]');
+      clean();
+    }
   });
   await check('beetle cap, dismissal and expiry cleanup', async () => {
     for (let i = 0; i < 8; i++) click('.favorite--chafer .favorite__action');

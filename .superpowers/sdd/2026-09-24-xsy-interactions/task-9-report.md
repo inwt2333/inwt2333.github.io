@@ -17,7 +17,7 @@ The initial focused run was RED as required:
 SyntaxError: The requested module '../xsy/interactions.mjs' does not provide an export named 'CURLING_SHEET_RATIO'
 ```
 
-After implementing the pure scoring/layout model, `node --test tests/xsy-interactions.test.mjs` passed 20/20. The final combined Node run passed 26/26.
+After implementing the pure scoring/layout model, `node --test tests/xsy-interactions.test.mjs` passed 20/20. The current combined Node run passes 33/33.
 
 The vertical/collision revision also followed RED→GREEN: missing collision and multi-stone-match exports caused the new focused tests to fail; the green model then proved input direction, collision momentum transfer, and settling of every stone.
 
@@ -27,11 +27,11 @@ Review fix round 1 also began with RED: missing `forceSettleCurlingMatch` stoppe
 
 ## Verification
 
-- `node --test tests/xsy.test.mjs tests/xsy-interactions.test.mjs` — 26 passed.
-- Desktop browser regression was rerun after the vertical revision. It found and helped fix a real size-source defect: the delivered stone still used its 24px CSS fallback while setup stones measured 15.52px. Both now read the same lane-level `--curling-stone-diameter`, assigned as soon as the lane is measured. During the review-fix run, Safari was navigated away by the user and no isolated IAB surface was available, so final 1440px normal and 390px reduced browser completion remains an explicit follow-up rather than a claimed pass.
+- `node --test tests/xsy.test.mjs tests/xsy-interactions.test.mjs` — 33 passed.
+- Browser evidence: controller verification completed 390px reduced motion at 7/7 passes. The initial 1440px normal failure was a harness timeout: its real PointerEvent branch polled only 5 seconds although app safety settlement may take 15 seconds. The harness now polls for 16 seconds and closes/cleans the curling dialog in `finally` on every outcome, preventing cascading checks. The final reruns could not be started here because Safari was under direct user interaction and no isolated IAB surface was available; rerun 1440px normal and 390px reduced to record the final post-fix result.
 - `git diff --check -- xsy tests docs/superpowers` — passed.
 - `python -m pytest -q` — known unrelated baseline failure: `tests/test_site.py::test_shared_site_styles_are_loaded_on_primary_pages` expects `assets/site.css` in a primary page. It is outside the xsy changes; 6 other Python tests passed.
 
 ## Self-review
 
-Checked mode changes reset timer/frame state through the existing dialog cleanup, count inputs clamp in the pure model, static setup stones do not participate in physics, and the horizontal letterbox sheet keeps its delivery/static stones inside the visible surface at mobile size.
+Checked mode changes reset timer/frame state through the existing dialog cleanup, count inputs clamp in the pure model, setup stones participate in the multi-body physics after contact, and the vertical game lane keeps delivery/setup stones inside the visible mobile surface.
