@@ -80,3 +80,9 @@ test('beetle slots enforce the global cap', () => {
   assert.equal(availableBeetleSlots(MAX_BEETLES - 2, 7), 2);
   assert.equal(availableBeetleSlots(MAX_BEETLES, 4), 0);
 });
+
+test('beetle slot calculation clamps invalid requests', () => {
+  assert.equal(availableBeetleSlots(-2, 4), 4);
+  assert.equal(availableBeetleSlots(0, 99), MAX_BEETLES);
+  assert.equal(availableBeetleSlots(MAX_BEETLES + 3, 2), 0);
+});

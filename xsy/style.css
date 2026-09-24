@@ -454,6 +454,52 @@ footer {
 .favorite--campus-bus.is-active .favorite__icon { animation: bus-pass 900ms ease; }
 .favorite--yorushika.is-active .favorite__icon { animation: deer-night 1.1s ease; }
 
+.flying-beetle {
+  position: absolute;
+  left: var(--beetle-start-x);
+  top: var(--beetle-start-y);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  padding: 0;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--acid);
+  font-size: 1.65rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: translate(-50%, -50%);
+  animation: beetle-flight var(--beetle-duration) var(--beetle-delay) ease-in-out forwards;
+}
+
+.flying-beetle:hover,
+.flying-beetle:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 2px;
+}
+
+.flying-beetle.is-dismissed {
+  color: var(--ink);
+  background: var(--pink);
+  animation: beetle-dismiss 260ms ease-out forwards;
+}
+
+.beetle-static {
+  position: absolute;
+  right: 20px;
+  top: 38%;
+  z-index: 3;
+  padding: 7px 10px;
+  border: 2px solid var(--ink);
+  background: var(--acid);
+  font-size: .9rem;
+  font-weight: 900;
+  animation: beetle-static 800ms ease-out forwards;
+}
+
 .runner-bug {
   position: absolute;
   left: -50px;
@@ -577,6 +623,27 @@ footer p { margin: 0; }
 
 @keyframes bug-run {
   to { left: calc(100% + 60px); transform: rotate(720deg); }
+}
+
+@keyframes beetle-flight {
+  0% {
+    left: var(--beetle-start-x);
+    top: var(--beetle-start-y);
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    left: var(--beetle-end-x);
+    top: var(--beetle-end-y);
+    transform: translate(-50%, -50%) rotate(var(--beetle-rotation));
+  }
+}
+
+@keyframes beetle-dismiss {
+  to { opacity: 0; transform: translate(-50%, -50%) scale(.4) rotate(180deg); }
+}
+
+@keyframes beetle-static {
+  100% { opacity: 0; transform: translateY(-8px); }
 }
 
 @media (max-width: 900px) {

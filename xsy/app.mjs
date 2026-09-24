@@ -1,4 +1,10 @@
-import { LYRIC_FRAGMENTS, nextIndex, nextNightState } from './interactions.mjs';
+import {
+  LYRIC_FRAGMENTS,
+  MAX_BEETLES,
+  availableBeetleSlots,
+  nextIndex,
+  nextNightState,
+} from './interactions.mjs';
 
 export const favorites = [
   {
@@ -297,6 +303,7 @@ export const interactionOutputs = {
 
 let activeDialog = null;
 let lyricIndex = 0;
+const beetleSwarmStates = new WeakMap();
 
 function dialogElements() {
   const dialog = document.querySelector('#exhibit-dialog');
@@ -468,16 +475,93 @@ function activateCard(card) {
     const button = card.querySelector('.favorite__action');
     setNightMode(document.body.classList.contains('night-shift'), button);
   }
-  if (effect === 'bug') spawnBug(card);
+  if (effect === 'bug') spawnBeetleSwarm(card);
 }
 
-function spawnBug(card) {
-  const bug = document.createElement('span');
-  bug.className = 'runner-bug';
-  bug.textContent = '🪲';
-  bug.setAttribute('aria-hidden', 'true');
-  card.append(bug);
-  bug.addEventListener('animationend', () => bug.remove(), { once: true });
+function prefersReducedMotion() {
+  return typeof window !== 'undefined'
+    && typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+export function cleanupBeetleSwarm(card) {
+  const state = beetleSwarmStates.get(card);
+  if (!state) return;
+  if (state.staticTimer) clearTimeout(state.staticTimer);
+  for (const { element, handler } of state.listeners) {
+    element.removeEventListener('animationend', handler);
+  }
+  for (const element of state.elements) element.remove();
+  beetleSwarmStates.delete(card);
+}
+
+function randomBetween(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+export function spawnBeetleSwarm(card) {
+  const reducedMotion = prefersReducedMotion();
+  let state = beetleSwarmStates.get(card);
+  if (reducedMotion) {
+    cleanupBeetleSwarm(card);
+    state = { elements: new Set(), listeners: [], staticTimer: null };
+    beetleSwarmStates.set(card, state);
+    const staticBeetle = document.createElement('span');
+    staticBeetle.className = 'beetle-static';
+    staticBeetle.setAttribute('role', 'status');
+    staticBeetle.textContent = '🪲 金龟子停在卡片里。';
+    card.append(staticBeetle);
+    state.elements.add(staticBeetle);
+    state.staticTimer = setTimeout(() => {
+      staticBeetle.remove();
+      state.elements.delete(staticBeetle);
+      state.staticTimer = null;
+    }, 800);
+    return;
+  }
+
+  if (!state) {
+    state = { elements: new Set(), listeners: [], staticTimer: null };
+    beetleSwarmStates.set(card, state);
+  }
+
+  const activeCount = card.querySelectorAll('.flying-beetle').length;
+  const requestedCount = 4 + Math.floor(Math.random() * 4);
+  const count = availableBeetleSlots(activeCount, Math.min(requestedCount, MAX_BEETLES));
+
+  for (let index = 0; index < count; index += 1) {
+    const beetle = document.createElement('button');
+    beetle.type = 'button';
+    beetle.className = 'flying-beetle';
+    beetle.setAttribute('aria-label', '驱赶金龟子');
+    beetle.textContent = '🪲';
+    beetle.style.setProperty('--beetle-start-x', `${randomBetween(8, 80)}%`);
+    beetle.style.setProperty('--beetle-start-y', `${randomBetween(16, 72)}%`);
+    beetle.style.setProperty('--beetle-end-x', `${randomBetween(8, 80)}%`);
+    beetle.style.setProperty('--beetle-end-y', `${randomBetween(16, 72)}%`);
+    beetle.style.setProperty('--beetle-duration', `${randomBetween(1.35, 2.45).toFixed(2)}s`);
+    beetle.style.setProperty('--beetle-delay', `${randomBetween(0, .24).toFixed(2)}s`);
+    beetle.style.setProperty('--beetle-rotation', `${Math.round(randomBetween(-540, 540))}deg`);
+
+    const remove = () => {
+      beetle.remove();
+      state.elements.delete(beetle);
+      state.listeners = state.listeners.filter((entry) => entry.element !== beetle);
+    };
+    const handleAnimationEnd = (event) => {
+      if (event.animationName === 'beetle-flight' || event.animationName === 'beetle-dismiss') remove();
+    };
+    beetle.addEventListener('animationend', handleAnimationEnd);
+    beetle.addEventListener('click', () => {
+      if (beetle.disabled) return;
+      beetle.disabled = true;
+      beetle.textContent = '啪';
+      beetle.classList.add('is-dismissed');
+    }, { once: true });
+    state.elements.add(beetle);
+    state.listeners.push({ element: beetle, handler: handleAnimationEnd });
+    card.append(beetle);
+  }
 }
 
 export function mountPage(root = document) {
