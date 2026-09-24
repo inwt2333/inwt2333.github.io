@@ -394,15 +394,18 @@ export function closeDialog({ restoreFocus = true } = {}) {
 
 export function setNightMode(isActive, button) {
   const state = nextNightState(isActive);
+  const closesLyrics = !state.active && activeDialog?.kind === 'lyrics';
   document.body.classList.toggle('night-shift', state.active);
   button.textContent = state.label;
   button.setAttribute('aria-pressed', state.ariaPressed);
+
+  if (closesLyrics) closeDialog({ restoreFocus: false });
 
   for (const lyricsButton of document.querySelectorAll('[data-extra-action="lyrics"]')) {
     lyricsButton.disabled = !state.active;
   }
 
-  if (!state.active && activeDialog?.kind === 'lyrics') closeDialog();
+  if (closesLyrics) button.focus();
 }
 
 export function openLyrics(trigger) {

@@ -470,17 +470,36 @@ footer {
   --blue: #9cceff;
   --acid: #d9ff43;
   background-color: var(--paper);
+  color: var(--ink);
 }
 
 .night-shift .cover::before { opacity: .16; }
 .night-shift .cover h1 mark { color: #101936; }
 .night-shift .cover__issue { color: #101936; background: var(--acid); }
+.night-shift .cover__tape,
+.night-shift footer { color: #101936; }
+.night-shift .favorite { --card-color: #1b2a56; }
+.night-shift .favorite:nth-child(2),
+.night-shift .favorite:nth-child(8) { --card-color: #29416d; }
+.night-shift .favorite:nth-child(3),
+.night-shift .favorite:nth-child(7) { --card-color: #243a68; }
+.night-shift .favorite:nth-child(4) { --card-color: #3a315d; }
+.night-shift .favorite:nth-child(6) { --card-color: #3a4558; }
 .night-shift .favorite:nth-child(9) { --card-color: #263a72; }
 .night-shift .favorite__icon { color: #111; }
 .favorite__extra:disabled {
   cursor: not-allowed;
   opacity: .52;
   box-shadow: none;
+}
+.night-shift .favorite__extra:hover,
+.night-shift .favorite__extra:focus-visible,
+.night-shift .favorite__action:hover,
+.night-shift .favorite__action:focus-visible,
+.night-shift .exhibit-dialog__close:hover,
+.night-shift .exhibit-dialog__close:focus-visible {
+  color: #101936;
+  background: var(--acid);
 }
 .night-shift .favorite:nth-child(9) .favorite__action:hover,
 .night-shift .favorite:nth-child(9) .favorite__action:focus-visible {
