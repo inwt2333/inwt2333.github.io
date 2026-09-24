@@ -199,7 +199,14 @@ async function run(width, reduced) {
       assert($('[data-curling-score-prefix]').textContent === '投掷后比分：', 'normal-motion after score missing');
     }
     } finally {
-      if (curlingOpened && !$('#exhibit-dialog').hidden) click('[data-dialog-backdrop]');
+      const dialog = $('#exhibit-dialog');
+      if (curlingOpened && (win.qaResources.keyListeners.size > 0
+        || !dialog.hidden || dialog.querySelector('[data-curling-lane]'))) {
+        click('[data-dialog-close]');
+      }
+      assert(!curlingOpened || dialog.hidden, 'curling dialog remained open after cleanup');
+      assert(!curlingOpened || win.qaResources.keyListeners.size === 0,
+        `curling cleanup retained keydown listeners (${win.qaResources.keyListeners.size})`);
       clean();
     }
   });
