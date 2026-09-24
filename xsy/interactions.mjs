@@ -83,7 +83,9 @@ export function scoreCurlingEnd(stones) {
     }))
     .sort((left, right) => left.distance - right.distance);
 
-  if (!inHouse.length || (inHouse[1] && inHouse[0].distance === inHouse[1].distance)) {
+  if (!inHouse.length || (inHouse[1]
+    && inHouse[0].team !== inHouse[1].team
+    && inHouse[0].distance === inHouse[1].distance)) {
     return { red: 0, blue: 0, scoringTeam: null, points: 0 };
   }
 
@@ -127,44 +129,58 @@ export function createCurlingSetup({ redCount = 0, blueCount = 0, random = Math.
   return stones;
 }
 
-export function resolveCurlingStoneCollisions(delivered, stones) {
-  const nextDelivered = { ...delivered, velocity: { ...delivered.velocity } };
-  const nextStones = stones.map((stone) => ({ ...stone, velocity: { ...stone.velocity } }));
+export function resolveCurlingStoneCollisions(delivered, stones, bounds = null) {
+  const allStones = [
+    { ...delivered, velocity: { ...delivered.velocity } },
+    ...stones.map((stone) => ({ ...stone, velocity: { ...stone.velocity } })),
+  ];
+  const minimumDistance = CURLING_STONE_RADIUS * 2;
+  const clamp = (stone) => {
+    if (!bounds) return;
+    stone.x = Math.max(bounds.radius, Math.min(bounds.width - bounds.radius, stone.x));
+    stone.y = Math.max(bounds.radius, Math.min(bounds.height - bounds.radius, stone.y));
+  };
 
-  for (const stone of nextStones) {
-    const dx = nextDelivered.x - stone.x;
-    const dy = nextDelivered.y - stone.y;
-    const distance = Math.hypot(dx, dy);
-    const minimumDistance = CURLING_STONE_RADIUS * 2;
-    if (distance >= minimumDistance) continue;
-
-    const normal = distance > 0 ? { x: dx / distance, y: dy / distance } : { x: 0, y: 1 };
-    const overlap = minimumDistance - distance;
-    nextDelivered.x += normal.x * overlap / 2;
-    nextDelivered.y += normal.y * overlap / 2;
-    stone.x -= normal.x * overlap / 2;
-    stone.y -= normal.y * overlap / 2;
-
-    const relativeVelocity = {
-      x: nextDelivered.velocity.x - stone.velocity.x,
-      y: nextDelivered.velocity.y - stone.velocity.y,
-    };
-    const approachSpeed = relativeVelocity.x * normal.x + relativeVelocity.y * normal.y;
-    if (approachSpeed < 0) {
-      nextDelivered.velocity.x -= approachSpeed * normal.x;
-      nextDelivered.velocity.y -= approachSpeed * normal.y;
-      stone.velocity.x += approachSpeed * normal.x;
-      stone.velocity.y += approachSpeed * normal.y;
+  for (let iteration = 0; iteration < allStones.length * 3; iteration += 1) {
+    let resolved = false;
+    for (let left = 0; left < allStones.length; left += 1) {
+      for (let right = left + 1; right < allStones.length; right += 1) {
+        const first = allStones[left];
+        const second = allStones[right];
+        const dx = first.x - second.x;
+        const dy = first.y - second.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance >= minimumDistance - 1e-9) continue;
+        const normal = distance > 1e-9 ? { x: dx / distance, y: dy / distance } : { x: 0, y: 1 };
+        const overlap = minimumDistance - distance;
+        first.x += normal.x * overlap / 2;
+        first.y += normal.y * overlap / 2;
+        second.x -= normal.x * overlap / 2;
+        second.y -= normal.y * overlap / 2;
+        clamp(first);
+        clamp(second);
+        const approachSpeed = (first.velocity.x - second.velocity.x) * normal.x
+          + (first.velocity.y - second.velocity.y) * normal.y;
+        if (approachSpeed < 0) {
+          first.velocity.x -= approachSpeed * normal.x;
+          first.velocity.y -= approachSpeed * normal.y;
+          second.velocity.x += approachSpeed * normal.x;
+          second.velocity.y += approachSpeed * normal.y;
+        }
+        resolved = true;
+      }
     }
+    if (!resolved) break;
   }
-  return { delivered: nextDelivered, stones: nextStones };
+  return { delivered: allStones[0], stones: allStones.slice(1) };
 }
 
 export function hasCurlingStoneOverlap(delivered, stones) {
-  return stones.some((stone) => Math.hypot(
-    delivered.x - stone.x,
-    delivered.y - stone.y,
-  ) < CURLING_STONE_RADIUS * 2 - 1e-9);
+  const allStones = [delivered, ...stones];
+  return allStones.some((stone, index) => allStones.slice(index + 1).some((other) => Math.hypot(
+    stone.x - other.x,
+    stone.y - other.y,
+  ) < CURLING_STONE_RADIUS * 2 - 1e-9));
 }
 
 export function curlingResult(score) {
@@ -232,7 +248,7 @@ export function advanceCurlingThrow(state, bounds) {
 }
 
 export function advanceCurlingMatch(state, bounds) {
-  const initialCollision = resolveCurlingStoneCollisions(state.delivered, state.stones);
+  const initialCollision = resolveCurlingStoneCollisions(state.delivered, state.stones, bounds);
   const deliveredPhysics = advanceCurlingPhysics(
     initialCollision.delivered,
     initialCollision.delivered.velocity,
@@ -251,6 +267,7 @@ export function advanceCurlingMatch(state, bounds) {
   const collision = resolveCurlingStoneCollisions(
     { ...initialCollision.delivered, ...deliveredPhysics.position, velocity: deliveredPhysics.velocity },
     movedStones,
+    bounds,
   );
   const allStones = [collision.delivered, ...collision.stones];
   return {
@@ -274,7 +291,16 @@ export function settleCurlingMatch(state, bounds, maxSteps) {
     next = advanceCurlingMatch(next, bounds);
     if (next.finished) return next;
   }
-  return { ...next, finished: true };
+  return { ...next, finished: false };
+}
+
+export function forceSettleCurlingMatch(state, bounds) {
+  const stopped = {
+    delivered: { ...state.delivered, velocity: { x: 0, y: 0 } },
+    stones: state.stones.map((stone) => ({ ...stone, velocity: { x: 0, y: 0 } })),
+  };
+  const separated = resolveCurlingStoneCollisions(stopped.delivered, stopped.stones, bounds);
+  return { ...separated, finished: !hasCurlingStoneOverlap(separated.delivered, separated.stones) };
 }
 
 export function pointerCurlingVelocity(stone, pull) {

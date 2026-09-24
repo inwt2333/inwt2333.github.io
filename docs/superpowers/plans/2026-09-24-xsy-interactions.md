@@ -519,7 +519,7 @@ Expected: FAIL because match scoring/layout exports do not exist.
 
 - [ ] **Step 3: Implement match mode and peach target**
 
-Add “练习模式 / 比分模式” controls. In score mode, let the user set existing red stones from 0–7 and blue stones from 0–8, regenerate a collision-free setup, show the score before the throw, and add the delivered red stone to compute the score after it settles. Existing setup stones remain static in this scoring-focused mode. Keep practice score/copy unchanged.
+Add “练习模式 / 比分模式” controls. In score mode, let the user set existing red stones from 0–7 and blue stones from 0–8, regenerate a collision-free setup, show the score before the throw, and add the delivered red stone to compute the score after the full multi-stone simulation settles. Existing setup stones begin at rest but move after collisions. Keep practice score/copy unchanged.
 
 Render the sheet using one fixed logical coordinate system and scale it uniformly. Keep the house, stones, pointer coordinate conversion, and keyboard velocity in that coordinate system. Move the delivery origin far enough above the lower boundary to allow a useful pull range. Replace the slap target's CSS-drawn symbol with the literal peach emoji `🍑` and remove obsolete pseudo-element drawing.
 

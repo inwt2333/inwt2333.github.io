@@ -159,8 +159,8 @@ async function run(width, reduced) {
     const beforeCollision = [...doc.querySelectorAll('[data-curling-static-stone]')].map((element) => `${element.style.left}/${element.style.top}`);
     assert(beforeCollision.length === 15, 're-layout did not provide collision stones');
     $('[data-curling-strength]').value = '100';
-    click('[data-curling-launch]');
     if (reduced) {
+      click('[data-curling-launch]');
       assert(!$('[data-curling-reset]').disabled, 'reduced throw did not settle immediately');
       const afterCollision = [...doc.querySelectorAll('[data-curling-static-stone]')].map((element) => `${element.style.left}/${element.style.top}`);
       assert(afterCollision.some((position, index) => position !== beforeCollision[index]), 'collision did not move any setup stone');
@@ -174,6 +174,26 @@ async function run(width, reduced) {
       assert($('[data-curling-score-prefix]').textContent === '投掷后比分：', 'after score missing');
       click('[data-curling-reset]');
       assert($('[data-curling-score-prefix]').textContent === '投掷前比分：', 'reset score');
+    } else {
+      const launchPoint = { x: laneRect.left + laneRect.width / 2, y: stoneRect.top + stoneRect.height / 2 };
+      const pullPoint = { x: launchPoint.x + laneRect.width * .08, y: laneRect.bottom - stoneRect.height };
+      const pointer = (type, point) => lane.dispatchEvent(new win.PointerEvent(type, {
+        bubbles: true,
+        button: 0,
+        buttons: type === 'pointerup' ? 0 : 1,
+        pointerId: 71,
+        pointerType: 'mouse',
+        clientX: point.x,
+        clientY: point.y,
+      }));
+      pointer('pointerdown', launchPoint);
+      pointer('pointermove', pullPoint);
+      pointer('pointerup', pullPoint);
+      for (let elapsed = 0; elapsed < 5_000 && $('[data-curling-reset]').disabled; elapsed += 50) await wait(50);
+      assert(!$('[data-curling-reset]').disabled, 'pointer throw did not settle within the bounded wait');
+      const afterCollision = [...doc.querySelectorAll('[data-curling-static-stone]')].map((element) => `${element.style.left}/${element.style.top}`);
+      assert(afterCollision.some((position, index) => position !== beforeCollision[index]), 'pointer collision did not move any setup stone');
+      assert($('[data-curling-score-prefix]').textContent === '投掷后比分：', 'normal-motion after score missing');
     }
     click('[data-dialog-backdrop]');
     clean();

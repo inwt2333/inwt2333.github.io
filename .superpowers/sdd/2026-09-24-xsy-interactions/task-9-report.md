@@ -23,10 +23,12 @@ The vertical/collision revision also followed RED→GREEN: missing collision and
 
 The follow-up all-stones-settle test was RED because `advanceCurlingMatch` was missing. Its GREEN model advances the delivered and setup stones together, resolves collision before and after motion, and reports finished only when every velocity is below the shared stop threshold and no overlap remains. The application uses that model for normal animation and reduced motion; its 15-second safety boundary settles the full match before it scores.
 
+Review fix round 1 also began with RED: missing `forceSettleCurlingMatch` stopped the focused suite. The green revision resolves every unordered stone pair iteratively (including setup-to-setup chains), only blanks a closest-distance tie when the tied stones are opposing teams, and returns the actual unfinished state at a capped settle. The explicit safety settle zeroes every velocity and separates all pairs before it reports completion. Browser coverage now dispatches an actual PointerEvent pull for normal motion and waits with a bounded poll for the after-score/collision result; reduced motion retains the full-settle assertions.
+
 ## Verification
 
 - `node --test tests/xsy.test.mjs tests/xsy-interactions.test.mjs` — 26 passed.
-- Desktop browser regression was rerun after the vertical revision. It found and helped fix a real size-source defect: the delivered stone still used its 24px CSS fallback while setup stones measured 15.52px. Both now read the same lane-level `--curling-stone-diameter`, assigned as soon as the lane is measured. A final isolated IAB run was unavailable in this environment and the final Safari reload had not completed before handoff; rerun 1440px normal and 390px reduced motion in the browser harness to close this remaining UI verification gap.
+- Desktop browser regression was rerun after the vertical revision. It found and helped fix a real size-source defect: the delivered stone still used its 24px CSS fallback while setup stones measured 15.52px. Both now read the same lane-level `--curling-stone-diameter`, assigned as soon as the lane is measured. During the review-fix run, Safari was navigated away by the user and no isolated IAB surface was available, so final 1440px normal and 390px reduced browser completion remains an explicit follow-up rather than a claimed pass.
 - `git diff --check -- xsy tests docs/superpowers` — passed.
 - `python -m pytest -q` — known unrelated baseline failure: `tests/test_site.py::test_shared_site_styles_are_loaded_on_primary_pages` expects `assets/site.css` in a primary page. It is outside the xsy changes; 6 other Python tests passed.
 

@@ -8,6 +8,7 @@ import {
   availableBeetleSlots,
   createCurlingSetup,
   settleCurlingMatch,
+  forceSettleCurlingMatch,
   scoreCurlingEnd,
   curlingResult,
   nextIndex,
@@ -716,10 +717,17 @@ export function openCurlingGame(trigger) {
       };
 
       const settleMatch = () => {
-        const settled = settleCurlingMatch({
+        let settled = settleCurlingMatch({
           delivered: { team: 'red', ...position, velocity },
           stones: setupStones,
         }, { width: CURLING_GAME_LANE_WIDTH, height: CURLING_GAME_LANE_HEIGHT, radius: CURLING_STONE_RADIUS }, CURLING_MAX_STEPS);
+        if (!settled.finished) {
+          settled = forceSettleCurlingMatch(settled, {
+            width: CURLING_GAME_LANE_WIDTH,
+            height: CURLING_GAME_LANE_HEIGHT,
+            radius: CURLING_STONE_RADIUS,
+          });
+        }
         position = { x: settled.delivered.x, y: settled.delivered.y };
         velocity = settled.delivered.velocity;
         setupStones = settled.stones;

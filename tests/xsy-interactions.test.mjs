@@ -20,6 +20,8 @@ import {
   curlingLaneGeometry,
   clampCurlingSetupCounts,
   createCurlingSetup,
+  forceSettleCurlingMatch,
+  hasCurlingStoneOverlap,
   resolveCurlingStoneCollisions,
   settleCurlingMatch,
   scoreCurlingEnd,
@@ -131,6 +133,25 @@ test('curling collision gives a front stone momentum and separates equal stones'
   ) >= CURLING_STONE_RADIUS * 2);
 });
 
+test('curling collision resolves an overlapping moving setup-stone pair', () => {
+  // A regression that checks only delivered-to-setup pairs would leave this chain overlapped and idle.
+  const result = resolveCurlingStoneCollisions(
+    { team: 'red', x: 1.5, y: 3.5, velocity: { x: 0, y: 0 } },
+    [
+      { team: 'blue', x: 1.5, y: 1.5, velocity: { x: 0, y: 0 } },
+      { team: 'red', x: 1.5, y: 1.68, velocity: { x: 0, y: -0.3 } },
+    ],
+    { width: 3, height: 5, radius: CURLING_STONE_RADIUS },
+  );
+  const next = advanceCurlingMatch({ delivered: result.delivered, stones: result.stones }, {
+    width: 3, height: 5, radius: CURLING_STONE_RADIUS,
+  });
+
+  assert.equal(hasCurlingStoneOverlap(result.delivered, result.stones), false);
+  assert.ok(result.stones.some((stone) => Math.hypot(stone.velocity.x, stone.velocity.y) > CURLING_STOP_SPEED));
+  assert.equal(next.finished, false);
+});
+
 test('a curling round stays active while a struck setup stone is still moving', () => {
   // A regression that ends based only on the delivered stone or a wall-clock cutoff would break this.
   const next = advanceCurlingMatch({
@@ -155,6 +176,24 @@ test('settling a curling match stops and separates every moving stone', () => {
     settled.delivered.x - settled.stones[0].x,
     settled.delivered.y - settled.stones[0].y,
   ) >= CURLING_STONE_RADIUS * 2);
+});
+
+test('a capped match settle reports unfinished until safety settling stops every stone', () => {
+  // A regression that reports finished after maxSteps without settling physics would break this.
+  const startingMatch = {
+    delivered: { team: 'red', x: 1.5, y: 2.08, velocity: { x: 0, y: -0.4 } },
+    stones: [{ team: 'blue', x: 1.5, y: 1.88, velocity: { x: 0, y: 0 } }],
+  };
+  const bounds = { width: 3, height: 5, radius: CURLING_STONE_RADIUS };
+  const capped = settleCurlingMatch(startingMatch, bounds, 0);
+  const forced = forceSettleCurlingMatch(capped, bounds);
+
+  assert.equal(capped.finished, false);
+  assert.ok([forced.delivered, ...forced.stones].every(
+    (stone) => Math.hypot(stone.velocity.x, stone.velocity.y) < CURLING_STOP_SPEED,
+  ));
+  assert.equal(hasCurlingStoneOverlap(forced.delivered, forced.stones), false);
+  assert.equal(forced.finished, true);
 });
 
 test('curling ring ratios match score boundaries', () => {
@@ -199,6 +238,20 @@ test('curling match scoring awards every closer red stone before blue', () => {
   });
 });
 
+test('curling match scoring awards equal closest stones from the same team', () => {
+  // A regression that treats every nearest-distance tie as a blank end would break this.
+  assert.deepEqual(scoreCurlingEnd([
+    { team: 'red', x: 1.5, y: 1.1 },
+    { team: 'red', x: 1.5, y: 1.1 },
+    { team: 'blue', x: 1.85, y: 1.1 },
+  ]), {
+    red: 2,
+    blue: 0,
+    scoringTeam: 'red',
+    points: 2,
+  });
+});
+
 test('curling match scoring excludes outside stones and stops at the opponent', () => {
   // A regression that counts out-of-house stones or stones beyond the closest opponent would break this.
   assert.deepEqual(scoreCurlingEnd([
@@ -228,7 +281,7 @@ test('curling match layout clamps setup counts and creates a deterministic legal
   assert.ok(first.every((stone) => stone.y >= 0.5 && stone.y <= 2.2), 'setup escaped the house and guard area');
   for (let left = 0; left < first.length; left += 1) {
     for (let right = left + 1; right < first.length; right += 1) {
-      assert.ok(Math.hypot(first[left].x - first[right].x, first[left].y - first[right].y) >= 0.07);
+      assert.ok(Math.hypot(first[left].x - first[right].x, first[left].y - first[right].y) >= CURLING_STONE_RADIUS * 2);
     }
   }
 });
