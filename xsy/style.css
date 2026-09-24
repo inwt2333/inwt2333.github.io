@@ -753,14 +753,167 @@ footer {
 .curling-game__launch:disabled,
 .curling-game__reset:disabled { cursor: not-allowed; opacity: .5; box-shadow: none; }
 
+.slap-game__instructions {
+  margin: 0 0 18px;
+  line-height: 1.6;
+}
+
+.slap-game__readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-bottom: 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.slap-game__readout strong { color: var(--red); font-size: 1rem; }
+
+.slap-game__arena {
+  position: relative;
+  min-height: 290px;
+  overflow: hidden;
+  border: var(--line);
+  background:
+    linear-gradient(135deg, rgba(255, 143, 199, .32), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(17, 17, 17, .08) 0 1px, transparent 1px 24px),
+    white;
+  cursor: crosshair;
+  isolation: isolate;
+}
+
+.slap-game__arena:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+
+.slap-game__target {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 55%;
+  display: grid;
+  place-items: center;
+  width: min(112px, 28%);
+  min-width: 78px;
+  aspect-ratio: 1 / .84;
+  padding: 0;
+  border: 0;
+  border-radius: 48% 52% 45% 46%;
+  background: transparent;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: left 180ms ease-out, top 180ms ease-out;
+}
+
+.slap-game__target:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.slap-game__target:disabled { cursor: not-allowed; opacity: .42; }
+
+.slap-game__peach {
+  position: relative;
+  display: block;
+  width: 82%;
+  height: 82%;
+  border: 3px solid var(--ink);
+  border-radius: 50% 50% 47% 47%;
+  background: #ff8fc7;
+  box-shadow: 4px 4px 0 var(--ink);
+  transform: rotate(-5deg);
+}
+
+.slap-game__peach::before,
+.slap-game__peach::after {
+  content: '';
+  position: absolute;
+  top: 12%;
+  width: 52%;
+  height: 76%;
+  border: 3px solid var(--ink);
+  background: #ffb1d6;
+}
+
+.slap-game__peach::before {
+  left: -12%;
+  border-radius: 55% 45% 50% 48%;
+}
+
+.slap-game__peach::after {
+  right: -12%;
+  border-radius: 45% 55% 48% 50%;
+}
+
+.slap-game__target:active .slap-game__peach { transform: rotate(-5deg) scale(.86); }
+
+.slap-game__marker {
+  position: absolute;
+  z-index: 2;
+  color: var(--red);
+  font-size: 2.3rem;
+  font-weight: 900;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: slap-marker 480ms ease-out forwards;
+}
+
+.slap-game__status,
+.slap-game__finish p {
+  min-height: 1.6em;
+  margin: 14px 0 0;
+  font-weight: 700;
+}
+
+.slap-game__finish p { color: var(--red); font-size: 1.1rem; font-weight: 900; }
+
+.slap-game__restart {
+  min-height: 42px;
+  margin-top: 4px;
+  padding: 8px 14px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+  color: inherit;
+  background: var(--acid);
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 currentColor;
+}
+
+.slap-game__restart:hover,
+.slap-game__restart:focus-visible {
+  color: var(--paper);
+  background: var(--ink);
+  outline: 0;
+}
+
+.slap-game__restart:active { transform: translate(3px, 3px); box-shadow: none; }
+
+.slap-game__arena.is-hit { animation: slap-arena-shake 190ms ease-in-out; }
+
+@keyframes slap-marker {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(.75); }
+  to { opacity: 0; transform: translate(-50%, calc(-50% - 32px)) scale(1.18); }
+}
+
+@keyframes slap-arena-shake {
+  0%, 100% { transform: translateX(0); }
+  30% { transform: translateX(-5px); }
+  70% { transform: translateX(5px); }
+}
+
 @media (max-width: 620px) {
   .curling-game__controls { grid-template-columns: 1fr 1fr; }
   .curling-game__launch,
   .curling-game__reset { width: 100%; }
+  .slap-game__arena { min-height: 250px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .curling-game__lane { scroll-behavior: auto; }
+  .slap-game__arena.is-hit { animation: none; }
 }
 
 footer {

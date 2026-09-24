@@ -20,6 +20,7 @@ import {
   registerSlapHit,
   registerSlapMiss,
   scoreCurling,
+  slapTitle,
 } from '../xsy/interactions.mjs';
 
 test('night state returns the next label and aria state', () => {
@@ -150,6 +151,18 @@ test('finishing a slap game preserves the score state', () => {
     ...state,
     finished: true,
   });
+});
+
+test('slap combo and title reflect successful hits', () => {
+  let state = createSlapGame(10_000, 0);
+  state = registerSlapHit(state, 100);
+  state = registerSlapHit(state, 200);
+
+  assert.equal(state.score, 2);
+  assert.equal(state.combo, 2);
+  assert.equal(slapTitle(0), '文明观众');
+  assert.equal(slapTitle(8), '掌声雷动');
+  assert.equal(slapTitle(20), '镇馆之手');
 });
 
 test('beetle slots enforce the global cap', () => {

@@ -9,8 +9,13 @@ import {
   nextNightState,
   keyboardCurlingVelocity,
   pointerCurlingVelocity,
+  createSlapGame,
+  finishSlapGame,
+  registerSlapHit,
+  registerSlapMiss,
   scoreCurling,
   settleCurlingThrow,
+  slapTitle,
 } from './interactions.mjs';
 
 export const favorites = [
@@ -798,6 +803,200 @@ export function openCurlingGame(trigger) {
   });
 }
 
+const SLAP_GAME_DURATION = 10_000;
+
+export function openSlapGame(trigger) {
+  openDialog({
+    title: '打屁股 · 十秒钟拍手训练',
+    kind: 'slap',
+    trigger,
+    render(content) {
+      content.innerHTML = `
+        <div class="slap-game" data-slap-game>
+          <p class="slap-game__instructions">点按抽象桃子开始。命中加分和连击，点空白处只会清空连击。</p>
+          <div class="slap-game__readout" aria-live="polite">
+            <span>剩余 <strong data-slap-countdown>10.0</strong> 秒</span>
+            <span>得分 <strong data-slap-score>0</strong></span>
+            <span>连击 <strong data-slap-combo>0</strong></span>
+          </div>
+          <div class="slap-game__arena" data-slap-arena tabindex="0" role="region" aria-label="抽象桃子拍击区域，按 Enter 或空格可判定未命中">
+            <button class="slap-game__target" data-slap-target type="button" aria-label="抽象桃子目标"><span class="slap-game__peach" aria-hidden="true"></span></button>
+          </div>
+          <p class="slap-game__status" data-slap-status aria-live="polite">点击桃子开始，键盘可聚焦目标后按 Enter 或空格。</p>
+          <div class="slap-game__finish" data-slap-finish hidden>
+            <p data-slap-result aria-live="assertive"></p>
+            <button class="slap-game__restart" data-slap-restart type="button">再来一局</button>
+          </div>
+        </div>`;
+
+      const arena = content.querySelector('[data-slap-arena]');
+      const target = content.querySelector('[data-slap-target]');
+      const countdown = content.querySelector('[data-slap-countdown]');
+      const score = content.querySelector('[data-slap-score]');
+      const combo = content.querySelector('[data-slap-combo]');
+      const status = content.querySelector('[data-slap-status]');
+      const finish = content.querySelector('[data-slap-finish]');
+      const result = content.querySelector('[data-slap-result]');
+      const restart = content.querySelector('[data-slap-restart]');
+      const reducedMotion = prefersReducedMotion();
+      let gameState = null;
+      let countdownInterval = null;
+      let closed = false;
+
+      const clearCountdown = () => {
+        if (countdownInterval !== null) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+        }
+      };
+
+      const displayRemaining = (now) => {
+        if (!gameState) return SLAP_GAME_DURATION;
+        return Math.max(0, gameState.endsAt - now);
+      };
+
+      const refreshReadout = (now = performance.now()) => {
+        countdown.textContent = (displayRemaining(now) / 1000).toFixed(1);
+        score.textContent = String(gameState?.score ?? 0);
+        combo.textContent = String(gameState?.combo ?? 0);
+      };
+
+      const finishRound = (now = performance.now()) => {
+        if (!gameState || closed) return;
+        gameState = finishSlapGame(gameState, now);
+        if (!gameState.finished) return;
+        clearCountdown();
+        refreshReadout(now);
+        target.disabled = true;
+        arena.classList.remove('is-hit');
+        status.textContent = '时间到，桃子已撤离。';
+        result.textContent = `${slapTitle(gameState.score)} · 本局 ${gameState.score} 分，最高连击 ${gameState.bestCombo}。`;
+        finish.hidden = false;
+        restart.focus();
+      };
+
+      const tick = () => {
+        if (closed || !gameState) return;
+        const now = performance.now();
+        gameState = finishSlapGame(gameState, now);
+        refreshReadout(now);
+        if (gameState.finished) finishRound(now);
+      };
+
+      const startRound = (now) => {
+        if (gameState) return;
+        gameState = createSlapGame(SLAP_GAME_DURATION, now);
+        countdownInterval = setInterval(tick, 100);
+      };
+
+      const moveTarget = () => {
+        const targetWidth = target.offsetWidth || 96;
+        const targetHeight = target.offsetHeight || 88;
+        const halfWidth = targetWidth / 2;
+        const halfHeight = targetHeight / 2;
+        const minLeft = (halfWidth / arena.clientWidth) * 100;
+        const maxLeft = 100 - minLeft;
+        const minTop = (halfHeight / arena.clientHeight) * 100;
+        const maxTop = 100 - minTop;
+        const left = minLeft + Math.random() * Math.max(0, maxLeft - minLeft);
+        const top = minTop + Math.random() * Math.max(0, maxTop - minTop);
+        target.style.left = `${left}%`;
+        target.style.top = `${top}%`;
+      };
+
+      const addMarker = () => {
+        const marker = document.createElement('span');
+        marker.className = 'slap-game__marker';
+        marker.setAttribute('aria-hidden', 'true');
+        marker.textContent = '啪';
+        marker.style.left = target.style.left;
+        marker.style.top = target.style.top;
+        marker.addEventListener('animationend', () => marker.remove(), { once: true });
+        arena.append(marker);
+      };
+
+      const registerHit = () => {
+        const now = performance.now();
+        startRound(now);
+        gameState = registerSlapHit(gameState, now);
+        if (gameState.finished) {
+          finishRound(now);
+          return;
+        }
+        refreshReadout(now);
+        status.textContent = `命中！${gameState.combo} 连击`;
+        addMarker();
+        if (!reducedMotion) {
+          arena.classList.remove('is-hit');
+          void arena.offsetWidth;
+          arena.classList.add('is-hit');
+        }
+        moveTarget();
+      };
+
+      const registerMiss = () => {
+        if (!gameState || gameState.finished) return;
+        const now = performance.now();
+        gameState = registerSlapMiss(gameState, now);
+        if (gameState.finished) {
+          finishRound(now);
+          return;
+        }
+        refreshReadout(now);
+        status.textContent = '扑空了，分数不变，连击归零。';
+      };
+
+      const restartRound = () => {
+        clearCountdown();
+        gameState = null;
+        target.disabled = false;
+        target.style.left = '50%';
+        target.style.top = '55%';
+        arena.classList.remove('is-hit');
+        finish.hidden = true;
+        result.textContent = '';
+        status.textContent = '点击桃子开始，键盘可聚焦目标后按 Enter 或空格。';
+        refreshReadout();
+        target.focus();
+      };
+
+      const onTargetClick = (event) => {
+        event.stopPropagation();
+        registerHit();
+      };
+      const onArenaClick = (event) => {
+        if (event.target === arena) registerMiss();
+      };
+      const onArenaKeydown = (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          registerMiss();
+        }
+      };
+      const onArenaAnimationEnd = (event) => {
+        if (event.animationName === 'slap-arena-shake') arena.classList.remove('is-hit');
+      };
+
+      target.addEventListener('click', onTargetClick);
+      arena.addEventListener('click', onArenaClick);
+      arena.addEventListener('keydown', onArenaKeydown);
+      arena.addEventListener('animationend', onArenaAnimationEnd);
+      restart.addEventListener('click', restartRound);
+      restartRound();
+
+      return () => {
+        closed = true;
+        clearCountdown();
+        target.removeEventListener('click', onTargetClick);
+        arena.removeEventListener('click', onArenaClick);
+        arena.removeEventListener('keydown', onArenaKeydown);
+        arena.removeEventListener('animationend', onArenaAnimationEnd);
+        restart.removeEventListener('click', restartRound);
+      };
+    },
+  });
+}
+
 function activateCard(card) {
   const effect = card.dataset.effect;
   const choices = interactionOutputs[effect] ?? ['已收藏。'];
@@ -925,6 +1124,7 @@ export function mountPage(root = document) {
     const extra = event.target.closest('[data-extra-action]');
     if (extra?.dataset.extraAction === 'lyrics' && !extra.disabled) openLyrics(extra);
     if (extra?.dataset.extraAction === 'curling') openCurlingGame(extra);
+    if (extra?.dataset.extraAction === 'slap') openSlapGame(extra);
   });
 }
 

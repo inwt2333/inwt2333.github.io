@@ -184,6 +184,12 @@ export function registerSlapMiss(state, now) {
   return { ...state, combo: 0 };
 }
 
+export function slapTitle(score) {
+  if (score >= 20) return '镇馆之手';
+  if (score >= 8) return '掌声雷动';
+  return '文明观众';
+}
+
 export function availableBeetleSlots(activeCount, requestedCount) {
   return Math.max(0, Math.min(requestedCount, MAX_BEETLES - activeCount));
 }
