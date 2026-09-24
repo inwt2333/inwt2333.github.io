@@ -586,6 +586,172 @@ footer {
 .lyrics__next:focus-visible { color: var(--paper); background: var(--ink); outline: 0; }
 .lyrics__next:active { transform: translate(3px, 3px); box-shadow: none; }
 
+.curling-game__instructions {
+  margin: 0 0 18px;
+  line-height: 1.6;
+}
+
+.curling-game__lane {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  background:
+    linear-gradient(90deg, transparent 49.7%, rgba(17, 17, 17, .12) 49.7%, rgba(17, 17, 17, .12) 50.3%, transparent 50.3%),
+    #d9f0f3;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.curling-game__lane:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+
+.curling-house {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  width: 28%;
+  aspect-ratio: 1;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: #f7fbfa;
+  transform: translate(-50%, -50%);
+}
+
+.curling-house::before,
+.curling-house::after,
+.curling-house span {
+  content: '';
+  position: absolute;
+  inset: 15%;
+  border: 2px solid var(--blue);
+  border-radius: 50%;
+}
+
+.curling-house::after {
+  inset: 30%;
+  border-color: var(--red);
+}
+
+.curling-house span {
+  inset: 45%;
+  border: 0;
+  background: var(--red);
+}
+
+.curling-stone {
+  position: absolute;
+  left: 50%;
+  top: 84%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  font-size: 1.45rem;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  user-select: none;
+}
+
+.curling-aim {
+  position: absolute;
+  z-index: 1;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--red);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.curling-game__readout {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.curling-game__result {
+  min-height: 1.6em;
+  margin: 12px 0 0;
+  color: var(--red);
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.curling-game__controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+  align-items: end;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.curling-game__controls label {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 7px;
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.curling-game__controls input { min-width: 0; accent-color: var(--red); }
+
+.curling-game__controls output {
+  min-width: 2.4em;
+  text-align: right;
+  font-family: 'Space Mono', monospace;
+}
+
+.curling-game__launch,
+.curling-game__reset {
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+  color: inherit;
+  background: transparent;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 currentColor;
+  white-space: nowrap;
+}
+
+.curling-game__launch:hover,
+.curling-game__launch:focus-visible,
+.curling-game__reset:hover,
+.curling-game__reset:focus-visible {
+  color: var(--paper);
+  background: var(--ink);
+  outline: 0;
+}
+
+.curling-game__launch:active,
+.curling-game__reset:active { transform: translate(3px, 3px); box-shadow: none; }
+
+.curling-game__launch:disabled,
+.curling-game__reset:disabled { cursor: not-allowed; opacity: .5; box-shadow: none; }
+
+@media (max-width: 620px) {
+  .curling-game__controls { grid-template-columns: 1fr 1fr; }
+  .curling-game__launch,
+  .curling-game__reset { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .curling-game__lane { scroll-behavior: auto; }
+}
+
 footer {
   display: flex;
   justify-content: space-between;

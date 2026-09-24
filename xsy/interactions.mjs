@@ -53,6 +53,15 @@ export function scoreCurling(distanceRatio) {
   return 0;
 }
 
+export function curlingResult(score) {
+  return {
+    3: '正中圆心，石头壶封神！',
+    2: '稳稳进营，塑料壶沉默了。',
+    1: '擦边得分，冰面替你圆场。',
+    0: '壶很自由，大本营很孤独。',
+  }[score] ?? '壶很自由，大本营很孤独。';
+}
+
 export function createSlapGame(durationMs, startedAt) {
   return {
     score: 0,

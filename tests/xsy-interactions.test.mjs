@@ -5,6 +5,7 @@ import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
   availableBeetleSlots,
+  curlingResult,
   createSlapGame,
   finishSlapGame,
   nextIndex,
@@ -47,6 +48,13 @@ test('curling score decreases across ring boundaries', () => {
   assert.equal(scoreCurling(0.33), 2);
   assert.equal(scoreCurling(0.66), 1);
   assert.equal(scoreCurling(1.01), 0);
+});
+
+test('curling result copy matches each score', () => {
+  assert.equal(curlingResult(3), '正中圆心，石头壶封神！');
+  assert.equal(curlingResult(2), '稳稳进营，塑料壶沉默了。');
+  assert.equal(curlingResult(1), '擦边得分，冰面替你圆场。');
+  assert.equal(curlingResult(0), '壶很自由，大本营很孤独。');
 });
 
 test('slap hits increase score and combo only before the deadline', () => {

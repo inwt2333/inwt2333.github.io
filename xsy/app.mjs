@@ -2,8 +2,10 @@ import {
   LYRIC_FRAGMENTS,
   MAX_BEETLES,
   availableBeetleSlots,
+  curlingResult,
   nextIndex,
   nextNightState,
+  scoreCurling,
 } from './interactions.mjs';
 
 export const favorites = [
@@ -461,6 +463,326 @@ export function openLyrics(trigger) {
   });
 }
 
+const CURLING_START_Y = 0.84;
+const CURLING_TARGET_Y = 0.22;
+const CURLING_HOUSE_RADIUS = 0.2;
+const CURLING_STONE_RADIUS = 18;
+const CURLING_FRICTION = 0.965;
+const CURLING_STOP_SPEED = 0.08;
+const CURLING_MAX_DURATION = 4000;
+
+function curlingFrame(callback) {
+  if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+    return { id: window.requestAnimationFrame(callback), native: true };
+  }
+  return { id: setTimeout(() => callback(Date.now()), 16), native: false };
+}
+
+function cancelCurlingFrame(frame) {
+  if (!frame) return;
+  if (frame.native && typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
+    window.cancelAnimationFrame(frame.id);
+  } else {
+    clearTimeout(frame.id);
+  }
+}
+
+export function openCurlingGame(trigger) {
+  openDialog({
+    title: '投一壶 · 石头壶训练场',
+    kind: 'curling',
+    trigger,
+    render(content) {
+      content.innerHTML = `
+        <div class="curling-game" data-curling-game>
+          <p class="curling-game__instructions">拖动冰壶向下蓄力，松开后让它滑向大本营。也可以用键盘设置方向和力度再投壶。</p>
+          <div class="curling-game__lane" data-curling-lane tabindex="0" role="application" aria-label="冰壶投掷冰道">
+            <div class="curling-house" data-curling-target aria-hidden="true"><span></span></div>
+            <div class="curling-aim" data-curling-aim aria-hidden="true"></div>
+            <div class="curling-stone" data-curling-stone aria-label="石头壶" role="img">🥌</div>
+          </div>
+          <div class="curling-game__readout" aria-live="polite">
+            <span>本轮得分：<strong data-curling-score>—</strong></span>
+            <span data-curling-status>准备投壶</span>
+          </div>
+          <p class="curling-game__result" data-curling-result aria-live="assertive"></p>
+          <div class="curling-game__controls">
+            <label>方向 <input data-curling-direction type="range" min="-80" max="80" value="0" step="1"><output data-curling-direction-value>0</output></label>
+            <label>力度 <input data-curling-strength type="range" min="25" max="100" value="72" step="1"><output data-curling-strength-value>72</output></label>
+            <button class="curling-game__launch" data-curling-launch type="button">投壶</button>
+            <button class="curling-game__reset" data-curling-reset type="button">再投一壶</button>
+          </div>
+        </div>`;
+
+      const lane = content.querySelector('[data-curling-lane]');
+      const stone = content.querySelector('[data-curling-stone]');
+      const aim = content.querySelector('[data-curling-aim]');
+      const score = content.querySelector('[data-curling-score]');
+      const result = content.querySelector('[data-curling-result]');
+      const status = content.querySelector('[data-curling-status]');
+      const launch = content.querySelector('[data-curling-launch]');
+      const reset = content.querySelector('[data-curling-reset]');
+      const direction = content.querySelector('[data-curling-direction]');
+      const strength = content.querySelector('[data-curling-strength]');
+      const directionValue = content.querySelector('[data-curling-direction-value]');
+      const strengthValue = content.querySelector('[data-curling-strength-value]');
+
+      let position = { x: 0, y: 0 };
+      let velocity = { x: 0, y: 0 };
+      let frame = null;
+      let startedAt = 0;
+      let pointerId = null;
+      let dragging = false;
+      let phase = 'idle';
+      let pullPoint = null;
+      let laneRect = null;
+      let curlDirection = 1;
+
+      const reducedMotion = prefersReducedMotion();
+
+      const laneMetrics = () => {
+        const rect = lane.getBoundingClientRect();
+        laneRect = rect;
+        return rect;
+      };
+
+      const updateStone = () => {
+        stone.style.left = `${position.x}px`;
+        stone.style.top = `${position.y}px`;
+      };
+
+      const resetPosition = () => {
+        const rect = laneMetrics();
+        position = { x: rect.width / 2, y: rect.height * CURLING_START_Y };
+        updateStone();
+        aim.hidden = true;
+      };
+
+      const updateAim = () => {
+        if (!pullPoint) {
+          aim.hidden = true;
+          return;
+        }
+        const dx = pullPoint.x - position.x;
+        const dy = pullPoint.y - position.y;
+        const length = Math.hypot(dx, dy);
+        aim.hidden = length < 2;
+        aim.style.left = `${position.x}px`;
+        aim.style.top = `${position.y}px`;
+        aim.style.width = `${length}px`;
+        aim.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+      };
+
+      const endThrow = () => {
+        if (phase !== 'flying') return;
+        phase = 'complete';
+        if (frame) {
+          cancelCurlingFrame(frame);
+          frame = null;
+        }
+        const rect = laneRect || laneMetrics();
+        const targetX = rect.width / 2;
+        const targetY = rect.height * CURLING_TARGET_Y;
+        const houseRadius = rect.height * CURLING_HOUSE_RADIUS;
+        const distanceRatio = Math.hypot(position.x - targetX, position.y - targetY) / houseRadius;
+        const roundScore = scoreCurling(distanceRatio);
+        score.textContent = String(roundScore);
+        result.textContent = curlingResult(roundScore);
+        status.textContent = `投掷结束 · 距离圆心 ${(distanceRatio).toFixed(2)} 圈`;
+        launch.disabled = true;
+        reset.disabled = false;
+        reset.focus();
+      };
+
+      const animate = (timestamp) => {
+        if (phase !== 'flying') return;
+        if (timestamp - startedAt >= CURLING_MAX_DURATION) {
+          endThrow();
+          return;
+        }
+        position.x += velocity.x;
+        position.y += velocity.y;
+        const rect = laneRect || laneMetrics();
+        const minX = CURLING_STONE_RADIUS;
+        const maxX = rect.width - CURLING_STONE_RADIUS;
+        const minY = CURLING_STONE_RADIUS;
+        const maxY = rect.height - CURLING_STONE_RADIUS;
+        if (position.x <= minX || position.x >= maxX) {
+          position.x = Math.max(minX, Math.min(maxX, position.x));
+          velocity.x *= -0.58;
+        }
+        if (position.y <= minY || position.y >= maxY) {
+          position.y = Math.max(minY, Math.min(maxY, position.y));
+          velocity.y *= -0.58;
+        }
+        const speed = Math.hypot(velocity.x, velocity.y);
+        velocity.x += curlDirection * 0.0009 * speed;
+        velocity.x *= CURLING_FRICTION;
+        velocity.y *= CURLING_FRICTION;
+        updateStone();
+        if (speed < CURLING_STOP_SPEED) {
+          endThrow();
+          return;
+        }
+        frame = curlingFrame(animate);
+      };
+
+      const beginThrow = ({ x, y }) => {
+        if (phase === 'flying') return;
+        const rect = laneMetrics();
+        const pull = {
+          x: Math.max(12, Math.min(rect.width - 12, x)),
+          y: Math.max(rect.height * 0.65, Math.min(rect.height - 12, y)),
+        };
+        const pullX = position.x - pull.x;
+        const pullY = position.y - pull.y;
+        const pointerMagnitude = Math.hypot(pullX, pullY);
+        const fallbackStrength = Number(strength.value) / 100;
+        const magnitude = Math.max(pointerMagnitude * 0.18, rect.height * fallbackStrength * 0.12);
+        const angle = pointerMagnitude > 1 ? Math.atan2(pullY, pullX) : -Math.PI / 2;
+        velocity = {
+          x: Math.cos(angle) * magnitude,
+          y: Math.sin(angle) * magnitude,
+        };
+        curlDirection = velocity.x < 0 ? -1 : 1;
+        phase = 'flying';
+        startedAt = performance.now();
+        score.textContent = '…';
+        result.textContent = '';
+        status.textContent = '石头壶滑行中…';
+        launch.disabled = true;
+        reset.disabled = true;
+        aim.hidden = true;
+        if (reducedMotion) {
+          position.x += velocity.x * 5;
+          position.y += velocity.y * 5;
+          updateStone();
+          endThrow();
+          return;
+        }
+        frame = curlingFrame(animate);
+      };
+
+      const pointerPosition = (event) => {
+        const rect = laneRect || laneMetrics();
+        return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+      };
+
+      const onPointerDown = (event) => {
+        if (phase !== 'idle' || event.button !== 0) return;
+        const point = pointerPosition(event);
+        const rect = laneRect || laneMetrics();
+        if (point.y < rect.height * 0.65) return;
+        dragging = true;
+        pointerId = event.pointerId;
+        pullPoint = point;
+        lane.setPointerCapture?.(pointerId);
+        updateAim();
+        status.textContent = '蓄力中，松开投壶';
+        event.preventDefault();
+      };
+
+      const onPointerMove = (event) => {
+        if (!dragging || event.pointerId !== pointerId) return;
+        const rect = laneRect || laneMetrics();
+        const point = pointerPosition(event);
+        pullPoint = {
+          x: Math.max(12, Math.min(rect.width - 12, point.x)),
+          y: Math.max(rect.height * 0.65, Math.min(rect.height - 12, point.y)),
+        };
+        updateAim();
+        event.preventDefault();
+      };
+
+      const onPointerUp = (event) => {
+        if (!dragging || event.pointerId !== pointerId) return;
+        dragging = false;
+        lane.releasePointerCapture?.(pointerId);
+        pointerId = null;
+        beginThrow(pullPoint || { x: position.x, y: position.y + 1 });
+        pullPoint = null;
+        aim.hidden = true;
+      };
+
+      const onPointerCancel = (event) => {
+        if (event.pointerId !== pointerId) return;
+        dragging = false;
+        lane.releasePointerCapture?.(pointerId);
+        pointerId = null;
+        pullPoint = null;
+        aim.hidden = true;
+        status.textContent = '准备投壶';
+      };
+
+      const resetGame = () => {
+        if (frame) {
+          cancelCurlingFrame(frame);
+          frame = null;
+        }
+        phase = 'idle';
+        velocity = { x: 0, y: 0 };
+        dragging = false;
+        pointerId = null;
+        pullPoint = null;
+        score.textContent = '—';
+        result.textContent = '';
+        status.textContent = '准备投壶';
+        launch.disabled = false;
+        reset.disabled = true;
+        resetPosition();
+      };
+
+      const launchFromKeyboard = () => {
+        if (phase !== 'idle') return;
+        const rect = laneMetrics();
+        const strengthRatio = Number(strength.value) / 100;
+        const directionRatio = Number(direction.value) / 100;
+        beginThrow({
+          x: position.x - directionRatio * rect.width * 0.22,
+          y: position.y + rect.height * strengthRatio * 0.14,
+        });
+      };
+
+      const onSliderInput = () => {
+        directionValue.textContent = direction.value;
+        strengthValue.textContent = strength.value;
+      };
+      const onLaneKeydown = (event) => {
+        if ((event.key === 'Enter' || event.key === ' ') && phase === 'idle') {
+          event.preventDefault();
+          launchFromKeyboard();
+        }
+      };
+
+      lane.addEventListener('pointerdown', onPointerDown);
+      lane.addEventListener('pointermove', onPointerMove);
+      lane.addEventListener('pointerup', onPointerUp);
+      lane.addEventListener('pointercancel', onPointerCancel);
+      lane.addEventListener('keydown', onLaneKeydown);
+      launch.addEventListener('click', launchFromKeyboard);
+      reset.addEventListener('click', resetGame);
+      direction.addEventListener('input', onSliderInput);
+      strength.addEventListener('input', onSliderInput);
+      resetGame();
+      reset.disabled = true;
+
+      return () => {
+        if (frame) cancelCurlingFrame(frame);
+        if (pointerId !== null) lane.releasePointerCapture?.(pointerId);
+        lane.removeEventListener('pointerdown', onPointerDown);
+        lane.removeEventListener('pointermove', onPointerMove);
+        lane.removeEventListener('pointerup', onPointerUp);
+        lane.removeEventListener('pointercancel', onPointerCancel);
+        lane.removeEventListener('keydown', onLaneKeydown);
+        launch.removeEventListener('click', launchFromKeyboard);
+        reset.removeEventListener('click', resetGame);
+        direction.removeEventListener('input', onSliderInput);
+        strength.removeEventListener('input', onSliderInput);
+      };
+    },
+  });
+}
+
 function activateCard(card) {
   const effect = card.dataset.effect;
   const choices = interactionOutputs[effect] ?? ['已收藏。'];
@@ -576,12 +898,18 @@ export function mountPage(root = document) {
   grid.addEventListener('click', (event) => {
     const button = event.target.closest('.favorite__action');
     if (button) {
-      activateCard(button.closest('.favorite'));
+      const card = button.closest('.favorite');
+      if (card?.dataset.effect === 'curling') {
+        openCurlingGame(button);
+      } else {
+        activateCard(card);
+      }
       return;
     }
 
     const extra = event.target.closest('[data-extra-action]');
     if (extra?.dataset.extraAction === 'lyrics' && !extra.disabled) openLyrics(extra);
+    if (extra?.dataset.extraAction === 'curling') openCurlingGame(extra);
   });
 }
 
