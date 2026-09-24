@@ -132,6 +132,8 @@ async function run(width, reduced) {
   });
   await check('curling throw/reset and closing cancels animation', async () => {
     let curlingOpened = false;
+    let pointerErrors = null;
+    let removePointerErrorSpy = () => {};
     try {
       click('[data-extra-action="curling"]');
       curlingOpened = true;
@@ -189,6 +191,16 @@ async function run(width, reduced) {
         clientX: point.x,
         clientY: point.y,
       }));
+      pointerErrors = [];
+      const onPointerError = (event) => pointerErrors.push(event.error?.name || event.message);
+      win.addEventListener('error', onPointerError);
+      removePointerErrorSpy = () => win.removeEventListener('error', onPointerError);
+      lane.setPointerCapture = () => { throw new win.DOMException('synthetic capture failure'); };
+      lane.releasePointerCapture = () => { throw new win.DOMException('synthetic release failure'); };
+      pointer('pointerdown', launchPoint);
+      pointer('pointermove', pullPoint);
+      pointer('pointercancel', pullPoint);
+      assert($('[data-curling-status]').textContent === '准备投壶', 'failed capture prevented cancel cleanup');
       pointer('pointerdown', launchPoint);
       pointer('pointermove', pullPoint);
       pointer('pointerup', pullPoint);
@@ -207,6 +219,9 @@ async function run(width, reduced) {
       assert(!curlingOpened || dialog.hidden, 'curling dialog remained open after cleanup');
       assert(!curlingOpened || win.qaResources.keyListeners.size === 0,
         `curling cleanup retained keydown listeners (${win.qaResources.keyListeners.size})`);
+      assert(!pointerErrors || pointerErrors.length === 0,
+        `synthetic pointer capture produced errors (${pointerErrors?.join(', ')})`);
+      removePointerErrorSpy();
       clean();
     }
   });

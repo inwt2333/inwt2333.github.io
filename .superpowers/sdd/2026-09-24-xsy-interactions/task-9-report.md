@@ -27,10 +27,13 @@ Review fix round 1 also began with RED: missing `forceSettleCurlingMatch` stoppe
 
 The final browser-cleanup repair also followed RED→GREEN. Controller evidence on the former `finally` branch recorded `keyListeners:1` after an otherwise successful 1440px normal pointer throw (the following beetle check inherited the same leak). The new regression asserts that a curling run leaves both the dialog hidden and its keydown-listener set empty. Its minimal cleanup calls the dialog close control whenever the curling run opened a dialog with active curling content, a visible dialog, or a tracked keydown listener, including the former hidden-dialog case.
 
+Pointer-capture hardening began from the controller's IAB console evidence: synthetic pointer events made `setPointerCapture` and `releasePointerCapture` throw `NotFoundError`; `pointerId` was already set, so the exception aborted pointer completion and the dialog cleanup release call before dialog/listener cleanup. The browser regression now forces both APIs to throw, cancels one drag, then launches another and requires no window error before final dialog cleanup. The application safely contains capture/release failures while retaining the tracked pointer id for pointer-up/cancel handling.
+
 ## Verification
 
 - `node --test tests/xsy.test.mjs tests/xsy-interactions.test.mjs` — 33 passed.
 - Browser evidence before this final cleanup repair: controller verification completed 390px reduced motion at 7/7 passes. A later 1440px normal run completed the real pointer throw, collision assertion, and after-score assertion; its sole failure was cleanup (`keyListeners:1`) because the old `finally` skipped close once the dialog was hidden. The harness now closes idempotently based on active content/listeners, then asserts a hidden dialog and zero listeners. Final 1440px normal and 390px reduced reruns are recorded below after this repair.
+- Latest 1440px normal Safari run after the pointer-capture change reached the curling check but failed before its synthetic-pointer branch at the pre-existing rendered-size assertion (`setup and delivery stones use different pixel diameters (15.515625/24)`); subsequent beetle/night failures cascaded from that open dialog. This run therefore cannot verify the new pointer branch. Node verification remains green; controller should rerun the focused IAB matrix after resolving or classifying that independent rendering assertion.
 - `git diff --check -- xsy tests docs/superpowers` — passed.
 - `python -m pytest -q` — known unrelated baseline failure: `tests/test_site.py::test_shared_site_styles_are_loaded_on_primary_pages` expects `assets/site.css` in a primary page. It is outside the xsy changes; 6 other Python tests passed.
 

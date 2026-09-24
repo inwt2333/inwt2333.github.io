@@ -774,6 +774,23 @@ export function openCurlingGame(trigger) {
         return renderedToLogical({ x: event.clientX - rect.left, y: event.clientY - rect.top }, rect);
       };
 
+      const capturePointer = (id) => {
+        try {
+          lane.setPointerCapture?.(id);
+        } catch {
+          // Synthetic and detached pointers cannot always be captured.
+        }
+      };
+
+      const releasePointer = (id) => {
+        try {
+          if (lane.hasPointerCapture?.(id) === false) return;
+          lane.releasePointerCapture?.(id);
+        } catch {
+          // A failed capture must not prevent throwing or dialog cleanup.
+        }
+      };
+
       const onPointerDown = (event) => {
         if (phase !== 'idle' || event.button !== 0) return;
         const point = pointerPosition(event);
@@ -781,7 +798,7 @@ export function openCurlingGame(trigger) {
         dragging = true;
         pointerId = event.pointerId;
         pullPoint = point;
-        lane.setPointerCapture?.(pointerId);
+        capturePointer(pointerId);
         updateAim();
         status.textContent = '蓄力中，松开投壶';
         event.preventDefault();
@@ -802,7 +819,7 @@ export function openCurlingGame(trigger) {
       const onPointerUp = (event) => {
         if (!dragging || event.pointerId !== pointerId) return;
         dragging = false;
-        lane.releasePointerCapture?.(pointerId);
+        releasePointer(pointerId);
         pointerId = null;
         beginThrow(pointerCurlingVelocity(position, pullPoint || position));
         pullPoint = null;
@@ -812,7 +829,7 @@ export function openCurlingGame(trigger) {
       const onPointerCancel = (event) => {
         if (event.pointerId !== pointerId) return;
         dragging = false;
-        lane.releasePointerCapture?.(pointerId);
+        releasePointer(pointerId);
         pointerId = null;
         pullPoint = null;
         aim.hidden = true;
@@ -904,7 +921,7 @@ export function openCurlingGame(trigger) {
       return () => {
         if (frame) cancelCurlingFrame(frame);
         if (initializationFrame) cancelCurlingFrame(initializationFrame);
-        if (pointerId !== null) lane.releasePointerCapture?.(pointerId);
+        if (pointerId !== null) releasePointer(pointerId);
         lane.removeEventListener('pointerdown', onPointerDown);
         lane.removeEventListener('pointermove', onPointerMove);
         lane.removeEventListener('pointerup', onPointerUp);
