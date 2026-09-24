@@ -1,3 +1,5 @@
+import { LYRIC_FRAGMENTS, nextIndex, nextNightState } from './interactions.mjs';
+
 export const favorites = [
   {
     id: 'yan-ge',
@@ -144,7 +146,7 @@ function cardMarkup(item, index) {
       </nav>`
     : '';
   const extras = item.extras?.map(({ label, action }) =>
-    `<button class="favorite__extra" type="button" data-extra-action="${escapeHtml(action)}">${escapeHtml(label)}</button>`
+    `<button class="favorite__extra" type="button" data-extra-action="${escapeHtml(action)}"${action === 'lyrics' ? ' disabled' : ''}>${escapeHtml(label)}</button>`
   ).join('') ?? '';
   const resources = links || extras
     ? `<div class="favorite__resources">${links}${extras}</div>`
@@ -159,7 +161,7 @@ function cardMarkup(item, index) {
       <p class="favorite__verdict">${escapeHtml(item.verdict)}</p>
       <p class="favorite__blurb">${escapeHtml(item.blurb)}</p>
       ${resources}
-      <button class="favorite__action" type="button">${escapeHtml(item.action)}</button>
+      <button class="favorite__action" type="button"${item.effect === 'yorushika' ? ' aria-pressed="false"' : ''}>${escapeHtml(item.action)}</button>
       <output class="favorite__output" aria-live="polite"></output>
     </article>`;
 }
@@ -294,6 +296,7 @@ export const interactionOutputs = {
 };
 
 let activeDialog = null;
+let lyricIndex = 0;
 
 function dialogElements() {
   const dialog = document.querySelector('#exhibit-dialog');
@@ -389,6 +392,65 @@ export function closeDialog({ restoreFocus = true } = {}) {
   if (restoreFocus && trigger && typeof trigger.focus === 'function') trigger.focus();
 }
 
+export function setNightMode(isActive, button) {
+  const state = nextNightState(isActive);
+  document.body.classList.toggle('night-shift', state.active);
+  button.textContent = state.label;
+  button.setAttribute('aria-pressed', state.ariaPressed);
+
+  for (const lyricsButton of document.querySelectorAll('[data-extra-action="lyrics"]')) {
+    lyricsButton.disabled = !state.active;
+  }
+
+  if (!state.active && activeDialog?.kind === 'lyrics') closeDialog();
+}
+
+export function openLyrics(trigger) {
+  openDialog({
+    title: 'ヨルシカ · 夜鹿时间',
+    kind: 'lyrics',
+    trigger,
+    render(content) {
+      const renderFragment = () => {
+        const fragment = LYRIC_FRAGMENTS[lyricIndex];
+        const song = document.createElement('h3');
+        song.className = 'lyrics__song';
+        song.textContent = fragment.song;
+
+        const japanese = document.createElement('p');
+        japanese.className = 'lyrics__japanese';
+        japanese.lang = 'ja';
+        japanese.textContent = fragment.ja;
+
+        const paraphrase = document.createElement('p');
+        paraphrase.className = 'lyrics__paraphrase';
+        paraphrase.textContent = fragment.zh;
+
+        const link = document.createElement('a');
+        link.className = 'lyrics__link';
+        link.href = fragment.url;
+        link.target = '_blank';
+        link.rel = 'noreferrer';
+        link.textContent = '查看官方作品目录 ↗';
+
+        const next = document.createElement('button');
+        next.className = 'lyrics__next';
+        next.type = 'button';
+        next.textContent = '换一句';
+        next.addEventListener('click', () => {
+          lyricIndex = nextIndex(lyricIndex, LYRIC_FRAGMENTS.length);
+          renderFragment();
+          content.querySelector('.lyrics__next').focus();
+        });
+
+        content.replaceChildren(song, japanese, paraphrase, link, next);
+      };
+
+      renderFragment();
+    },
+  });
+}
+
 function activateCard(card) {
   const effect = card.dataset.effect;
   const choices = interactionOutputs[effect] ?? ['已收藏。'];
@@ -399,7 +461,10 @@ function activateCard(card) {
   card.classList.add('is-active');
   card.querySelector('.favorite__output').textContent = choices[current % choices.length];
 
-  if (effect === 'yorushika') document.body.classList.toggle('night-shift');
+  if (effect === 'yorushika') {
+    const button = card.querySelector('.favorite__action');
+    setNightMode(document.body.classList.contains('night-shift'), button);
+  }
   if (effect === 'bug') spawnBug(card);
 }
 
@@ -423,7 +488,13 @@ export function mountPage(root = document) {
 
   grid.addEventListener('click', (event) => {
     const button = event.target.closest('.favorite__action');
-    if (button) activateCard(button.closest('.favorite'));
+    if (button) {
+      activateCard(button.closest('.favorite'));
+      return;
+    }
+
+    const extra = event.target.closest('[data-extra-action]');
+    if (extra?.dataset.extraAction === 'lyrics' && !extra.disabled) openLyrics(extra);
   });
 }
 

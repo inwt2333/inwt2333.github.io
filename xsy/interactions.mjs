@@ -42,6 +42,10 @@ export function nextNightState(isActive) {
   };
 }
 
+export function nextIndex(index, length) {
+  return (index + 1) % length;
+}
+
 export function scoreCurling(distanceRatio) {
   if (distanceRatio <= 0.32) return 3;
   if (distanceRatio <= 0.65) return 2;

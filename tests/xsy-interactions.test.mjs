@@ -7,6 +7,7 @@ import {
   availableBeetleSlots,
   createSlapGame,
   finishSlapGame,
+  nextIndex,
   nextNightState,
   registerSlapHit,
   registerSlapMiss,
@@ -33,6 +34,11 @@ test('lyric fragments are short bilingual records', () => {
     assert.match(item.url, /^https:\/\/(yorushika\.com|www\.youtube\.com)\//);
     assert.ok(item.ja.length <= 24);
   }
+});
+
+test('lyric selection wraps only after the last fragment', () => {
+  assert.equal(nextIndex(0, LYRIC_FRAGMENTS.length), 1);
+  assert.equal(nextIndex(LYRIC_FRAGMENTS.length - 1, LYRIC_FRAGMENTS.length), 0);
 });
 
 test('curling score decreases across ring boundaries', () => {

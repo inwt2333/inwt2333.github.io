@@ -463,13 +463,63 @@ footer {
   animation: bug-run 1.4s linear forwards;
 }
 
-.night-shift { background-color: #101936; }
-.night-shift .cover h1,
-.night-shift .cover__dek,
-.night-shift .cover__footnote { color: white; }
-.night-shift .collection { color: white; }
-.night-shift .collection__heading { border-color: white; }
-.night-shift footer { color: var(--ink); border-color: white; }
+.night-shift {
+  --paper: #101936;
+  --ink: #f4f3ef;
+  --red: #ff8fc7;
+  --blue: #9cceff;
+  --acid: #d9ff43;
+  background-color: var(--paper);
+}
+
+.night-shift .cover::before { opacity: .16; }
+.night-shift .cover h1 mark { color: #101936; }
+.night-shift .cover__issue { color: #101936; background: var(--acid); }
+.night-shift .favorite:nth-child(9) { --card-color: #263a72; }
+.night-shift .favorite__icon { color: #111; }
+.favorite__extra:disabled {
+  cursor: not-allowed;
+  opacity: .52;
+  box-shadow: none;
+}
+.night-shift .favorite:nth-child(9) .favorite__action:hover,
+.night-shift .favorite:nth-child(9) .favorite__action:focus-visible {
+  color: #101936;
+  background: var(--acid);
+}
+.night-shift .exhibit-dialog__backdrop { background: rgba(3, 7, 22, .84); }
+
+.lyrics__song { margin: 0; font-size: 1.55rem; }
+.lyrics__japanese { margin: 22px 0 8px; font-size: 1.45rem; font-weight: 900; }
+.lyrics__paraphrase { margin: 0; line-height: 1.7; }
+.lyrics__link {
+  display: inline-block;
+  margin-top: 22px;
+  color: inherit;
+  font-family: 'Space Mono', monospace;
+  font-size: .78rem;
+  font-weight: 700;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+.lyrics__link:hover,
+.lyrics__link:focus-visible { color: var(--red); outline: 0; }
+.lyrics__next {
+  display: block;
+  min-height: 42px;
+  margin-top: 26px;
+  padding: 8px 14px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+  color: inherit;
+  background: transparent;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 currentColor;
+}
+.lyrics__next:hover,
+.lyrics__next:focus-visible { color: var(--paper); background: var(--ink); outline: 0; }
+.lyrics__next:active { transform: translate(3px, 3px); box-shadow: none; }
 
 footer {
   display: flex;
