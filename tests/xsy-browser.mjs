@@ -187,14 +187,19 @@ async function run(width, reduced) {
           return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
         })
         .sort((left, right) => (right.y - left.y) || (Math.abs(left.x - launchPoint.x) - Math.abs(right.x - launchPoint.x)))[0];
-      const targetVector = { x: setupTarget.x - launchPoint.x, y: setupTarget.y - launchPoint.y };
-      const targetDistance = Math.hypot(targetVector.x, targetVector.y);
-      const pullDistance = laneRect.width / 3 * .55;
+      const targetLogical = {
+        x: (setupTarget.x - laneRect.left) / laneRect.width * 3,
+        y: (setupTarget.y - laneRect.top) / laneRect.height * 5,
+      };
+      const launchLogical = { x: 1.5, y: 3.9 };
+      const pullLogicalY = 4.85;
+      const pullLogicalX = Math.max(.12, Math.min(2.88,
+        launchLogical.x - (targetLogical.x - launchLogical.x)
+          / Math.max(Math.abs(targetLogical.y - launchLogical.y), 1)
+          * (pullLogicalY - launchLogical.y)));
       const pullPoint = {
-        x: Math.max(laneRect.left + stoneRect.width / 2, Math.min(laneRect.right - stoneRect.width / 2,
-          launchPoint.x - targetVector.x / targetDistance * pullDistance)),
-        y: Math.max(launchPoint.y, Math.min(laneRect.bottom - stoneRect.height / 2,
-          launchPoint.y - targetVector.y / targetDistance * pullDistance)),
+        x: laneRect.left + pullLogicalX / 3 * laneRect.width,
+        y: laneRect.top + pullLogicalY / 5 * laneRect.height,
       };
       assert(pullPoint.y > launchPoint.y, 'targeted pull did not stay below the delivery stone');
       const pointer = (type, point) => lane.dispatchEvent(new win.PointerEvent(type, {
