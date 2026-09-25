@@ -568,6 +568,7 @@ export function openCurlingGame(trigger) {
       let mode = 'practice';
       let setupStones = [];
       let initialSetupStones = [];
+      let deliveredOutOfPlay = false;
 
       const reducedMotion = prefersReducedMotion();
 
@@ -616,6 +617,7 @@ export function openCurlingGame(trigger) {
       };
 
       const updateStone = () => {
+        stone.hidden = deliveredOutOfPlay;
         const rendered = logicalToRendered(position);
         const diameter = CURLING_STONE_RADIUS * 2 / CURLING_GAME_LANE_WIDTH * (laneRect || laneMetrics()).width;
         lane.style.setProperty('--curling-stone-diameter', `${diameter}px`);
@@ -650,7 +652,8 @@ export function openCurlingGame(trigger) {
           score.textContent = '—';
           return;
         }
-        const end = scoreCurlingEnd(afterThrow ? [...setupStones, { team: 'red', ...position }] : setupStones);
+        const delivered = deliveredOutOfPlay ? [] : [{ team: 'red', ...position }];
+        const end = scoreCurlingEnd(afterThrow ? [...setupStones, ...delivered] : setupStones);
         scorePrefix.textContent = `${afterThrow ? '投掷后比分' : '投掷前比分'}：`;
         score.textContent = `红 ${end.red} · 蓝 ${end.blue}`;
       };
@@ -705,7 +708,8 @@ export function openCurlingGame(trigger) {
           status.textContent = `投掷结束 · 距离圆心 ${(distanceRatio).toFixed(2)} 圈`;
         } else {
           setScoreReadout(true);
-          const end = scoreCurlingEnd([...setupStones, { team: 'red', ...position }]);
+          const delivered = deliveredOutOfPlay ? [] : [{ team: 'red', ...position }];
+          const end = scoreCurlingEnd([...setupStones, ...delivered]);
           result.textContent = end.points ? `${end.scoringTeam === 'red' ? '红队' : '蓝队'}本局 ${end.points} 分。` : '本局无人得分。';
           status.textContent = '投掷结束 · 已按大本营内最近壶计分';
         }
@@ -716,11 +720,12 @@ export function openCurlingGame(trigger) {
 
       const advancePhysics = () => {
         const next = advanceCurlingMatch({
-          delivered: { team: 'red', ...position, velocity },
+          delivered: { team: 'red', ...position, velocity, outOfPlay: deliveredOutOfPlay },
           stones: setupStones,
         }, { width: CURLING_GAME_LANE_WIDTH, height: CURLING_GAME_LANE_HEIGHT, radius: CURLING_STONE_RADIUS });
         position = { x: next.delivered.x, y: next.delivered.y };
         velocity = next.delivered.velocity;
+        deliveredOutOfPlay = Boolean(next.delivered.outOfPlay);
         setupStones = next.stones;
         updateStone();
         renderSetupStones();
@@ -729,11 +734,12 @@ export function openCurlingGame(trigger) {
 
       const settleMatch = () => {
         let settled = settleCurlingMatch({
-          delivered: { team: 'red', ...position, velocity },
+          delivered: { team: 'red', ...position, velocity, outOfPlay: deliveredOutOfPlay },
           stones: setupStones,
         }, { width: CURLING_GAME_LANE_WIDTH, height: CURLING_GAME_LANE_HEIGHT, radius: CURLING_STONE_RADIUS }, CURLING_MAX_STEPS);
         position = { x: settled.delivered.x, y: settled.delivered.y };
         velocity = settled.delivered.velocity;
+        deliveredOutOfPlay = Boolean(settled.delivered.outOfPlay);
         setupStones = settled.stones;
         updateStone();
         renderSetupStones();
@@ -853,6 +859,7 @@ export function openCurlingGame(trigger) {
         }
         phase = 'idle';
         velocity = { x: 0, y: 0 };
+        deliveredOutOfPlay = false;
         dragging = false;
         pointerId = null;
         pullPoint = null;

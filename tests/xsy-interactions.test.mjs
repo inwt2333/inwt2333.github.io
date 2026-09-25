@@ -81,7 +81,7 @@ test('curling result copy matches each score', () => {
   assert.equal(curlingResult(0), '壶很自由，大本营很孤独。');
 });
 
-test('curling physics clamps the stone and applies friction with curl', () => {
+test('curling physics marks an edge crossing out of play without reflecting velocity', () => {
   const next = advanceCurlingPhysics(
     { x: 20, y: 60 },
     { x: -4, y: -2 },
@@ -89,9 +89,9 @@ test('curling physics clamps the stone and applies friction with curl', () => {
     -1,
   );
 
-  assert.deepEqual(next.position, { x: 18, y: 58 });
-  assert.equal(next.speed, Math.hypot(4 * 0.58, -2));
-  assert.ok(next.velocity.x > 0);
+  assert.equal(next.outOfPlay, true);
+  assert.ok(next.position.x < 18, 'edge crossing should preserve the position beyond the playable center limit');
+  assert.ok(next.velocity.x < 0, 'out-of-play velocity must not reflect from the wall');
   assert.equal(next.velocity.y, -2 * 0.965);
 });
 
@@ -165,19 +165,51 @@ test('a curling round stays active while a struck setup stone is still moving', 
   assert.ok(next.stones[0].velocity.y < -CURLING_STOP_SPEED);
 });
 
+test('a curling round can finish when the delivered stone leaves before setup stones settle', () => {
+  const next = advanceCurlingMatch({
+    delivered: { team: 'red', x: 0.3, y: 2.08, velocity: { x: -0.4, y: 0 } },
+    stones: [{ team: 'blue', x: 1.5, y: 1.1, velocity: { x: 0, y: 0 } }],
+  }, { width: 3, height: 5, radius: CURLING_STONE_RADIUS });
+
+  assert.equal(next.delivered.outOfPlay, true);
+  assert.equal(next.finished, true);
+  assert.equal(next.stones.length, 1);
+  assert.equal(Math.hypot(next.stones[0].velocity.x, next.stones[0].velocity.y) < CURLING_STOP_SPEED, true);
+});
+
+test('out-of-play setup stones are removed from active match state and scoring', () => {
+  const next = advanceCurlingMatch({
+    delivered: { team: 'red', x: 1.5, y: 1.1, velocity: { x: 0, y: 0 } },
+    stones: [{ team: 'blue', x: 2.8, y: 1.1, velocity: { x: 0.4, y: 0 } }],
+  }, { width: 3, height: 5, radius: CURLING_STONE_RADIUS });
+
+  assert.equal(next.stones.length, 0);
+  assert.deepEqual(scoreCurlingEnd([
+    next.delivered,
+    { team: 'blue', x: 2.8, y: 1.1, outOfPlay: true },
+  ]), {
+    red: 1,
+    blue: 0,
+    scoringTeam: 'red',
+    points: 1,
+  });
+});
+
 test('settling a curling match stops and separates every moving stone', () => {
   // A regression that settles only the delivered stone or leaves a collision overlap would break this.
   const settled = settleCurlingMatch({
     delivered: { team: 'red', x: 1.5, y: 2.08, velocity: { x: 0, y: -0.4 } },
     stones: [{ team: 'blue', x: 1.5, y: 1.88, velocity: { x: 0, y: 0 } }],
   }, { width: 3, height: 5, radius: CURLING_STONE_RADIUS }, 1_200);
-  const allStones = [settled.delivered, ...settled.stones];
+  const allStones = [settled.delivered, ...settled.stones].filter((stone) => !stone.outOfPlay);
 
   assert.ok(allStones.every((stone) => Math.hypot(stone.velocity.x, stone.velocity.y) < CURLING_STOP_SPEED));
-  assert.ok(Math.hypot(
-    settled.delivered.x - settled.stones[0].x,
-    settled.delivered.y - settled.stones[0].y,
-  ) >= CURLING_STONE_RADIUS * 2);
+  if (settled.stones.length) {
+    assert.ok(Math.hypot(
+      settled.delivered.x - settled.stones[0].x,
+      settled.delivered.y - settled.stones[0].y,
+    ) >= CURLING_STONE_RADIUS * 2);
+  }
 });
 
 test('a capped match settle reports unfinished until safety settling stops every stone', () => {
@@ -286,6 +318,17 @@ test('curling match layout clamps setup counts and creates a deterministic legal
       assert.ok(Math.hypot(first[left].x - first[right].x, first[left].y - first[right].y) >= CURLING_STONE_RADIUS * 2);
     }
   }
+
+  let otherIndex = 0;
+  const otherRandomValues = [0.91, 0.17, 0.68, 0.04, 0.77, 0.32, 0.55, 0.24];
+  const other = createCurlingSetup({
+    redCount: 7,
+    blueCount: 8,
+    random: () => otherRandomValues[otherIndex++ % otherRandomValues.length],
+  });
+  assert.notDeepEqual(other, first);
+  assert.ok(new Set(first.map((stone) => Math.floor(stone.x))).size >= 3);
+  assert.ok(new Set(first.map((stone) => Math.floor(stone.y))).size >= 2);
 });
 
 test('curling setup snapshots clone positions and clear every velocity', () => {
