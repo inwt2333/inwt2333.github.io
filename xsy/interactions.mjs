@@ -287,16 +287,34 @@ export function advanceCurlingThrow(state, bounds) {
   };
 }
 
+export function isCurlingStoneOffscreen(stone, bounds) {
+  return stone.x + bounds.radius <= 0 || stone.x - bounds.radius >= bounds.width
+    || stone.y + bounds.radius <= 0 || stone.y - bounds.radius >= bounds.height;
+}
+
+function advanceExitingStone(stone, bounds) {
+  if (isCurlingStoneOffscreen(stone, bounds)) return stone;
+  const velocity = { ...stone.velocity };
+  // Once off the ice, carry the stone through the clipped edge instead of
+  // letting friction strand part of it in view. Never bounce it back inward.
+  if (stone.x < bounds.radius) velocity.x = Math.min(velocity.x, -0.02);
+  if (stone.x > bounds.width - bounds.radius) velocity.x = Math.max(velocity.x, 0.02);
+  if (stone.y < bounds.radius) velocity.y = Math.min(velocity.y, -0.02);
+  if (stone.y > bounds.height - bounds.radius) velocity.y = Math.max(velocity.y, 0.02);
+  return { ...stone, x: stone.x + velocity.x, y: stone.y + velocity.y, velocity };
+}
+
 export function advanceCurlingMatch(state, bounds) {
   const activeSetupStones = state.stones.filter((stone) => !stone.outOfPlay);
   const deliveredWasOut = Boolean(state.delivered?.outOfPlay);
   const initialCollision = deliveredWasOut
     ? { delivered: { ...state.delivered, velocity: { ...state.delivered.velocity } }, stones: activeSetupStones }
     : resolveCurlingStoneCollisions(state.delivered, activeSetupStones, bounds);
+  const exitingDelivered = deliveredWasOut ? advanceExitingStone(initialCollision.delivered, bounds) : null;
   const deliveredPhysics = deliveredWasOut
     ? {
-      position: { x: initialCollision.delivered.x, y: initialCollision.delivered.y },
-      velocity: { ...(initialCollision.delivered.velocity || { x: 0, y: 0 }) },
+      position: { x: exitingDelivered.x, y: exitingDelivered.y },
+      velocity: exitingDelivered.velocity,
       outOfPlay: true,
     }
     : advanceCurlingPhysics(
@@ -316,9 +334,10 @@ export function advanceCurlingMatch(state, bounds) {
       ? { ...stone, ...physics.position, velocity: physics.velocity, outOfPlay: true }
       : { ...stone, ...physics.position, velocity: physics.velocity };
   }).filter((stone) => !stone.outOfPlay);
-  const movedDelivered = deliveredWasOut
-    ? { ...initialCollision.delivered, outOfPlay: true }
-    : { ...initialCollision.delivered, ...deliveredPhysics.position, velocity: deliveredPhysics.velocity };
+  const movedDelivered = {
+    ...initialCollision.delivered, ...deliveredPhysics.position, velocity: deliveredPhysics.velocity,
+    outOfPlay: deliveredWasOut || deliveredPhysics.outOfPlay,
+  };
   const collision = resolveCurlingStoneCollisions(movedDelivered, movedStones, bounds);
   const delivered = deliveredWasOut || deliveredPhysics.outOfPlay
     ? { ...movedDelivered, ...(!deliveredWasOut ? deliveredPhysics.position : {}), outOfPlay: true }
@@ -327,7 +346,8 @@ export function advanceCurlingMatch(state, bounds) {
   return {
     delivered,
     stones: collision.stones,
-    finished: allStones.every((stone) => stone.velocity.x === 0 && stone.velocity.y === 0)
+    finished: (!delivered.outOfPlay || isCurlingStoneOffscreen(delivered, bounds))
+      && allStones.every((stone) => stone.velocity.x === 0 && stone.velocity.y === 0)
       && !hasCurlingStoneOverlap(delivered, collision.stones),
   };
 }

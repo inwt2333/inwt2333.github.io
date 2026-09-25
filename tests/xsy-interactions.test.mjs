@@ -201,16 +201,35 @@ test('an out-of-play player stone cannot end the round while a setup stone coast
   assert.equal(next.finished, false);
 });
 
-test('a curling round can finish when the delivered stone leaves before setup stones settle', () => {
+test('a partly visible out-of-play player stone keeps the round active until fully offscreen', () => {
   const next = advanceCurlingMatch({
     delivered: { team: 'red', x: 0.3, y: 2.08, velocity: { x: -0.4, y: 0 } },
     stones: [{ team: 'blue', x: 1.5, y: 1.1, velocity: { x: 0, y: 0 } }],
   }, { width: 3, height: 5, radius: CURLING_STONE_RADIUS });
 
   assert.equal(next.delivered.outOfPlay, true);
-  assert.equal(next.finished, true);
+  assert.equal(next.finished, false);
   assert.equal(next.stones.length, 1);
   assert.equal(Math.hypot(next.stones[0].velocity.x, next.stones[0].velocity.y) < CURLING_STOP_SPEED, true);
+  const final = settleCurlingMatch(next, { width: 3, height: 5, radius: CURLING_STONE_RADIUS }, 300);
+  assert.equal(final.finished, true);
+  assert.ok(final.delivered.x + CURLING_STONE_RADIUS <= 0);
+});
+
+test('a barely moving edge crossing slides fully out without freezing on the edge', () => {
+  let state = {
+    delivered: { team: 'red', x: 0.159, y: 3, velocity: { x: -0.00001, y: 0 }, outOfPlay: true },
+    stones: [],
+  };
+  const bounds = { width: 3, height: 6, radius: CURLING_STONE_RADIUS };
+  for (let step = 0; step < 300 && !state.finished; step++) {
+    const next = advanceCurlingMatch(state, bounds);
+    assert.ok(next.delivered.x < state.delivered.x);
+    if (next.delivered.x + CURLING_STONE_RADIUS > 0) assert.equal(next.finished, false);
+    state = next;
+  }
+  assert.equal(state.finished, true);
+  assert.ok(state.delivered.x + CURLING_STONE_RADIUS <= 0);
 });
 
 test('out-of-play setup stones are removed from active match state and scoring', () => {

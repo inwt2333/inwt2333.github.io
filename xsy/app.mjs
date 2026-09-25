@@ -8,6 +8,7 @@ import {
   CURLING_DELIVERY_START_Y,
   clampCurlingLaunchX,
   advanceCurlingMatch,
+  isCurlingStoneOffscreen,
   availableBeetleSlots,
   createCurlingSetup,
   cloneCurlingStones,
@@ -24,7 +25,7 @@ import {
   registerSlapMiss,
   scoreCurling,
   slapTitle,
-} from './interactions.mjs';
+} from './interactions.mjs?v=20260925-exit';
 
 export const favorites = [
   {
@@ -507,7 +508,18 @@ export function openCurlingGame(trigger) {
     render(content) {
       content.innerHTML = `
         <div class="curling-game" data-curling-game>
-          <p class="curling-game__instructions">向下拖动冰壶蓄力，松开后让它向上滑向大本营。也可以用键盘设置左右方向和力度再投壶。</p>
+          <p class="curling-game__instructions">向后拖动蓄力，松手投壶。也可调整方向与力度，点击「投壶」。</p>
+          <div class="curling-game__board">
+          <div class="curling-game__lane" data-curling-lane tabindex="0" role="application" aria-label="冰壶投掷冰道">
+            <div class="curling-house" data-curling-target aria-hidden="true"><span></span></div>
+            <div class="curling-aim" data-curling-aim aria-hidden="true"></div>
+            <div class="curling-stone" data-curling-stone aria-label="石头壶" role="img">🥌</div>
+          </div>
+          <div class="curling-game__launch-position" data-curling-launch-position-control>
+            <label>发球位置 <input data-curling-launch-position aria-label="发球位置" type="range" min="${CURLING_STONE_RADIUS}" max="${CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS}" value="${CURLING_GAME_LANE_WIDTH / 2}" step="0.01"><output data-curling-launch-position-value>${(CURLING_GAME_LANE_WIDTH / 2).toFixed(2)}</output></label>
+          </div>
+          </div>
+          <div class="curling-game__panel">
           <div class="curling-game__modes" role="group" aria-label="冰壶玩法模式">
             <button type="button" data-curling-mode="practice" aria-pressed="true">练习模式</button>
             <button type="button" data-curling-mode="score" aria-pressed="false">比分模式</button>
@@ -516,14 +528,6 @@ export function openCurlingGame(trigger) {
             <label>已有红壶 <input data-curling-red-count type="number" min="0" max="7" value="2"></label>
             <label>已有蓝壶 <input data-curling-blue-count type="number" min="0" max="8" value="2"></label>
             <button type="button" data-curling-relayout>重新布局</button>
-          </div>
-          <div class="curling-game__lane" data-curling-lane tabindex="0" role="application" aria-label="冰壶投掷冰道">
-            <div class="curling-house" data-curling-target aria-hidden="true"><span></span></div>
-            <div class="curling-aim" data-curling-aim aria-hidden="true"></div>
-            <div class="curling-stone" data-curling-stone aria-label="石头壶" role="img">🥌</div>
-          </div>
-          <div class="curling-game__launch-position" data-curling-launch-position-control>
-            <label>发球位置 <input data-curling-launch-position aria-label="发球位置" type="range" min="${CURLING_STONE_RADIUS}" max="${CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS}" value="${CURLING_GAME_LANE_WIDTH / 2}" step="0.01"><output data-curling-launch-position-value>${(CURLING_GAME_LANE_WIDTH / 2).toFixed(2)}</output></label>
           </div>
           <div class="curling-game__readout" aria-live="polite">
             <span><span data-curling-score-prefix>本轮得分：</span><strong data-curling-score>—</strong></span>
@@ -535,6 +539,7 @@ export function openCurlingGame(trigger) {
             <label>力度 <input data-curling-strength type="range" min="25" max="100" value="72" step="1"><output data-curling-strength-value>72</output></label>
             <button class="curling-game__launch" data-curling-launch type="button">投壶</button>
             <button class="curling-game__reset" data-curling-reset type="button">再投一壶</button>
+          </div>
           </div>
         </div>`;
 
@@ -622,7 +627,9 @@ export function openCurlingGame(trigger) {
       };
 
       const updateStone = () => {
-        stone.hidden = deliveredOutOfPlay;
+        stone.hidden = deliveredOutOfPlay && isCurlingStoneOffscreen(position, {
+          width: CURLING_GAME_LANE_WIDTH, height: CURLING_GAME_LANE_HEIGHT, radius: CURLING_STONE_RADIUS,
+        });
         const rendered = logicalToRendered(position);
         const diameter = CURLING_STONE_RADIUS * 2 / CURLING_GAME_LANE_WIDTH * (laneRect || laneMetrics()).width;
         lane.style.setProperty('--curling-stone-diameter', `${diameter}px`);

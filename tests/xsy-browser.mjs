@@ -60,7 +60,7 @@ async function run(width, reduced) {
   document.body.append(frame);
   const html = await (await fetch('../xsy/index.html')).text();
   const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
-  frame.srcdoc = html.replace('href="style.css"', `href="style.css?qa=${Date.now()}"`).replace('<head>', `<head><base href="${new URL('../xsy/', location.href)}"><script>(${instrument})(${reduced})<\/script>`);
+  frame.srcdoc = html.replace(/href="style\.css(?:\?[^"]*)?"/, `href="style.css?qa=${Date.now()}"`).replace('<head>', `<head><base href="${new URL('../xsy/', location.href)}"><script>(${instrument})(${reduced})<\/script>`);
   await loaded;
   const win = frame.contentWindow;
   if (reduced) {
@@ -173,6 +173,22 @@ async function run(width, reduced) {
       assert(Math.abs(parseFloat(player.style.top) - previousY) < 0.05, 'score appeared while the stone was visibly moving');
       assert(pending.size === 0, 'finished throw retained animation callbacks');
       assert(rect.width > 0, 'lane was not rendered');
+      click('[data-curling-reset]');
+      $('[data-curling-launch-position]').value = '2.8';
+      $('[data-curling-launch-position]').dispatchEvent(new win.Event('input', { bubbles: true }));
+      $('[data-curling-direction]').value = '80';
+      $('[data-curling-strength]').value = '25';
+      click('[data-curling-launch]');
+      tick();
+      assert(!player.hidden, 'player stone vanished while still partly inside the lane');
+      assert($('[data-curling-reset]').disabled, 'round ended at the first edge contact');
+      const edgeX = parseFloat(player.style.left);
+      tick();
+      assert(parseFloat(player.style.left) > edgeX, 'out-of-play stone froze at the edge');
+      for (let step = 0; step < 300 && $('[data-curling-reset]').disabled; step++) tick();
+      assert(player.hidden && !$('[data-curling-reset]').disabled, 'round did not finish after the stone slid fully out');
+      assert(parseFloat(player.style.left) - parseFloat(player.style.width) / 2 >= lane.clientWidth,
+        'stone was hidden before its trailing edge cleared the lane');
     } finally {
       click('[data-dialog-close]');
       win.requestAnimationFrame = nativeRAF;
