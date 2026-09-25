@@ -130,6 +130,56 @@ async function run(width, reduced) {
     click('[data-dialog-close]');
     clean();
   });
+  if (!reduced) await check('slow curling coasts to rest even across long frame delays', () => {
+    // Drive the real UI with a controlled RAF clock: a throttled tab must not
+    // skip the remaining trajectory when wall-clock time passes 15 seconds.
+    const nativeRAF = win.requestAnimationFrame;
+    const nativeCancel = win.cancelAnimationFrame;
+    const pending = new Map();
+    let id = 0;
+    let now = win.performance.now();
+    win.requestAnimationFrame = (callback) => { pending.set(++id, callback); return id; };
+    win.cancelAnimationFrame = (handle) => pending.delete(handle);
+    const tick = () => {
+      now += 1000;
+      const callbacks = [...pending.values()];
+      pending.clear();
+      callbacks.forEach((callback) => callback(now));
+    };
+    try {
+      click('[data-extra-action="curling"]');
+      tick();
+      const lane = $('[data-curling-lane]');
+      const rect = lane.getBoundingClientRect();
+      const player = $('[data-curling-stone]');
+      const playerRect = player.getBoundingClientRect();
+      const start = { x: playerRect.left + playerRect.width / 2, y: playerRect.top + playerRect.height / 2 };
+      const pull = { x: start.x, y: start.y + lane.clientHeight / 6 * (0.04 / 0.18) };
+      for (const [type, point] of [['pointerdown', start], ['pointermove', pull], ['pointerup', pull]]) {
+        lane.dispatchEvent(new win.PointerEvent(type, { bubbles: true, button: 0, pointerId: 72,
+          clientX: point.x, clientY: point.y }));
+      }
+      for (let step = 0; step < 20; step++) tick();
+      assert($('[data-curling-reset]').disabled, 'a moving stone was settled early or fast-forwarded after 15 seconds');
+      const coastY = parseFloat(player.style.top);
+      tick();
+      assert(parseFloat(player.style.top) < coastY - 0.1, 'slow coasting did not remain animated');
+      let previousY;
+      for (let step = 0; step < 1000 && $('[data-curling-reset]').disabled; step++) {
+        previousY = parseFloat(player.style.top);
+        tick();
+      }
+      assert(!$('[data-curling-reset]').disabled, 'stone never reached rest');
+      assert(Math.abs(parseFloat(player.style.top) - previousY) < 0.05, 'score appeared while the stone was visibly moving');
+      assert(pending.size === 0, 'finished throw retained animation callbacks');
+      assert(rect.width > 0, 'lane was not rendered');
+    } finally {
+      click('[data-dialog-close]');
+      win.requestAnimationFrame = nativeRAF;
+      win.cancelAnimationFrame = nativeCancel;
+    }
+    clean();
+  });
   await check('curling throw/reset and closing cancels animation', async () => {
     let curlingOpened = false;
     let pointerErrors = null;

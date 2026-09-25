@@ -481,8 +481,7 @@ export function openLyrics(trigger) {
   });
 }
 
-const CURLING_MAX_DURATION = 15_000;
-const CURLING_MAX_STEPS = Math.ceil(CURLING_MAX_DURATION / (1000 / 60));
+const CURLING_REDUCED_MOTION_STEPS = 900;
 
 function curlingFrame(callback) {
   if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
@@ -565,7 +564,6 @@ export function openCurlingGame(trigger) {
       let velocity = { x: 0, y: 0 };
       let frame = null;
       let initializationFrame = null;
-      let startedAt = 0;
       let pointerId = null;
       let dragging = false;
       let phase = 'idle';
@@ -743,7 +741,7 @@ export function openCurlingGame(trigger) {
         let settled = settleCurlingMatch({
           delivered: { team: 'red', ...position, velocity, outOfPlay: deliveredOutOfPlay },
           stones: setupStones,
-        }, { width: CURLING_GAME_LANE_WIDTH, height: CURLING_GAME_LANE_HEIGHT, radius: CURLING_STONE_RADIUS }, CURLING_MAX_STEPS);
+        }, { width: CURLING_GAME_LANE_WIDTH, height: CURLING_GAME_LANE_HEIGHT, radius: CURLING_STONE_RADIUS }, CURLING_REDUCED_MOTION_STEPS);
         position = { x: settled.delivered.x, y: settled.delivered.y };
         velocity = settled.delivered.velocity;
         deliveredOutOfPlay = Boolean(settled.delivered.outOfPlay);
@@ -753,18 +751,14 @@ export function openCurlingGame(trigger) {
         return settled.finished;
       };
 
-      const animate = (timestamp) => {
+      const animate = () => {
         if (phase !== 'flying') return;
         if (advancePhysics()) {
           endThrow();
           return;
         }
-        // The duration is only a safety point: keep deterministic settling until
-        // the same all-stones-stopped condition used by normal animation.
-        if (timestamp - startedAt >= CURLING_MAX_DURATION && settleMatch()) {
-          endThrow();
-          return;
-        }
+        // Keep rendering every physics step, including the slow coast after a
+        // collision. Elapsed time must never fast-forward a visible throw.
         frame = curlingFrame(animate);
       };
 
@@ -773,7 +767,6 @@ export function openCurlingGame(trigger) {
         const rect = laneMetrics();
         velocity = nextVelocity;
         phase = 'flying';
-        startedAt = performance.now();
         score.textContent = '…';
         result.textContent = '';
         status.textContent = '石头壶滑行中…';

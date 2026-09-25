@@ -166,6 +166,41 @@ test('a curling round stays active while a struck setup stone is still moving', 
   assert.ok(next.stones[0].velocity.y < -CURLING_STOP_SPEED);
 });
 
+for (const movingStone of ['delivered', 'setup']) {
+  test(`visible slow motion of the ${movingStone} stone must not end the round`, () => {
+    const state = {
+      delivered: { team: 'red', x: 1.5, y: 4.2, velocity: { x: 0, y: movingStone === 'delivered' ? -0.04 : 0 } },
+      stones: [{ team: 'blue', x: 1, y: 2, velocity: { x: 0, y: movingStone === 'setup' ? -0.04 : 0 } }],
+    };
+    const next = advanceCurlingMatch(state, { width: 3, height: 6, radius: CURLING_STONE_RADIUS });
+    assert.equal(next.finished, false, 'a stone moving several pixels per frame was declared stopped');
+  });
+}
+
+test('finished matches have zero velocities and remain unchanged on further physics steps', () => {
+  const bounds = { width: 3, height: 6, radius: CURLING_STONE_RADIUS };
+  const settled = settleCurlingMatch({
+    delivered: { team: 'red', x: 1.5, y: 4.2, velocity: { x: 0, y: -0.08 } },
+    stones: [{ team: 'blue', x: 1.5, y: 2.8, velocity: { x: 0, y: 0 } }],
+  }, bounds, 1200);
+  assert.equal(settled.finished, true);
+  assert.ok(settled.stones[0].y < 2.8, 'the delivered stone stopped before reaching the collision');
+  for (const stone of [settled.delivered, ...settled.stones]) {
+    assert.deepEqual(stone.velocity, { x: 0, y: 0 });
+  }
+  let continued = settled;
+  for (let frame = 0; frame < 60; frame++) continued = advanceCurlingMatch(continued, bounds);
+  assert.deepEqual(continued, settled);
+});
+
+test('an out-of-play player stone cannot end the round while a setup stone coasts', () => {
+  const next = advanceCurlingMatch({
+    delivered: { team: 'red', x: -1, y: 4, outOfPlay: true, velocity: { x: -0.2, y: 0 } },
+    stones: [{ team: 'blue', x: 1.5, y: 2, velocity: { x: 0, y: -0.01 } }],
+  }, { width: 3, height: 6, radius: CURLING_STONE_RADIUS });
+  assert.equal(next.finished, false);
+});
+
 test('a curling round can finish when the delivered stone leaves before setup stones settle', () => {
   const next = advanceCurlingMatch({
     delivered: { team: 'red', x: 0.3, y: 2.08, velocity: { x: -0.4, y: 0 } },
@@ -373,16 +408,18 @@ test('reduced-motion settling matches incremental curling termination', () => {
   const bounds = { width: 300, height: 225, radius: 18 };
   const start = { position: { x: 150, y: 189 }, velocity: { x: 0, y: -18.801 * 0.18 }, curlDirection: 1 };
   let incremental = start;
-  for (let step = 0; step < 240 && !incremental.finished; step += 1) {
+  for (let step = 0; step < 600 && !incremental.finished; step += 1) {
     incremental = advanceCurlingThrow(incremental, bounds);
   }
-  const reduced = settleCurlingThrow(start, bounds, 240);
+  const reduced = settleCurlingThrow(start, bounds, 600);
   const geometry = curlingLaneGeometry(bounds.width, bounds.height);
   const score = (state) => scoreCurling(Math.hypot(
     state.position.x - geometry.targetX,
     state.position.y - geometry.targetY,
   ) / geometry.houseRadius);
 
+  assert.equal(incremental.finished, true);
+  assert.deepEqual(incremental.velocity, { x: 0, y: 0 });
   assert.equal(score(incremental), 1);
   assert.deepEqual(reduced, incremental);
   assert.equal(score(reduced), score(incremental));

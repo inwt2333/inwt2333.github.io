@@ -35,7 +35,9 @@ export const MAX_BEETLES = 18;
 export const CURLING_SCORE_RATIOS = Object.freeze({ three: 0.32, two: 0.65, one: 1 });
 export const CURLING_HOUSE_RADIUS_RATIO = 0.2;
 export const CURLING_TARGET_Y_RATIO = 0.22;
-export const CURLING_STOP_SPEED = 0.08;
+// Logical lane units per step: below 0.01 rendered pixels even on the widest lane.
+// Static friction removes this imperceptible tail; scoring requires exact zero.
+export const CURLING_STOP_SPEED = 0.0001;
 export const CURLING_GAME_LANE_WIDTH = 3;
 export const CURLING_GAME_LANE_HEIGHT = 6;
 export const CURLING_GAME_LANE_RATIO = CURLING_GAME_LANE_WIDTH / CURLING_GAME_LANE_HEIGHT;
@@ -250,7 +252,11 @@ export function advanceCurlingPhysics(position, velocity, bounds, curlDirection 
   const speed = Math.hypot(nextVelocity.x, nextVelocity.y);
   nextVelocity.x = (nextVelocity.x + curlDirection * 0.0009 * speed) * 0.965;
   nextVelocity.y *= 0.965;
-  return { position: nextPosition, velocity: nextVelocity, speed, outOfPlay };
+  if (Math.hypot(nextVelocity.x, nextVelocity.y) < CURLING_STOP_SPEED) {
+    nextVelocity.x = 0;
+    nextVelocity.y = 0;
+  }
+  return { position: nextPosition, velocity: nextVelocity, speed: Math.hypot(nextVelocity.x, nextVelocity.y), outOfPlay };
 }
 
 export function curlingLaneGeometry(width, height) {
@@ -277,7 +283,7 @@ export function advanceCurlingThrow(state, bounds) {
     position: physics.position,
     velocity: physics.velocity,
     speed: physics.speed,
-    finished: physics.speed < CURLING_STOP_SPEED,
+    finished: physics.speed === 0,
   };
 }
 
@@ -321,7 +327,7 @@ export function advanceCurlingMatch(state, bounds) {
   return {
     delivered,
     stones: collision.stones,
-    finished: allStones.every((stone) => Math.hypot(stone.velocity.x, stone.velocity.y) < CURLING_STOP_SPEED)
+    finished: allStones.every((stone) => stone.velocity.x === 0 && stone.velocity.y === 0)
       && !hasCurlingStoneOverlap(delivered, collision.stones),
   };
 }
@@ -331,7 +337,7 @@ export function settleCurlingThrow(state, bounds, maxSteps) {
   for (let step = 0; step < maxSteps && !next.finished; step += 1) {
     next = advanceCurlingThrow(next, bounds);
   }
-  return { ...next, finished: true };
+  return { ...next, finished: Boolean(next.finished) };
 }
 
 export function settleCurlingMatch(state, bounds, maxSteps) {
