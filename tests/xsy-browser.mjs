@@ -140,7 +140,7 @@ async function run(width, reduced) {
       await wait(40);
     const lane = $('[data-curling-lane]');
     const laneRect = lane.getBoundingClientRect();
-    assert(Math.abs(laneRect.width / laneRect.height - 3 / 5) < .01, 'game lane ratio stretched');
+    assert(Math.abs(laneRect.width / laneRect.height - 3 / 6) < .01, 'game lane ratio stretched');
     const dialog = $('#exhibit-dialog');
     const dialogRect = dialog.getBoundingClientRect();
     assert(laneRect.left >= dialogRect.left && laneRect.right <= dialogRect.right
@@ -149,6 +149,14 @@ async function run(width, reduced) {
     const stoneRect = $('[data-curling-stone]').getBoundingClientRect();
     assert(stoneRect.top >= laneRect.top && stoneRect.bottom <= laneRect.bottom, 'delivery stone escapes the sheet');
     assert(laneRect.bottom - stoneRect.bottom > laneRect.height * .12, 'delivery stone too close to lower edge');
+    const launchPosition = $('[data-curling-launch-position]');
+    assert(launchPosition && launchPosition.getAttribute('aria-label') === '发球位置', 'launch position control missing label');
+    const centerStoneX = stoneRect.left + stoneRect.width / 2;
+    launchPosition.value = '0.5';
+    launchPosition.dispatchEvent(new win.Event('input', { bubbles: true }));
+    const shiftedStoneRect = $('[data-curling-stone]').getBoundingClientRect();
+    assert(shiftedStoneRect.left + shiftedStoneRect.width / 2 < centerStoneX - laneRect.width * .2,
+      'launch position slider did not move the idle stone');
     click('[data-curling-mode="score"]');
     assert($('[data-curling-setup]').hidden === false, 'score setup hidden');
     const setupStone = $('[data-curling-static-stone]');
@@ -183,7 +191,7 @@ async function run(width, reduced) {
         .map((element) => `${element.style.left}/${element.style.top}`);
       assert(resetPositions.join('|') === beforeCollision.join('|'), 'reset did not restore setup positions');
     } else {
-      const launchPoint = { x: laneRect.left + laneRect.width / 2, y: stoneRect.top + stoneRect.height / 2 };
+      const launchPoint = { x: shiftedStoneRect.left + shiftedStoneRect.width / 2, y: shiftedStoneRect.top + shiftedStoneRect.height / 2 };
       const setupTarget = [...doc.querySelectorAll('[data-curling-static-stone]')]
         .map((element) => {
           const rect = element.getBoundingClientRect();
@@ -192,17 +200,17 @@ async function run(width, reduced) {
         .sort((left, right) => (right.y - left.y) || (Math.abs(left.x - launchPoint.x) - Math.abs(right.x - launchPoint.x)))[0];
       const targetLogical = {
         x: (setupTarget.x - laneRect.left) / laneRect.width * 3,
-        y: (setupTarget.y - laneRect.top) / laneRect.height * 5,
+        y: (setupTarget.y - laneRect.top) / laneRect.height * 6,
       };
-      const launchLogical = { x: 1.5, y: 3.2 };
-      const pullLogicalY = 4.85;
+      const launchLogical = { x: 0.5, y: 4.2 };
+      const pullLogicalY = 5.85;
       const pullLogicalX = Math.max(.12, Math.min(2.88,
         launchLogical.x - (targetLogical.x - launchLogical.x)
           / Math.max(Math.abs(targetLogical.y - launchLogical.y), 1)
           * (pullLogicalY - launchLogical.y)));
       const pullPoint = {
         x: laneRect.left + pullLogicalX / 3 * laneRect.width,
-        y: laneRect.top + pullLogicalY / 5 * laneRect.height,
+        y: laneRect.top + pullLogicalY / 6 * laneRect.height,
       };
       assert(pullPoint.y > launchPoint.y, 'targeted pull did not stay below the delivery stone');
       const pointer = (type, point) => lane.dispatchEvent(new win.PointerEvent(type, {

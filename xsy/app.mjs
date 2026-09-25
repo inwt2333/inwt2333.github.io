@@ -6,6 +6,7 @@ import {
   CURLING_STONE_RADIUS,
   CURLING_HOUSE_RADIUS,
   CURLING_DELIVERY_START_Y,
+  clampCurlingLaunchX,
   advanceCurlingMatch,
   availableBeetleSlots,
   createCurlingSetup,
@@ -530,6 +531,7 @@ export function openCurlingGame(trigger) {
           <div class="curling-game__controls">
             <label>方向 <input data-curling-direction type="range" min="-80" max="80" value="0" step="1"><output data-curling-direction-value>0</output></label>
             <label>力度 <input data-curling-strength type="range" min="25" max="100" value="72" step="1"><output data-curling-strength-value>72</output></label>
+            <label>发球位置 <input data-curling-launch-position aria-label="发球位置" type="range" min="${CURLING_STONE_RADIUS}" max="${CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS}" value="${CURLING_GAME_LANE_WIDTH / 2}" step="0.01"><output data-curling-launch-position-value>${(CURLING_GAME_LANE_WIDTH / 2).toFixed(2)}</output></label>
             <button class="curling-game__launch" data-curling-launch type="button">投壶</button>
             <button class="curling-game__reset" data-curling-reset type="button">再投一壶</button>
           </div>
@@ -547,8 +549,10 @@ export function openCurlingGame(trigger) {
       const reset = content.querySelector('[data-curling-reset]');
       const direction = content.querySelector('[data-curling-direction]');
       const strength = content.querySelector('[data-curling-strength]');
+      const launchPosition = content.querySelector('[data-curling-launch-position]');
       const directionValue = content.querySelector('[data-curling-direction-value]');
       const strengthValue = content.querySelector('[data-curling-strength-value]');
+      const launchPositionValue = content.querySelector('[data-curling-launch-position-value]');
       const setup = content.querySelector('[data-curling-setup]');
       const redCount = content.querySelector('[data-curling-red-count]');
       const blueCount = content.querySelector('[data-curling-blue-count]');
@@ -569,6 +573,7 @@ export function openCurlingGame(trigger) {
       let setupStones = [];
       let initialSetupStones = [];
       let deliveredOutOfPlay = false;
+      let launchX = CURLING_GAME_LANE_WIDTH / 2;
 
       const reducedMotion = prefersReducedMotion();
 
@@ -659,11 +664,11 @@ export function openCurlingGame(trigger) {
       };
 
       const resetPosition = () => {
-        position = { x: CURLING_GAME_LANE_WIDTH / 2, y: CURLING_DELIVERY_START_Y };
+        position = { x: launchX, y: CURLING_DELIVERY_START_Y };
         const rect = laneMetrics();
         if (!rect.width || !rect.height) {
           laneRect = null;
-          stone.style.left = '50%';
+          stone.style.left = `${launchX / CURLING_GAME_LANE_WIDTH * 100}%`;
           stone.style.top = `${CURLING_DELIVERY_START_Y / CURLING_GAME_LANE_HEIGHT * 100}%`;
           return;
         }
@@ -771,6 +776,7 @@ export function openCurlingGame(trigger) {
         result.textContent = '';
         status.textContent = '石头壶滑行中…';
         launch.disabled = true;
+        launchPosition.disabled = true;
         reset.disabled = true;
         aim.hidden = true;
         if (reducedMotion) {
@@ -868,6 +874,7 @@ export function openCurlingGame(trigger) {
         result.textContent = '';
         status.textContent = '准备投壶';
         launch.disabled = false;
+        launchPosition.disabled = false;
         reset.disabled = true;
         resetPosition();
         if (mode === 'score') {
@@ -906,6 +913,13 @@ export function openCurlingGame(trigger) {
         directionValue.textContent = direction.value;
         strengthValue.textContent = strength.value;
       };
+      const onLaunchPositionInput = () => {
+        if (phase !== 'idle') return;
+        launchX = clampCurlingLaunchX(launchPosition.value);
+        launchPosition.value = String(launchX);
+        launchPositionValue.textContent = launchX.toFixed(2);
+        resetPosition();
+      };
       const onLaneKeydown = (event) => {
         if ((event.key === 'Enter' || event.key === ' ') && phase === 'idle') {
           event.preventDefault();
@@ -926,6 +940,7 @@ export function openCurlingGame(trigger) {
       for (const button of modeButtons) button.addEventListener('click', () => setMode(button.dataset.curlingMode));
       direction.addEventListener('input', onSliderInput);
       strength.addEventListener('input', onSliderInput);
+      launchPosition.addEventListener('input', onLaunchPositionInput);
       resetGame();
       reset.disabled = true;
       initializationFrame = curlingFrame(() => {
@@ -949,6 +964,7 @@ export function openCurlingGame(trigger) {
         blueCount.removeEventListener('change', updateSetup);
         direction.removeEventListener('input', onSliderInput);
         strength.removeEventListener('input', onSliderInput);
+        launchPosition.removeEventListener('input', onLaunchPositionInput);
       };
     },
   });

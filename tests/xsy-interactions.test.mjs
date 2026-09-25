@@ -12,6 +12,7 @@ import {
   CURLING_STONE_RADIUS,
   CURLING_DELIVERY_START_Y,
   CURLING_STOP_SPEED,
+  clampCurlingLaunchX,
   advanceCurlingMatch,
   advanceCurlingThrow,
   advanceCurlingPhysics,
@@ -350,15 +351,22 @@ test('curling setup snapshots clone positions and clear every velocity', () => {
 
 test('curling delivery starts high enough to preserve the full downward pull', () => {
   assert.ok(CURLING_DELIVERY_START_Y <= CURLING_GAME_LANE_HEIGHT - 0.7);
-  assert.ok(CURLING_GAME_LANE_HEIGHT - CURLING_DELIVERY_START_Y >= 1.7);
+  assert.ok(Math.abs(CURLING_GAME_LANE_HEIGHT - CURLING_DELIVERY_START_Y - 1.8) < 1e-9);
 });
 
-test('curling game lane preserves the screen-fit three-by-five vertical proportion', () => {
-  // A regression that restores a horizontal lane or stretches the game lane would break this.
-  assert.equal(CURLING_GAME_LANE_RATIO, 3 / 5);
+test('curling game lane preserves the longer screen-fit three-by-six vertical proportion', () => {
+  // A regression that restores the shorter lane or stretches the game lane would break this.
+  assert.equal(CURLING_GAME_LANE_RATIO, 3 / 6);
   assert.equal(CURLING_GAME_LANE_WIDTH, 3);
-  assert.equal(CURLING_GAME_LANE_HEIGHT, 5);
+  assert.equal(CURLING_GAME_LANE_HEIGHT, 6);
   assert.ok(CURLING_HOUSE_RADIUS >= CURLING_STONE_RADIUS * 4);
+});
+
+test('curling launch position clamps to the stone-safe lane and maps invalid input to center', () => {
+  assert.equal(clampCurlingLaunchX(-1), CURLING_STONE_RADIUS);
+  assert.equal(clampCurlingLaunchX(CURLING_GAME_LANE_WIDTH + 1), CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS);
+  assert.equal(clampCurlingLaunchX(1.8), 1.8);
+  assert.equal(clampCurlingLaunchX('not-a-number'), CURLING_GAME_LANE_WIDTH / 2);
 });
 
 test('reduced-motion settling matches incremental curling termination', () => {

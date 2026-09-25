@@ -37,15 +37,24 @@ export const CURLING_HOUSE_RADIUS_RATIO = 0.2;
 export const CURLING_TARGET_Y_RATIO = 0.22;
 export const CURLING_STOP_SPEED = 0.08;
 export const CURLING_GAME_LANE_WIDTH = 3;
-export const CURLING_GAME_LANE_HEIGHT = 5;
+export const CURLING_GAME_LANE_HEIGHT = 6;
 export const CURLING_GAME_LANE_RATIO = CURLING_GAME_LANE_WIDTH / CURLING_GAME_LANE_HEIGHT;
 export const CURLING_STONE_RADIUS = 0.16;
 export const CURLING_HOUSE_RADIUS = 0.72;
-export const CURLING_DELIVERY_START_Y = 3.2;
+export const CURLING_DELIVERY_START_Y = 4.2;
 export const CURLING_HOUSE_CENTER = Object.freeze({
   x: CURLING_GAME_LANE_WIDTH / 2,
   y: 1.1,
 });
+
+export function clampCurlingLaunchX(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return CURLING_GAME_LANE_WIDTH / 2;
+  return Math.max(CURLING_STONE_RADIUS, Math.min(
+    CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS,
+    numeric,
+  ));
+}
 
 export function nextNightState(isActive) {
   const active = !isActive;
