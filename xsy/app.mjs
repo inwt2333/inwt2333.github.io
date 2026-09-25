@@ -516,7 +516,7 @@ export function openCurlingGame(trigger) {
             <div class="curling-stone" data-curling-stone aria-label="石头壶" role="img">🥌</div>
           </div>
           <div class="curling-game__launch-position" data-curling-launch-position-control>
-            <label>发球位置 <input data-curling-launch-position aria-label="发球位置" type="range" min="${CURLING_STONE_RADIUS}" max="${CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS}" value="${CURLING_GAME_LANE_WIDTH / 2}" step="0.01"><output data-curling-launch-position-value>${(CURLING_GAME_LANE_WIDTH / 2).toFixed(2)}</output></label>
+            <label><span>发球位置</span><input data-curling-launch-position aria-label="发球位置" type="range" min="${CURLING_STONE_RADIUS}" max="${CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS}" value="${CURLING_GAME_LANE_WIDTH / 2}" step="0.01"><output data-curling-launch-position-value>${(CURLING_GAME_LANE_WIDTH / 2).toFixed(2)}</output></label>
           </div>
           </div>
           <div class="curling-game__panel">

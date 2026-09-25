@@ -636,23 +636,37 @@ footer {
 }
 
 .curling-game__launch-position label {
+  position: relative;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 24px;
   align-items: center;
-  gap: 7px;
   font-size: .78rem;
   font-weight: 900;
 }
 
+.curling-game__launch-position label > span,
+.curling-game__launch-position output {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.curling-game__launch-position label > span { right: calc(100% + 8px); }
+
 .curling-game__launch-position input {
+  display: block;
   min-width: 0;
   width: 100%;
+  margin: 0;
   accent-color: var(--red);
 }
 
 .curling-game__launch-position output {
+  left: calc(100% + 8px);
   min-width: 2.4em;
-  text-align: right;
+  text-align: left;
   font-family: 'Space Mono', monospace;
 }
 
