@@ -179,6 +179,9 @@ async function run(width, reduced) {
       assert($('[data-curling-score-prefix]').textContent === '投掷后比分：', 'after score missing');
       click('[data-curling-reset]');
       assert($('[data-curling-score-prefix]').textContent === '投掷前比分：', 'reset score');
+      const resetPositions = [...doc.querySelectorAll('[data-curling-static-stone]')]
+        .map((element) => `${element.style.left}/${element.style.top}`);
+      assert(resetPositions.join('|') === beforeCollision.join('|'), 'reset did not restore setup positions');
     } else {
       const launchPoint = { x: laneRect.left + laneRect.width / 2, y: stoneRect.top + stoneRect.height / 2 };
       const setupTarget = [...doc.querySelectorAll('[data-curling-static-stone]')]
@@ -191,7 +194,7 @@ async function run(width, reduced) {
         x: (setupTarget.x - laneRect.left) / laneRect.width * 3,
         y: (setupTarget.y - laneRect.top) / laneRect.height * 5,
       };
-      const launchLogical = { x: 1.5, y: 3.9 };
+      const launchLogical = { x: 1.5, y: 3.2 };
       const pullLogicalY = 4.85;
       const pullLogicalX = Math.max(.12, Math.min(2.88,
         launchLogical.x - (targetLogical.x - launchLogical.x)
@@ -226,9 +229,16 @@ async function run(width, reduced) {
       pointer('pointerup', pullPoint);
       for (let elapsed = 0; elapsed < 16_000 && $('[data-curling-reset]').disabled; elapsed += 50) await wait(50);
       assert(!$('[data-curling-reset]').disabled, 'pointer throw did not settle within the bounded wait');
-      const afterCollision = [...doc.querySelectorAll('[data-curling-static-stone]')].map((element) => `${element.style.left}/${element.style.top}`);
-      assert(afterCollision.some((position, index) => position !== beforeCollision[index]), 'pointer collision did not move any setup stone');
       assert($('[data-curling-score-prefix]').textContent === '投掷后比分：', 'normal-motion after score missing');
+      const renderedStonePositions = () => [...doc.querySelectorAll('[data-curling-stone], [data-curling-static-stone]')]
+        .map((element) => `${element.style.left}/${element.style.top}`).join('|');
+      const settledPositions = renderedStonePositions();
+      await wait(80);
+      assert(renderedStonePositions() === settledPositions, 'rendered stones were not stable after score');
+      click('[data-curling-reset]');
+      assert([...doc.querySelectorAll('[data-curling-static-stone]')]
+        .map((element) => `${element.style.left}/${element.style.top}`).join('|') === beforeCollision.join('|'),
+      'reset did not restore setup positions');
     }
     } finally {
       const dialog = $('#exhibit-dialog');

@@ -10,6 +10,7 @@ import {
   CURLING_GAME_LANE_WIDTH,
   CURLING_HOUSE_RADIUS,
   CURLING_STONE_RADIUS,
+  CURLING_DELIVERY_START_Y,
   CURLING_STOP_SPEED,
   advanceCurlingMatch,
   advanceCurlingThrow,
@@ -20,6 +21,7 @@ import {
   curlingLaneGeometry,
   clampCurlingSetupCounts,
   createCurlingSetup,
+  cloneCurlingStones,
   forceSettleCurlingMatch,
   hasCurlingStoneOverlap,
   resolveCurlingStoneCollisions,
@@ -284,6 +286,28 @@ test('curling match layout clamps setup counts and creates a deterministic legal
       assert.ok(Math.hypot(first[left].x - first[right].x, first[left].y - first[right].y) >= CURLING_STONE_RADIUS * 2);
     }
   }
+});
+
+test('curling setup snapshots clone positions and clear every velocity', () => {
+  const source = [
+    { team: 'red', x: 1.2, y: 1.1, velocity: { x: 0.4, y: -0.2 } },
+    { team: 'blue', x: 1.8, y: 1.1, velocity: { x: -0.3, y: 0.1 } },
+  ];
+  const snapshot = cloneCurlingStones(source);
+  snapshot[0].x = 2.4;
+  snapshot[0].velocity.x = 99;
+  assert.deepEqual(source[0], {
+    team: 'red', x: 1.2, y: 1.1, velocity: { x: 0.4, y: -0.2 },
+  });
+  assert.deepEqual(snapshot, [
+    { team: 'red', x: 2.4, y: 1.1, velocity: { x: 99, y: 0 } },
+    { team: 'blue', x: 1.8, y: 1.1, velocity: { x: 0, y: 0 } },
+  ]);
+});
+
+test('curling delivery starts high enough to preserve the full downward pull', () => {
+  assert.ok(CURLING_DELIVERY_START_Y <= CURLING_GAME_LANE_HEIGHT - 0.7);
+  assert.ok(CURLING_GAME_LANE_HEIGHT - CURLING_DELIVERY_START_Y >= 1.7);
 });
 
 test('curling game lane preserves the screen-fit three-by-five vertical proportion', () => {

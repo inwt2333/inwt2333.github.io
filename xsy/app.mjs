@@ -4,11 +4,13 @@ import {
   CURLING_GAME_LANE_WIDTH,
   CURLING_GAME_LANE_HEIGHT,
   CURLING_STONE_RADIUS,
+  CURLING_HOUSE_RADIUS,
+  CURLING_DELIVERY_START_Y,
   advanceCurlingMatch,
   availableBeetleSlots,
   createCurlingSetup,
+  cloneCurlingStones,
   settleCurlingMatch,
-  forceSettleCurlingMatch,
   scoreCurlingEnd,
   curlingResult,
   nextIndex,
@@ -478,7 +480,6 @@ export function openLyrics(trigger) {
   });
 }
 
-const CURLING_START_Y = 3.9;
 const CURLING_MAX_DURATION = 15_000;
 const CURLING_MAX_STEPS = Math.ceil(CURLING_MAX_DURATION / (1000 / 60));
 
@@ -566,6 +567,7 @@ export function openCurlingGame(trigger) {
       let laneRect = null;
       let mode = 'practice';
       let setupStones = [];
+      let initialSetupStones = [];
 
       const reducedMotion = prefersReducedMotion();
 
@@ -599,7 +601,11 @@ export function openCurlingGame(trigger) {
       });
 
       const renderHouse = (rect) => {
-        const geometry = { outerDiameter: 1.24, twoDiameter: 0.806, threeDiameter: 0.397 };
+        const geometry = {
+          outerDiameter: CURLING_HOUSE_RADIUS * 2,
+          twoDiameter: CURLING_HOUSE_RADIUS * 2 * 0.65,
+          threeDiameter: CURLING_HOUSE_RADIUS * 2 * 0.32,
+        };
         const center = logicalToRendered({ x: CURLING_GAME_LANE_WIDTH / 2, y: 1.1 }, rect);
         const scale = rect.width / CURLING_GAME_LANE_WIDTH;
         target.style.setProperty('--curling-house-left', `${center.x}px`);
@@ -613,6 +619,8 @@ export function openCurlingGame(trigger) {
         const rendered = logicalToRendered(position);
         const diameter = CURLING_STONE_RADIUS * 2 / CURLING_GAME_LANE_WIDTH * (laneRect || laneMetrics()).width;
         lane.style.setProperty('--curling-stone-diameter', `${diameter}px`);
+        stone.style.width = `${diameter}px`;
+        stone.style.height = `${diameter}px`;
         stone.style.left = `${rendered.x}px`;
         stone.style.top = `${rendered.y}px`;
       };
@@ -627,6 +635,9 @@ export function openCurlingGame(trigger) {
           element.dataset.curlingStaticStone = existingStone.team;
           element.setAttribute('aria-label', existingStone.team === 'red' ? '已有红壶' : '已有蓝壶');
           element.setAttribute('role', 'img');
+          const diameter = CURLING_STONE_RADIUS * 2 / CURLING_GAME_LANE_WIDTH * rect.width;
+          element.style.width = `${diameter}px`;
+          element.style.height = `${diameter}px`;
           element.style.left = `${rendered.x}px`;
           element.style.top = `${rendered.y}px`;
           lane.append(element);
@@ -645,14 +656,14 @@ export function openCurlingGame(trigger) {
       };
 
       const resetPosition = () => {
+        position = { x: CURLING_GAME_LANE_WIDTH / 2, y: CURLING_DELIVERY_START_Y };
         const rect = laneMetrics();
         if (!rect.width || !rect.height) {
           laneRect = null;
           stone.style.left = '50%';
-          stone.style.top = `${CURLING_START_Y / CURLING_GAME_LANE_HEIGHT * 100}%`;
+          stone.style.top = `${CURLING_DELIVERY_START_Y / CURLING_GAME_LANE_HEIGHT * 100}%`;
           return;
         }
-        position = { x: CURLING_GAME_LANE_WIDTH / 2, y: CURLING_START_Y };
         updateStone();
         aim.hidden = true;
       };
@@ -682,7 +693,7 @@ export function openCurlingGame(trigger) {
           frame = null;
         }
         const rect = laneRect || laneMetrics();
-        const geometry = { targetX: CURLING_GAME_LANE_WIDTH / 2, targetY: 1.1, houseRadius: 0.62 };
+        const geometry = { targetX: CURLING_GAME_LANE_WIDTH / 2, targetY: 1.1, houseRadius: CURLING_HOUSE_RADIUS };
         const distanceRatio = Math.hypot(
           position.x - geometry.targetX,
           position.y - geometry.targetY,
@@ -721,28 +732,23 @@ export function openCurlingGame(trigger) {
           delivered: { team: 'red', ...position, velocity },
           stones: setupStones,
         }, { width: CURLING_GAME_LANE_WIDTH, height: CURLING_GAME_LANE_HEIGHT, radius: CURLING_STONE_RADIUS }, CURLING_MAX_STEPS);
-        if (!settled.finished) {
-          settled = forceSettleCurlingMatch(settled, {
-            width: CURLING_GAME_LANE_WIDTH,
-            height: CURLING_GAME_LANE_HEIGHT,
-            radius: CURLING_STONE_RADIUS,
-          });
-        }
         position = { x: settled.delivered.x, y: settled.delivered.y };
         velocity = settled.delivered.velocity;
         setupStones = settled.stones;
         updateStone();
         renderSetupStones();
+        return settled.finished;
       };
 
       const animate = (timestamp) => {
         if (phase !== 'flying') return;
-        if (timestamp - startedAt >= CURLING_MAX_DURATION) {
-          settleMatch();
+        if (advancePhysics()) {
           endThrow();
           return;
         }
-        if (advancePhysics()) {
+        // The duration is only a safety point: keep deterministic settling until
+        // the same all-stones-stopped condition used by normal animation.
+        if (timestamp - startedAt >= CURLING_MAX_DURATION && settleMatch()) {
           endThrow();
           return;
         }
@@ -762,8 +768,8 @@ export function openCurlingGame(trigger) {
         reset.disabled = true;
         aim.hidden = true;
         if (reducedMotion) {
-          settleMatch();
-          endThrow();
+          if (settleMatch()) endThrow();
+          else frame = curlingFrame(animate);
           return;
         }
         frame = curlingFrame(animate);
@@ -794,7 +800,7 @@ export function openCurlingGame(trigger) {
       const onPointerDown = (event) => {
         if (phase !== 'idle' || event.button !== 0) return;
         const point = pointerPosition(event);
-        if (point.y < CURLING_GAME_LANE_HEIGHT * 0.55) return;
+        if (point.y < CURLING_GAME_LANE_HEIGHT * 0.5) return;
         dragging = true;
         pointerId = event.pointerId;
         pullPoint = point;
@@ -850,6 +856,7 @@ export function openCurlingGame(trigger) {
         dragging = false;
         pointerId = null;
         pullPoint = null;
+        setupStones = mode === 'score' ? cloneCurlingStones(initialSetupStones) : [];
         if (mode === 'practice') score.textContent = '—';
         result.textContent = '';
         status.textContent = '准备投壶';
@@ -871,7 +878,7 @@ export function openCurlingGame(trigger) {
       };
 
       const updateSetup = () => {
-        setupStones = createCurlingSetup({ redCount: redCount.value, blueCount: blueCount.value });
+        initialSetupStones = createCurlingSetup({ redCount: redCount.value, blueCount: blueCount.value });
         resetGame();
       };
 
@@ -881,6 +888,7 @@ export function openCurlingGame(trigger) {
         for (const button of modeButtons) button.setAttribute('aria-pressed', String(button.dataset.curlingMode === mode));
         if (mode === 'score') updateSetup();
         else {
+          initialSetupStones = [];
           setupStones = [];
           renderSetupStones();
           resetGame();

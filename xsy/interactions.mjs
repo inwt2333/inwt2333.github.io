@@ -39,8 +39,9 @@ export const CURLING_STOP_SPEED = 0.08;
 export const CURLING_GAME_LANE_WIDTH = 3;
 export const CURLING_GAME_LANE_HEIGHT = 5;
 export const CURLING_GAME_LANE_RATIO = CURLING_GAME_LANE_WIDTH / CURLING_GAME_LANE_HEIGHT;
-export const CURLING_STONE_RADIUS = 0.12;
-export const CURLING_HOUSE_RADIUS = 0.62;
+export const CURLING_STONE_RADIUS = 0.16;
+export const CURLING_HOUSE_RADIUS = 0.72;
+export const CURLING_DELIVERY_START_Y = 3.2;
 export const CURLING_HOUSE_CENTER = Object.freeze({
   x: CURLING_GAME_LANE_WIDTH / 2,
   y: 1.1,
@@ -118,7 +119,7 @@ export function createCurlingSetup({ redCount = 0, blueCount = 0, random = Math.
     return true;
   };
 
-  const columns = [1.5, 1.15, 1.85, 0.8, 2.2];
+  const columns = [0.5, 1, 1.5, 2, 2.5];
   for (const [index, team] of teams.entries()) {
     const column = columns[index % columns.length];
     const row = Math.floor(index / columns.length);
@@ -127,6 +128,15 @@ export function createCurlingSetup({ redCount = 0, blueCount = 0, random = Math.
     addCandidate({ x: column + offsetX, y: .75 + row * .5 + offsetY }, team);
   }
   return stones;
+}
+
+export function cloneCurlingStones(stones) {
+  return stones.map(({ team, x, y }) => ({
+    team,
+    x,
+    y,
+    velocity: { x: 0, y: 0 },
+  }));
 }
 
 export function resolveCurlingStoneCollisions(delivered, stones, bounds = null) {
