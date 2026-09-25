@@ -523,6 +523,9 @@ export function openCurlingGame(trigger) {
             <div class="curling-aim" data-curling-aim aria-hidden="true"></div>
             <div class="curling-stone" data-curling-stone aria-label="石头壶" role="img">🥌</div>
           </div>
+          <div class="curling-game__launch-position" data-curling-launch-position-control>
+            <label>发球位置 <input data-curling-launch-position aria-label="发球位置" type="range" min="${CURLING_STONE_RADIUS}" max="${CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS}" value="${CURLING_GAME_LANE_WIDTH / 2}" step="0.01"><output data-curling-launch-position-value>${(CURLING_GAME_LANE_WIDTH / 2).toFixed(2)}</output></label>
+          </div>
           <div class="curling-game__readout" aria-live="polite">
             <span><span data-curling-score-prefix>本轮得分：</span><strong data-curling-score>—</strong></span>
             <span data-curling-status>准备投壶</span>
@@ -531,7 +534,6 @@ export function openCurlingGame(trigger) {
           <div class="curling-game__controls">
             <label>方向 <input data-curling-direction type="range" min="-80" max="80" value="0" step="1"><output data-curling-direction-value>0</output></label>
             <label>力度 <input data-curling-strength type="range" min="25" max="100" value="72" step="1"><output data-curling-strength-value>72</output></label>
-            <label>发球位置 <input data-curling-launch-position aria-label="发球位置" type="range" min="${CURLING_STONE_RADIUS}" max="${CURLING_GAME_LANE_WIDTH - CURLING_STONE_RADIUS}" value="${CURLING_GAME_LANE_WIDTH / 2}" step="0.01"><output data-curling-launch-position-value>${(CURLING_GAME_LANE_WIDTH / 2).toFixed(2)}</output></label>
             <button class="curling-game__launch" data-curling-launch type="button">投壶</button>
             <button class="curling-game__reset" data-curling-reset type="button">再投一壶</button>
           </div>

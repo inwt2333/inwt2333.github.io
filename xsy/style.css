@@ -608,6 +608,32 @@ footer {
   touch-action: none;
 }
 
+.curling-game__launch-position {
+  width: min(100%, 22.2svh, 216px);
+  margin: 10px auto 0;
+}
+
+.curling-game__launch-position label {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 7px;
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.curling-game__launch-position input {
+  min-width: 0;
+  width: 100%;
+  accent-color: var(--red);
+}
+
+.curling-game__launch-position output {
+  min-width: 2.4em;
+  text-align: right;
+  font-family: 'Space Mono', monospace;
+}
+
 .curling-game__lane:focus-visible {
   outline: 3px solid var(--red);
   outline-offset: 3px;
@@ -720,7 +746,7 @@ footer {
 
 .curling-game__controls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
   align-items: end;
   gap: 12px;
   margin-top: 8px;

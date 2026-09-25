@@ -151,6 +151,17 @@ async function run(width, reduced) {
     assert(laneRect.bottom - stoneRect.bottom > laneRect.height * .12, 'delivery stone too close to lower edge');
     const launchPosition = $('[data-curling-launch-position]');
     assert(launchPosition && launchPosition.getAttribute('aria-label') === '发球位置', 'launch position control missing label');
+    const launchPositionControl = $('[data-curling-launch-position-control]');
+    const launchPositionRect = launchPositionControl?.getBoundingClientRect();
+    assert(launchPositionControl && lane.nextElementSibling === launchPositionControl,
+      'launch position control is not directly below the lane');
+    assert(Math.abs(launchPositionRect.width - laneRect.width) < 1
+      && Math.abs(launchPositionRect.left - laneRect.left) < 1,
+    'launch position control is not aligned with the lane');
+    const launchButtonRect = $('[data-curling-launch]').getBoundingClientRect();
+    const resetButtonRect = $('[data-curling-reset]').getBoundingClientRect();
+    assert(Math.abs(launchButtonRect.top - resetButtonRect.top) < 1,
+      'curling action buttons are not on the same row');
     const centerStoneX = stoneRect.left + stoneRect.width / 2;
     launchPosition.value = '0.5';
     launchPosition.dispatchEvent(new win.Event('input', { bubbles: true }));
