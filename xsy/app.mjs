@@ -64,7 +64,6 @@ export const favorites = [
     icon: '🥌',
     verdict: '冰壶，但必须是石头的。',
     blurb: '塑料壶请在门外稍候。真正的重量感，需要一条冰道来证明。',
-    action: '出壶',
     effect: 'curling',
     extras: [{ label: '投一壶', action: 'curling' }],
     links: [
@@ -91,7 +90,7 @@ export const favorites = [
     kicker: 'HISTORY HITS BACK',
     icon: '📚',
     verdict: '近代史不是过去式。',
-    blurb: '交大马克思主义学院助理教授，研究中国近现代史，也研究如何让课堂突然醒来。',
+    blurb: '交大马克思主义学院长聘副教授，研究中国近现代史，也研究如何让课堂突然醒来。',
     action: '接受批注',
     effect: 'history',
     links: [
@@ -179,6 +178,10 @@ function cardMarkup(item, index) {
     ? `<div class="favorite__resources">${links}${extras}</div>`
     : '';
 
+  const actionButton = item.action
+    ? `<button class="favorite__action" type="button"${item.effect === 'yorushika' ? ' aria-pressed="false"' : ''}>${escapeHtml(item.action)}</button>`
+    : '';
+
   return `
     <article class="favorite favorite--${escapeHtml(item.id)}" data-effect="${escapeHtml(item.effect)}" tabindex="0">
       <div class="favorite__number" aria-hidden="true">${String(index + 1).padStart(2, '0')}</div>
@@ -188,7 +191,7 @@ function cardMarkup(item, index) {
       <p class="favorite__verdict">${escapeHtml(item.verdict)}</p>
       <p class="favorite__blurb">${escapeHtml(item.blurb)}</p>
       ${resources}
-      <button class="favorite__action" type="button"${item.effect === 'yorushika' ? ' aria-pressed="false"' : ''}>${escapeHtml(item.action)}</button>
+      ${actionButton}
       <output class="favorite__output" aria-live="polite"></output>
     </article>`;
 }

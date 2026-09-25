@@ -80,6 +80,7 @@ test('interactive cards expose the requested secondary actions', () => {
   const byId = Object.fromEntries(favorites.map((item) => [item.id, item]));
 
   assert.deepEqual(byId['stone-kettle'].extras, [{ label: '投一壶', action: 'curling' }]);
+  assert.equal(byId['stone-kettle'].action, undefined);
   assert.deepEqual(byId['hanyuecheng-butt'].extras, [{ label: '打屁股', action: 'slap' }]);
   assert.deepEqual(byId.yorushika.extras, [{ label: '翻开一句歌词', action: 'lyrics' }]);
 });
