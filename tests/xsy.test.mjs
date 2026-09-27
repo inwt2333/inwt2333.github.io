@@ -17,7 +17,7 @@ test('the title count follows the number of favorite entries', () => {
 });
 
 test('the initial collection contains every requested favorite exactly once', () => {
-  assert.equal(favorites.length, 9);
+  assert.equal(favorites.length, 12);
   assert.deepEqual(
     favorites.map(({ name }) => name),
     [
@@ -30,9 +30,19 @@ test('the initial collection contains every requested favorite exactly once', ()
       '校园巴士',
       '二餐教工餐厅',
       'ヨルシカ',
+      '日麻',
+      '国际象棋',
+      '心理咨询',
     ],
   );
   assert.equal(new Set(favorites.map(({ id }) => id)).size, favorites.length);
+});
+
+test('the composure report declines with interaction and stops at zero', () => {
+  assert.deepEqual(xsy.composureReport(0), { percent: 100, verdict: '目前仍在硬绷' });
+  assert.deepEqual(xsy.composureReport(1), { percent: 87, verdict: '嘴角已申请离岗' });
+  assert.deepEqual(xsy.composureReport(8), { percent: 0, verdict: '绷住这件事已被撤稿' });
+  assert.deepEqual(xsy.composureReport(100), { percent: 0, verdict: '绷住这件事已被撤稿' });
 });
 
 test('public references use verified https destinations', () => {

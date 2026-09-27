@@ -193,6 +193,39 @@ footer {
 .collection__heading h2 { margin: 0; font-size: 3.5rem; line-height: 1; }
 .collection__heading span { font-size: .82rem; font-weight: 700; }
 
+.collection__composure {
+  display: grid;
+  grid-template-columns: auto auto minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin: -20px 0 42px;
+  padding: 12px 0;
+  border-bottom: 2px solid var(--ink);
+  font-size: .84rem;
+  font-weight: 800;
+}
+
+.collection__composure-label { white-space: nowrap; }
+.collection__composure strong {
+  min-width: 2.6em;
+  color: var(--red);
+  font-family: 'Space Mono', monospace;
+  font-size: 1.2rem;
+}
+.collection__composure progress {
+  width: 100%;
+  height: 13px;
+  border: 2px solid var(--ink);
+  border-radius: 0;
+  color: var(--red);
+  background: transparent;
+  appearance: none;
+}
+.collection__composure progress::-webkit-progress-bar { background: transparent; }
+.collection__composure progress::-webkit-progress-value { background: var(--red); }
+.collection__composure progress::-moz-progress-bar { background: var(--red); }
+.collection__composure [data-composure-verdict] { text-align: right; }
+
 .favorites {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -221,6 +254,9 @@ footer {
 .favorite:nth-child(4) { --card-color: var(--pink); }
 .favorite:nth-child(6) { --card-color: #fff2a8; }
 .favorite:nth-child(9) { --card-color: #101936; color: white; }
+.favorite:nth-child(10) { --card-color: #ffc3a0; }
+.favorite:nth-child(11) { --card-color: #d2def2; }
+.favorite:nth-child(12) { --card-color: #b9e8cf; }
 
 .favorite:nth-child(1),
 .favorite:nth-child(6) { grid-column: span 7; }
@@ -267,6 +303,25 @@ footer {
 
 .favorite:nth-child(even) .favorite__icon { margin-left: auto; transform: rotate(4deg); }
 .favorite:hover .favorite__icon { transform: rotate(5deg) scale(1.04); }
+
+.favorite--mahjong .favorite__icon {
+  background: #fff;
+  font-size: 5.7rem;
+}
+.favorite--mahjong.is-active .favorite__icon {
+  font-size: 2.8rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.favorite--chess .favorite__icon {
+  color: #fff;
+  background: conic-gradient(#263a42 25%, #c9d6cb 0 50%, #263a42 0 75%, #c9d6cb 0) 0 0 / 68px 68px;
+  font-size: 6rem;
+  text-shadow: 3px 3px 0 #111;
+}
+.favorite--counseling .favorite__icon { background: #fce7ed; }
+.favorite--mahjong.is-active .favorite__icon { animation: tile-flip 480ms ease; }
+.favorite--chess.is-active .favorite__icon { animation: chess-hop 420ms ease; }
 
 .favorite h2 { margin: 0 0 10px; font-size: 2rem; line-height: 1.15; }
 .favorite__verdict { margin: 0 0 14px; font-size: 1.05rem; font-weight: 900; }
@@ -534,7 +589,11 @@ footer {
 .night-shift .favorite:nth-child(4) { --card-color: #3a315d; }
 .night-shift .favorite:nth-child(6) { --card-color: #3a4558; }
 .night-shift .favorite:nth-child(9) { --card-color: #263a72; }
+.night-shift .favorite:nth-child(10) { --card-color: #603d50; }
+.night-shift .favorite:nth-child(11) { --card-color: #304565; }
+.night-shift .favorite:nth-child(12) { --card-color: #255851; }
 .night-shift .favorite__icon { color: #111; }
+.night-shift .favorite--chess .favorite__icon { color: #fff; }
 .favorite__extra:disabled {
   cursor: not-allowed;
   opacity: .52;
@@ -1042,6 +1101,14 @@ footer p { margin: 0; }
   50% { transform: rotate(-8deg) scale(1.15); }
 }
 
+@keyframes tile-flip {
+  50% { transform: rotate(12deg) scale(.84); }
+}
+
+@keyframes chess-hop {
+  50% { transform: translateY(-14px) rotate(-7deg); }
+}
+
 @keyframes slide-stone {
   0% { transform: translateX(0) rotate(-4deg); }
   55% { transform: translateX(calc(100% + 80px)) rotate(25deg); }
@@ -1113,6 +1180,15 @@ footer p { margin: 0; }
   .collection { padding: 62px 18px 82px; }
   .collection__heading { display: block; }
   .collection__heading h2 { font-size: 2.55rem; margin-bottom: 12px; }
+  .collection__composure {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    gap: 8px 12px;
+    margin: -16px 0 30px;
+  }
+  .collection__composure [data-composure-verdict] {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
   .favorites { display: block; }
   .favorite { min-height: 480px; margin-bottom: 28px; padding: 24px; }
   .favorite__number { font-size: 4rem; }
@@ -1125,7 +1201,41 @@ footer p { margin: 0; }
   footer p + p { margin-top: 8px; }
 }
 
+@media (max-width: 360px) {
+  .cover__dek { width: 100%; }
+  .cover__seal { display: none; }
+  .cover__specimen {
+    right: 20px;
+    bottom: 80px;
+    left: 20px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    transform: none;
+  }
+  .cover__specimen span {
+    width: 44px;
+    font-size: 1.6rem;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .cover__specimen span:nth-child(3),
+  .cover__specimen span:nth-child(5) { transform: none; }
+  .favorite--mahjong,
+  .favorite--chess,
+  .favorite--counseling { min-height: 580px; }
+  .favorite--mahjong .favorite__output,
+  .favorite--chess .favorite__output,
+  .favorite--counseling .favorite__output {
+    right: 24px;
+    bottom: 88px;
+    left: 24px;
+    max-width: none;
+    text-align: left;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .favorite--mahjong.is-active .favorite__icon,
+  .favorite--chess.is-active .favorite__icon { animation: none; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
 }

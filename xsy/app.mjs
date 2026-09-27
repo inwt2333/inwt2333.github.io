@@ -145,6 +145,36 @@ export const favorites = [
     ],
     extras: [{ label: '翻开一句歌词', action: 'lyrics' }],
   },
+  {
+    id: 'mahjong',
+    name: '日麻',
+    kicker: 'FOUR PLAYERS, ONE BRAIN CELL',
+    icon: '🀄',
+    verdict: '立直之后，人生开始听牌。',
+    blurb: '每次摸牌都像在拆命运的快递。拆开一看：又是别人要的那张。',
+    action: '摸一张',
+    effect: 'mahjong',
+  },
+  {
+    id: 'chess',
+    name: '国际象棋',
+    kicker: 'CHECKMATE, EVENTUALLY',
+    icon: '♞',
+    verdict: '开局想了十步，第一步就想悔棋。',
+    blurb: '王很安全，主要因为 xsy 一直没让他出门。对手还在思考，他已开始复盘。',
+    action: '走一步',
+    effect: 'chess',
+  },
+  {
+    id: 'counseling',
+    name: '心理咨询',
+    kicker: 'THE INNER COMMITTEE',
+    icon: '🛋️',
+    verdict: '认真聊天，认真把心放回原处。',
+    blurb: '这里没有标准答案。偶尔只是把脑内同时发言的代表请去排队。',
+    action: '召开内心会议',
+    effect: 'counseling',
+  },
 ];
 
 export function makePageModel(items) {
@@ -153,6 +183,14 @@ export function makePageModel(items) {
     title: `xsy最喜欢的${items.length}样东西`,
     items,
   };
+}
+
+export function composureReport(interactions) {
+  const percent = Math.max(0, 100 - Math.max(0, interactions) * 13);
+  const verdict = percent === 100 ? '目前仍在硬绷'
+    : percent === 0 ? '绷住这件事已被撤稿'
+      : percent <= 48 ? '表情管理进入加时赛' : '嘴角已申请离岗';
+  return { percent, verdict };
 }
 
 const escapeHtml = (value) => String(value)
@@ -322,6 +360,48 @@ export const interactionOutputs = {
     '下一首仍然舍不得跳过。',
     '窗外天气：适合戴耳机。',
     '脑内演唱会拒绝散场。',
+  ],
+  mahjong: [
+    '摸到一张：别人刚打出去的后悔。',
+    '立直！然后立刻开始后悔。',
+    '听牌了，听的是心跳。',
+    '岭上开花？岭上开会。',
+    '牌很好，主要是别人的。',
+    '差一张，差的是整个宇宙。',
+    '自摸！等等，规则书拿反了。',
+    '手里九张安全牌，心里零张。',
+    '这把不胡，专门收集表情包。',
+    '三家都很安静，xsy更不敢动了。',
+    '摸牌像拆盲盒，保底是叹气。',
+    '最后一巡，信仰开始摸牌。',
+  ],
+  chess: [
+    '马走日，xsy走神。',
+    '这一步的战术名叫：先看看。',
+    '对方将军，己方开始开会。',
+    '王后已出差，王还在写申请。',
+    '牺牲一兵，换来一声“啊？”',
+    '开局准备充分，准备了三个借口。',
+    '棋钟在走，脑内PPT刚打开。',
+    '这不是弃子，这是放长假。',
+    '对手下了一步，他复盘了上周。',
+    '王车易位，情绪原地待命。',
+    '十步以后必胜，第一步除外。',
+    '将死没有，想法先超时了。',
+  ],
+  counseling: [
+    '内心会议开场：先给自己倒杯水。',
+    '第一位发言：今天已经很努力了。',
+    '第二位发言：校园巴士确实难等。',
+    '议题一：允许自己喜欢这么多样东西。',
+    '记录员：刚才那口气终于喘匀了。',
+    '会议暂停五分钟，去看看窗外。',
+    '主持人：这件事不必今天想通。',
+    '内心委员会一致通过休息申请。',
+    '“你现在需要什么？” “先吃饭。”',
+    '此刻不做总结，也算一个好结尾。',
+    '今天的待办：对自己说话客气一点。',
+    '会议纪要：可以慢慢来。',
   ],
 };
 
@@ -1180,6 +1260,10 @@ function activateCard(card) {
   card.classList.add('is-active');
   card.querySelector('.favorite__output').textContent = choices[current % choices.length];
 
+  const icon = card.querySelector('.favorite__icon');
+  if (effect === 'mahjong') icon.textContent = ['一萬', '五筒', '九索', '紅中'][current % 4];
+  if (effect === 'chess') icon.textContent = ['♟', '♜', '♛', '♚', '♞'][current % 5];
+
   if (effect === 'yorushika') {
     const button = card.querySelector('.favorite__action');
     setNightMode(document.body.classList.contains('night-shift'), button);
@@ -1282,6 +1366,17 @@ export function mountPage(root = document) {
   count.textContent = String(model.count);
   grid.innerHTML = model.items.map(cardMarkup).join('');
 
+  let interactions = 0;
+  const composure = root.querySelector('[data-composure]');
+  const composureProgress = root.querySelector('[data-composure-progress]');
+  const composureVerdict = root.querySelector('[data-composure-verdict]');
+  const updateComposure = () => {
+    const report = composureReport(++interactions);
+    composure.textContent = `${report.percent}%`;
+    composureProgress.value = report.percent;
+    composureVerdict.textContent = report.verdict;
+  };
+
   grid.addEventListener('click', (event) => {
     const button = event.target.closest('.favorite__action');
     if (button) {
@@ -1291,13 +1386,16 @@ export function mountPage(root = document) {
       } else {
         activateCard(card);
       }
+      updateComposure();
       return;
     }
 
     const extra = event.target.closest('[data-extra-action]');
-    if (extra?.dataset.extraAction === 'lyrics' && !extra.disabled) openLyrics(extra);
+    if (extra?.disabled) return;
+    if (extra?.dataset.extraAction === 'lyrics') openLyrics(extra);
     if (extra?.dataset.extraAction === 'curling') openCurlingGame(extra);
     if (extra?.dataset.extraAction === 'slap') openSlapGame(extra);
+    if (extra?.dataset.extraAction) updateComposure();
   });
 }
 

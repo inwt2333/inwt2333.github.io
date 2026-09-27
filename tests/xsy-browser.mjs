@@ -86,9 +86,34 @@ async function run(width, reduced) {
     assert(Object.values(counts).every((size) => size === 0), `leaked resources ${JSON.stringify(counts)}`);
   };
   await check('mount, count and horizontal fit', () => {
-    assert($('[data-favorite-count]').textContent === '9', 'count');
-    assert(doc.title === 'xsy最喜欢的9样东西', 'title');
+    assert($('[data-favorite-count]').textContent === '12', 'count');
+    assert(doc.title === 'xsy最喜欢的12样东西', 'title');
     assert(doc.documentElement.scrollWidth === width, 'page overflow');
+  });
+  await check('new favorites change their props and composure report', () => {
+    assert(doc.querySelectorAll('.favorite').length === 12, 'missing favorite cards');
+    assert($('[data-composure]').textContent === '100%', 'initial composure');
+    click('.favorite--mahjong .favorite__action');
+    assert($('.favorite--mahjong .favorite__icon').textContent !== '🀄', 'mahjong tile did not change');
+    click('.favorite--chess .favorite__action');
+    assert($('.favorite--chess .favorite__icon').textContent !== '♞', 'chess piece did not change');
+    click('.favorite--counseling .favorite__action');
+    assert($('.favorite--counseling .favorite__output').textContent.length > 0, 'counseling card has no response');
+    assert($('[data-composure]').textContent === '61%', 'interaction report did not count clicks');
+  });
+  if (width <= 360) await check('narrow-screen copy and card responses do not overlap', () => {
+    const overlaps = (a, b) => {
+      const first = $(a).getBoundingClientRect();
+      const second = $(b).getBoundingClientRect();
+      return first.left < second.right && first.right > second.left
+        && first.top < second.bottom && first.bottom > second.top;
+    };
+    assert(!overlaps('.cover__dek', '.cover__seal'), 'cover copy overlaps seal');
+    assert(!overlaps('.cover__dek', '.cover__specimen'), 'cover copy overlaps specimens');
+    for (const card of ['mahjong', 'chess', 'counseling']) {
+      assert(!overlaps(`.favorite--${card} .favorite__action`, `.favorite--${card} .favorite__output`), `${card} response overlaps action`);
+      assert(!overlaps(`.favorite--${card} .favorite__blurb`, `.favorite--${card} .favorite__output`), `${card} response overlaps copy`);
+    }
   });
   click('.favorite--yorushika .favorite__action');
   await check('night lyrics wrap, focus trap, close and restoration', () => {
