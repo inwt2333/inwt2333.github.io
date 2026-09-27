@@ -73,11 +73,15 @@ test('public references use verified https destinations', () => {
     'ma-nan',
     'campus-bus',
     'yorushika',
+    'mahjong',
   ]);
   assert.equal(linked['yan-ge'][0].url, 'https://grahamyan.github.io/');
   assert.equal(linked['ma-nan'][0].url, 'https://ma.sjtu.edu.cn/info/1196/3174.htm');
   assert.equal(linked['campus-bus'][0].url, 'https://campuslife.sjtu.edu.cn/ui/bus');
   assert.equal(linked.yorushika[0].url, 'https://music.163.com/#/artist?id=12390232');
+  assert.deepEqual(linked.mahjong, [
+    { label: 'xsy 自制日麻资料馆', url: 'https://shiyixiao05.github.io/pairi-riichi-mahjong/#resources' },
+  ]);
 
   for (const links of Object.values(linked)) {
     for (const link of links) {

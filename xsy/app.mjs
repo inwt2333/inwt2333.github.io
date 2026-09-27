@@ -155,6 +155,9 @@ export const favorites = [
     blurb: '每次摸牌都像在拆命运的快递。拆开一看：又是别人要的那张。',
     action: '摸一张',
     effect: 'mahjong',
+    links: [
+      { label: 'xsy 自制日麻资料馆', url: 'https://shiyixiao05.github.io/pairi-riichi-mahjong/#resources' },
+    ],
   },
   {
     id: 'chess',
