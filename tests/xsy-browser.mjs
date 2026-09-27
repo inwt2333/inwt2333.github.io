@@ -55,10 +55,10 @@ function contrast(a, b) {
 async function run(width, reduced) {
   const frame = document.createElement('iframe');
   frame.width = width;
-  frame.height = width === 390 ? 844 : 900;
+  frame.height = width === 320 ? 568 : width === 390 ? 844 : 900;
   frame.title = `${width}px, reduced motion ${reduced}`;
   document.body.append(frame);
-  const html = await (await fetch('../xsy/index.html')).text();
+  const html = await (await fetch('../xsy/index.html', { cache: 'no-store' })).text();
   const loaded = new Promise((resolve) => frame.addEventListener('load', resolve, { once: true }));
   frame.srcdoc = html.replace(/href="style\.css(?:\?[^"]*)?"/, `href="style.css?qa=${Date.now()}"`).replace('<head>', `<head><base href="${new URL('../xsy/', location.href)}"><script>(${instrument})(${reduced})<\/script>`);
   await loaded;
@@ -110,10 +110,21 @@ async function run(width, reduced) {
     };
     assert(!overlaps('.cover__dek', '.cover__seal'), 'cover copy overlaps seal');
     assert(!overlaps('.cover__dek', '.cover__specimen'), 'cover copy overlaps specimens');
+    assert(!overlaps('.cover__launch', '.cover__specimen'), 'cover launch overlaps specimens');
     for (const card of ['mahjong', 'chess', 'counseling']) {
       assert(!overlaps(`.favorite--${card} .favorite__action`, `.favorite--${card} .favorite__output`), `${card} response overlaps action`);
       assert(!overlaps(`.favorite--${card} .favorite__blurb`, `.favorite--${card} .favorite__output`), `${card} response overlaps copy`);
     }
+  });
+  await check('incident stage turns clicks into visible crossover scenes', () => {
+    click('[data-chaos-start]');
+    assert($('[data-incident-stage]').dataset.scene === 'bus', 'first incident did not start');
+    assert($('[data-incident-title]').textContent.includes('校园巴士'), 'first title missing');
+    assert($('[data-incident-punchline]').textContent.includes('排队'), 'first punchline missing');
+    click('[data-chaos-next]');
+    assert($('[data-incident-stage]').dataset.scene === 'review', 'second incident did not advance');
+    assert($('[data-incident-number]').textContent.includes('02'), 'incident counter did not advance');
+    assert($('[data-composure]').textContent === '35%', 'incident clicks did not change composure');
   });
   click('.favorite--yorushika .favorite__action');
   await check('night lyrics wrap, focus trap, close and restoration', () => {

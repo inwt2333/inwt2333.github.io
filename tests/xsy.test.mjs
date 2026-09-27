@@ -2,8 +2,21 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import * as xsy from '../xsy/app.mjs';
+import { absurdScenes, incidentAt } from '../xsy/chaos.mjs';
 
 const { favorites, makePageModel } = xsy;
+
+test('incident broadcasts form a full cycle of distinct crossovers', () => {
+  assert.equal(absurdScenes.length, 7);
+  assert.equal(new Set(absurdScenes.map(({ id }) => id)).size, 7);
+  assert.equal(incidentAt(0).number, 1);
+  assert.equal(incidentAt(7).id, absurdScenes[0].id);
+  assert.equal(incidentAt(8).id, absurdScenes[1].id);
+  for (const scene of absurdScenes) {
+    assert.ok(scene.title && scene.setup && scene.punchline);
+    assert.equal(scene.actors.length, 2);
+  }
+});
 
 test('the title count follows the number of favorite entries', () => {
   const model = makePageModel([

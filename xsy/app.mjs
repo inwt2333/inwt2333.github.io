@@ -26,6 +26,7 @@ import {
   scoreCurling,
   slapTitle,
 } from './interactions.mjs?v=20260925-exit';
+import { absurdScenes, incidentAt } from './chaos.mjs';
 
 export const favorites = [
   {
@@ -1376,6 +1377,32 @@ export function mountPage(root = document) {
     composureProgress.value = report.percent;
     composureVerdict.textContent = report.verdict;
   };
+
+  const incidentStage = root.querySelector('[data-incident-stage]');
+  let incidentIndex = -1;
+  const showIncident = (index) => {
+    const scene = incidentAt(index);
+    incidentStage.dataset.scene = scene.id;
+    incidentStage.querySelector('[data-incident-number]').textContent = `事故 ${String(scene.number).padStart(2, '0')} / ${String(absurdScenes.length).padStart(2, '0')}`;
+    incidentStage.querySelector('[data-incident-eyebrow]').textContent = '本馆播报 / 整改越改越严重';
+    incidentStage.querySelector('[data-incident-title]').textContent = scene.title;
+    incidentStage.querySelector('[data-incident-setup]').textContent = scene.setup;
+    incidentStage.querySelector('[data-incident-punchline]').textContent = scene.punchline;
+    incidentStage.querySelector('[data-incident-actor-a]').textContent = scene.actors[0];
+    incidentStage.querySelector('[data-incident-actor-b]').textContent = scene.actors[1];
+    incidentStage.querySelector('[data-incident-stamp]').textContent = scene.stamp;
+    incidentStage.querySelector('[data-chaos-next]').textContent = '嫌不够离谱？下一起 →';
+    incidentStage.classList.remove('is-playing');
+    void incidentStage.offsetWidth;
+    incidentStage.classList.add('is-playing');
+    incidentIndex = index;
+    updateComposure();
+  };
+  root.querySelector('[data-chaos-start]').addEventListener('click', () => {
+    showIncident(0);
+    incidentStage.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+  });
+  root.querySelector('[data-chaos-next]').addEventListener('click', () => showIncident(incidentIndex + 1));
 
   grid.addEventListener('click', (event) => {
     const button = event.target.closest('.favorite__action');

@@ -9,8 +9,8 @@
   <meta name="theme-color" content="#f4f3ef">
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/fonts/fonts.css">
-  <link rel="stylesheet" href="style.css?v=20260927-chaos2">
-  <script type="module" src="app.mjs?v=20260927-chaos2"></script>
+  <link rel="stylesheet" href="style.css?v=20260927-incidents">
+  <script type="module" src="app.mjs?v=20260927-incidents"></script>
 </head>
 <body>
   <header class="cover">
@@ -18,6 +18,7 @@
     <p class="cover__issue">XSY FAVORITES ARCHIVE / ISSUE 0001</p>
     <h1>xsy最喜欢的<br><mark><span data-favorite-count>0</span>样东西</mark></h1>
     <p class="cover__dek">经本人长期观察、偶然提及与若干无法解释的眼神确认。本馆现已失去解释权。</p>
+    <button class="cover__launch" type="button" data-chaos-start>点此检查笑点是否到站 <span aria-hidden="true">↗</span></button>
     <div class="cover__specimen" aria-hidden="true">
       <span>🀄</span><span>🥌</span><span>♞</span><span>🌕</span><span>🛋️</span>
     </div>
@@ -26,6 +27,26 @@
   </header>
 
   <main>
+    <section class="incident" data-incident-stage data-scene="idle" aria-labelledby="incident-title">
+      <div class="incident__topline">
+        <span>XSY 本人质检 · 笑点整改现场</span>
+        <span data-incident-number>事故 00 / 07</span>
+      </div>
+      <div class="incident__body">
+        <div class="incident__copy" aria-live="polite">
+          <p class="incident__eyebrow" data-incident-eyebrow>本馆播报 / 等待触发</p>
+          <h2 id="incident-title" data-incident-title>严肃声明：笑点还在等校巴</h2>
+          <p class="incident__setup" data-incident-setup>经调查，它昨天说“下一辆就来”，目前仍未到站。</p>
+          <p class="incident__punchline" data-incident-punchline>请按下按钮，协助本馆展开荒唐事故调查。</p>
+        </div>
+        <div class="incident__scene" aria-hidden="true">
+          <span class="incident__actor" data-incident-actor-a>🚌</span>
+          <span class="incident__actor" data-incident-actor-b>❔</span>
+          <span class="incident__stamp" data-incident-stamp>笑点失踪</span>
+        </div>
+      </div>
+      <button class="incident__next" type="button" data-chaos-next>启动神经整改 <span aria-hidden="true">→</span></button>
+    </section>
     <section class="collection" aria-labelledby="collection-title">
       <div class="collection__heading">
         <p>THE COLLECTION</p>
