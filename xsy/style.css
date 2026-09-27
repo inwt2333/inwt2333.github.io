@@ -519,12 +519,11 @@ footer {
 
 .favorite--mahjong .favorite__icon {
   background: #fff;
-  font-size: 5.7rem;
 }
-.favorite--mahjong.is-active .favorite__icon {
-  font-size: 2.8rem;
-  font-weight: 900;
-  white-space: nowrap;
+.favorite--mahjong .favorite__icon img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
 }
 .favorite--chess .favorite__icon {
   color: #fff;

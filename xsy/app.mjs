@@ -28,6 +28,8 @@ import {
 } from './interactions.mjs?v=20260925-exit';
 import { absurdScenes, incidentAt } from './chaos.mjs';
 
+const mahjongTileImages = ['Man1', 'Pin5', 'Sou9', 'Chun', 'Hatsu', 'Pin5-Dora'];
+
 export const favorites = [
   {
     id: 'yan-ge',
@@ -151,6 +153,7 @@ export const favorites = [
     name: '日麻',
     kicker: 'FOUR PLAYERS, ONE BRAIN CELL',
     icon: '🀄',
+    iconImage: 'tiles/Pin5.png',
     verdict: '立直之后，人生开始听牌。',
     blurb: '每次摸牌都像在拆命运的快递。拆开一看：又是别人要的那张。',
     action: '摸一张',
@@ -228,7 +231,9 @@ function cardMarkup(item, index) {
     <article class="favorite favorite--${escapeHtml(item.id)}" data-effect="${escapeHtml(item.effect)}" tabindex="0">
       <div class="favorite__number" aria-hidden="true">${String(index + 1).padStart(2, '0')}</div>
       <p class="favorite__kicker">${escapeHtml(item.kicker)}</p>
-      <div class="favorite__icon" aria-hidden="true">${escapeHtml(item.icon)}</div>
+      <div class="favorite__icon" aria-hidden="true">${item.iconImage
+        ? `<img src="${escapeHtml(item.iconImage)}" alt="" draggable="false" width="600" height="800">`
+        : escapeHtml(item.icon)}</div>
       <h2>${escapeHtml(item.name)}</h2>
       <p class="favorite__verdict">${escapeHtml(item.verdict)}</p>
       <p class="favorite__blurb">${escapeHtml(item.blurb)}</p>
@@ -1266,7 +1271,9 @@ function activateCard(card) {
   card.querySelector('.favorite__output').textContent = choices[current % choices.length];
 
   const icon = card.querySelector('.favorite__icon');
-  if (effect === 'mahjong') icon.textContent = ['一萬', '五筒', '九索', '紅中'][current % 4];
+  if (effect === 'mahjong') {
+    icon.querySelector('img').src = `tiles/${mahjongTileImages[current % mahjongTileImages.length]}.png`;
+  }
   if (effect === 'chess') icon.textContent = ['♟', '♜', '♛', '♚', '♞'][current % 5];
 
   if (effect === 'yorushika') {

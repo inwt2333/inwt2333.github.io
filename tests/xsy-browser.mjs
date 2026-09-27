@@ -90,11 +90,16 @@ async function run(width, reduced) {
     assert(doc.title === 'xsy最喜欢的12样东西', 'title');
     assert(doc.documentElement.scrollWidth === width, 'page overflow');
   });
-  await check('new favorites change their props and composure report', () => {
+  await check('new favorites change their props and composure report', async () => {
     assert(doc.querySelectorAll('.favorite').length === 12, 'missing favorite cards');
     assert($('[data-composure]').textContent === '100%', 'initial composure');
+    const tile = $('.favorite--mahjong .favorite__icon img');
+    assert(tile, 'mahjong should display a tile image');
+    await tile.decode();
+    const initialTile = tile.src;
     click('.favorite--mahjong .favorite__action');
-    assert($('.favorite--mahjong .favorite__icon').textContent !== '🀄', 'mahjong tile did not change');
+    await tile.decode();
+    assert(tile.src !== initialTile && tile.naturalWidth > 0, 'mahjong tile image did not change or load');
     click('.favorite--chess .favorite__action');
     assert($('.favorite--chess .favorite__icon').textContent !== '♞', 'chess piece did not change');
     click('.favorite--counseling .favorite__action');
