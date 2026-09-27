@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沿线友邻 · Inwt</title>
+    <meta name="description" content="Inwt 小站的友情链接与沿线友邻。">
+    <link rel="canonical" href="https://inwt233.cn/friends.html">
+    <meta name="theme-color" content="#0a0a0c">
+    <meta property="og:site_name" content="Inwt · 小站">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://inwt233.cn/friends.html">
+    <meta property="og:title" content="沿线友邻 · Inwt">
+    <meta property="og:description" content="在各自的轨道上前行，偶尔交换沿途的风景。">
+    <meta property="og:image" content="https://inwt233.cn/assets/og.png">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/fonts/fonts.css">
+    <link rel="stylesheet" href="assets/site.css">
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --ink: #f5f5f7;
+            --soft: #96969f;
+            --grid: rgba(255,255,255,.045);
+            --panel: rgba(18,18,23,.72);
+            --line: rgba(255,255,255,.11);
+            --green: #30d158;
+            --cyan: #42f5e9;
+            --mono: 'Space Mono', ui-monospace, monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { color-scheme: dark; }
+        body {
+            min-height: 100vh;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 72% 18%, rgba(66,245,233,.08), transparent 34%),
+                radial-gradient(var(--grid) 1px, transparent 1px),
+                var(--bg);
+            background-size: auto, 26px 26px, auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: inherit; }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid var(--line);
+            background: rgba(10,10,12,.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+        .topbar-inner {
+            width: min(900px, calc(100% - 48px));
+            height: 58px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand { display: flex; align-items: center; text-decoration: none; font-weight: 700; letter-spacing: .08em; }
+        .back { color: var(--soft); text-decoration: none; font-size: .84rem; transition: color .2s; }
+        .back:hover { color: var(--ink); }
+
+        main { width: min(900px, calc(100% - 48px)); margin: auto; padding: 88px 0 96px; }
+        .eyebrow { color: var(--cyan); font: .66rem var(--mono); letter-spacing: .38em; }
+        h1 { margin-top: 18px; font-size: clamp(2.6rem, 8vw, 5rem); font-weight: 900; letter-spacing: .11em; line-height: 1.08; }
+        .intro { max-width: 36em; margin-top: 24px; color: var(--soft); font-size: .98rem; line-height: 2; }
+
+        .route {
+            position: relative;
+            margin-top: 72px;
+            padding: 0 0 24px 58px;
+        }
+        .route::before {
+            content: '';
+            position: absolute;
+            top: -24px;
+            bottom: -30px;
+            left: 15px;
+            width: 7px;
+            border-radius: 8px;
+            background: linear-gradient(var(--cyan), var(--green));
+            box-shadow: 0 0 24px rgba(66,245,233,.18);
+        }
+        .route::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            bottom: -42px;
+            width: 22px;
+            height: 22px;
+            border: 5px solid var(--green);
+            border-radius: 50%;
+            background: var(--bg);
+        }
+        .route-label { margin-bottom: 16px; color: var(--soft); font: .62rem var(--mono); letter-spacing: .2em; }
+
+        .friend-card {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 28px;
+            align-items: center;
+            padding: 30px 32px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,.055), var(--panel));
+            text-decoration: none;
+            box-shadow: 0 24px 70px rgba(0,0,0,.22);
+            transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+        }
+        .friend-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 150px; height: 150px;
+            background: radial-gradient(circle at top right, rgba(66,245,233,.13), transparent 68%);
+            pointer-events: none;
+        }
+        .friend-card::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: -51px;
+            width: 18px; height: 18px;
+            border: 5px solid var(--cyan);
+            border-radius: 50%;
+            background: var(--bg);
+            transform: translateY(-50%);
+            box-shadow: 0 0 0 5px var(--bg);
+        }
+        .friend-card:hover { transform: translateY(-4px); border-color: rgba(66,245,233,.42); box-shadow: 0 28px 80px rgba(0,0,0,.3); }
+        .friend-card:focus-visible { outline: 2px solid var(--cyan); outline-offset: 5px; }
+        .friend-no { color: var(--cyan); font: .62rem var(--mono); letter-spacing: .2em; }
+        .friend-name { margin-top: 9px; font-size: clamp(1.45rem, 4vw, 2rem); font-weight: 800; letter-spacing: .05em; }
+        .friend-desc { margin-top: 9px; color: var(--soft); line-height: 1.7; }
+        .friend-url { margin-top: 20px; color: var(--cyan); font: .7rem var(--mono); letter-spacing: .08em; }
+        .arrow {
+            display: grid;
+            place-items: center;
+            width: 48px; height: 48px;
+            border: 1px solid var(--line);
+            border-radius: 50%;
+            font-size: 1.25rem;
+            transition: background .2s, transform .2s;
+        }
+        .friend-card:hover .arrow { background: rgba(66,245,233,.12); transform: translate(2px,-2px); }
+
+        .note { margin: 68px 0 0 58px; color: var(--soft); font-size: .82rem; line-height: 1.8; }
+        footer { margin-top: 88px; padding-top: 26px; border-top: 1px solid var(--line); color: var(--soft); font: .64rem var(--mono); letter-spacing: .16em; }
+
+        @media (max-width: 600px) {
+            .topbar-inner, main { width: min(100% - 32px, 900px); }
+            main { padding-top: 60px; }
+            h1 { font-size: 2.6rem; }
+            .intro { font-size: .92rem; }
+            .route { margin-top: 52px; padding-left: 40px; }
+            .route::before { left: 10px; width: 6px; }
+            .route::after { left: 1px; }
+            .friend-card { grid-template-columns: 1fr; gap: 22px; padding: 24px; }
+            .friend-card::after { left: -39px; }
+            .arrow { width: 42px; height: 42px; }
+            .note { margin-left: 40px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .friend-card, .arrow { transition: none; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="index.html"><span class="site-mark" aria-hidden="true"></span>Inwt · 小站</a>
+            <a class="back" href="about.html">返回关于站 ←</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="eyebrow">FRIENDS · 换乘名录</div>
+        <h1>沿线友邻</h1>
+        <p class="intro">在各自的轨道上前行，偶尔交换沿途的风景。这里收录一些值得停靠的小站。</p>
+
+        <section class="route" aria-labelledby="route-title">
+            <div class="route-label" id="route-title">INTERCHANGE 01 · 友邻换乘线</div>
+            <a class="friend-card" href="http://andysgz.top" target="_blank" rel="noopener">
+                <div>
+                    <div class="friend-no">STATION 001</div>
+                    <div class="friend-name">Andy SGZ</div>
+                    <p class="friend-desc">随笔、作品与练琴记录。一个持续生长的个人站点。</p>
+                    <div class="friend-url">ANDYSGZ.TOP</div>
+                </div>
+                <span class="arrow" aria-hidden="true">↗</span>
+            </a>
+        </section>
+
+        <p class="note">下一站仍在铺轨。愿每一座认真生活的小站，都能被恰好经过的人看见。</p>
+        <footer>© INWT · EST. 2026</footer>
+    </main>
+</body>
+</html>
