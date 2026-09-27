@@ -459,7 +459,7 @@ function handleDialogKeydown(event) {
 
 export function openDialog({ title, kind, trigger, render }) {
   if (typeof document === 'undefined') return;
-  if (activeDialog) closeDialog({ restoreFocus: false });
+  if (activeDialog) closeDialog({ restoreFocus: false, notifyClosed: false });
 
   const elements = dialogElements();
   if (!elements) return;
@@ -486,7 +486,7 @@ export function openDialog({ title, kind, trigger, render }) {
   elements.close.focus();
 }
 
-export function closeDialog({ restoreFocus = true } = {}) {
+export function closeDialog({ restoreFocus = true, notifyClosed = true } = {}) {
   if (!activeDialog) return;
 
   const { trigger, cleanup, previousOverflow, elements } = activeDialog;
@@ -502,6 +502,7 @@ export function closeDialog({ restoreFocus = true } = {}) {
   elements.backdrop.removeEventListener('click', closeDialog);
 
   if (restoreFocus && trigger && typeof trigger.focus === 'function') trigger.focus();
+  if (notifyClosed) document.dispatchEvent(new Event('xsy:dialog-closed'));
 }
 
 export function setNightMode(isActive, button) {
@@ -1371,12 +1372,57 @@ export function mountPage(root = document) {
   const composure = root.querySelector('[data-composure]');
   const composureProgress = root.querySelector('[data-composure-progress]');
   const composureVerdict = root.querySelector('[data-composure-verdict]');
+  const breakdownReplay = root.querySelector('[data-breakdown-replay]');
+  let eruptionPending = false;
+  let erupted = false;
+  const openBreakdown = () => {
+    eruptionPending = false;
+    erupted = true;
+    breakdownReplay.hidden = false;
+    document.body.classList.add('has-broken');
+    openDialog({
+      title: '紧急通报：绷住度已失踪',
+      kind: 'breakdown',
+      trigger: breakdownReplay,
+      render(content) {
+        const icons = favorites.map(({ icon }) => `<span>${escapeHtml(icon)}</span>`).join('');
+        content.innerHTML = `<div class="breakdown">
+          <p class="breakdown__code">事故等级：全馆失控 / 请勿联系校园巴士</p>
+          <div class="breakdown__swarm" aria-hidden="true">${icons}</div>
+          <p class="breakdown__verdict">本馆郑重宣布：xsy 的喜欢已经从展柜里跑出来了。<br>金龟子负责飞，校巴负责迟到，其他藏品负责假装无事发生。</p>
+          <button class="breakdown__dismiss" type="button" data-breakdown-dismiss>把它们塞回展柜</button>
+        </div>`;
+        content.querySelector('[data-breakdown-dismiss]').addEventListener('click', () => closeDialog());
+        return () => document.body.classList.remove('has-broken');
+      },
+    });
+  };
+  document.addEventListener('xsy:dialog-closed', () => {
+    if (eruptionPending && !activeDialog) openBreakdown();
+  });
+  breakdownReplay.addEventListener('click', openBreakdown);
   const updateComposure = () => {
     const report = composureReport(++interactions);
     composure.textContent = `${report.percent}%`;
     composureProgress.value = report.percent;
     composureVerdict.textContent = report.verdict;
+    if (report.percent === 0 && !erupted && !eruptionPending) {
+      eruptionPending = true;
+      if (!activeDialog) openBreakdown();
+    }
   };
+
+  root.querySelector('[data-mystery="seal"]').addEventListener('click', () => {
+    root.querySelector('[data-mystery-secret]').hidden = false;
+  });
+  root.querySelector('[data-mystery="receipt"]').addEventListener('click', () => {
+    root.querySelector('[data-mystery-receipt]').hidden = false;
+  });
+  root.querySelector('[data-mystery="gravity"]').addEventListener('click', (event) => {
+    const active = document.body.classList.toggle('gravity-borrowed');
+    event.currentTarget.setAttribute('aria-pressed', String(active));
+    event.currentTarget.textContent = active ? '归还重力 ↖' : '借用重力 ↘';
+  });
 
   const incidentStage = root.querySelector('[data-incident-stage]');
   let incidentIndex = -1;

@@ -9,8 +9,8 @@
   <meta name="theme-color" content="#f4f3ef">
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/fonts/fonts.css">
-  <link rel="stylesheet" href="style.css?v=20260927-incidents">
-  <script type="module" src="app.mjs?v=20260927-incidents"></script>
+  <link rel="stylesheet" href="style.css?v=20260927-breakdown">
+  <script type="module" src="app.mjs?v=20260927-breakdown"></script>
 </head>
 <body>
   <header class="cover">
@@ -22,8 +22,8 @@
     <div class="cover__specimen" aria-hidden="true">
       <span>🀄</span><span>🥌</span><span>♞</span><span>🌕</span><span>🛋️</span>
     </div>
-    <div class="cover__seal" aria-hidden="true">绝对<br>主观</div>
-    <p class="cover__footnote">排名不分先后，精神状态另附。</p>
+    <button class="cover__seal" type="button" data-mystery="seal" aria-label="检查绝对主观印章">绝对<br>主观</button>
+    <p class="cover__footnote">排名不分先后，精神状态另附。<span data-mystery-secret hidden>馆藏注脚：请勿向校巴询问笑点下落。</span></p>
   </header>
 
   <main>
@@ -52,12 +52,14 @@
         <p>THE COLLECTION</p>
         <h2 id="collection-title">逐件清点</h2>
         <span>新增藏品通过了喜欢审核，没通过常识审核</span>
+        <button class="collection__gravity" type="button" data-mystery="gravity" aria-pressed="false">借用重力 ↘</button>
       </div>
       <div class="collection__composure" aria-live="polite">
         <span class="collection__composure-label">现场绷住率</span>
         <strong data-composure>100%</strong>
         <progress data-composure-progress max="100" value="100" aria-label="现场绷住率"></progress>
         <span data-composure-verdict>目前仍在硬绷</span>
+        <button class="collection__replay" type="button" data-breakdown-replay hidden>重演失控现场 ↗</button>
       </div>
       <div class="favorites" data-favorites></div>
     </section>
@@ -66,6 +68,8 @@
   <footer>
     <p>策展：不愿透露姓名的观察员</p>
     <p>库存数字由页面自动清点</p>
+    <button class="footer__receipt" type="button" data-mystery="receipt">打印不存在的收据 ⌁</button>
+    <p class="footer__secret" data-mystery-receipt hidden>收据 № 0000：校园巴士，未到；笑点，已签收；总计：无法报销。</p>
   </footer>
 
   <div id="exhibit-dialog" class="exhibit-dialog" role="dialog" aria-modal="true" aria-labelledby="exhibit-dialog-title" hidden>

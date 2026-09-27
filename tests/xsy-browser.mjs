@@ -126,7 +126,52 @@ async function run(width, reduced) {
     assert($('[data-incident-number]').textContent.includes('02'), 'incident counter did not advance');
     assert($('[data-composure]').textContent === '35%', 'incident clicks did not change composure');
   });
+  await check('zero composure waits for a game to close, erupts once, and cleans up', () => {
+    click('[data-chaos-next]');
+    click('[data-chaos-next]');
+    assert($('[data-composure]').textContent === '9%', 'threshold reached too early');
+    click('[data-extra-action="curling"]');
+    assert($('[data-composure]').textContent === '0%', 'zero not reached');
+    assert($('#exhibit-dialog').dataset.kind === 'curling', 'zero interrupted game');
+    click('[data-extra-action="slap"]');
+    assert($('#exhibit-dialog').dataset.kind === 'slap', 'dialog replacement interrupted');
+    click('[data-dialog-close]');
+    assert($('#exhibit-dialog').dataset.kind === 'breakdown', 'pending eruption missing');
+    assert(doc.querySelectorAll('.breakdown__swarm span').length === 12, 'missing runaway exhibits');
+    assert(doc.body.classList.contains('has-broken'), 'aftermath missing');
+    key(doc.activeElement, 'Escape');
+    assert($('#exhibit-dialog').hidden, 'eruption cannot close');
+    click('[data-chaos-next]');
+    assert($('#exhibit-dialog').hidden, 'eruption repeats without request');
+    click('[data-breakdown-replay]');
+    assert($('#exhibit-dialog').dataset.kind === 'breakdown', 'manual replay missing');
+    click('[data-breakdown-dismiss]');
+    assert($('#exhibit-dialog').hidden, 'cleanup button failed');
+    clean();
+  });
+  await check('mysterious objects reveal clues and return borrowed gravity', () => {
+    click('[data-mystery="seal"]');
+    assert(!$('[data-mystery-secret]').hidden, 'sealed clue stays hidden');
+    click('[data-mystery="receipt"]');
+    assert(!$('[data-mystery-receipt]').hidden, 'receipt not printed');
+    click('[data-mystery="gravity"]');
+    assert(doc.body.classList.contains('gravity-borrowed'), 'gravity did not change');
+    assert($('[data-mystery="gravity"]').getAttribute('aria-pressed') === 'true', 'gravity state missing');
+    click('[data-mystery="gravity"]');
+    assert(!doc.body.classList.contains('gravity-borrowed'), 'gravity cannot be restored');
+    assert(doc.documentElement.scrollWidth === width, 'mystery props overflow');
+  });
   click('.favorite--yorushika .favorite__action');
+  await check('night breakdown text has readable contrast and restores scrolling', () => {
+    click('[data-breakdown-replay]');
+    const codeStyle = win.getComputedStyle($('.breakdown__code'));
+    const panelStyle = win.getComputedStyle($('.exhibit-dialog__panel'));
+    assert(contrast(codeStyle.color, panelStyle.backgroundColor) >= 4.5, 'night breakdown code contrast');
+    click('[data-breakdown-dismiss]');
+    assert(doc.body.style.overflow !== 'hidden', 'dialog replacement left scrolling locked');
+    assert(!doc.body.classList.contains('has-broken'), 'dialog replacement leaked aftermath');
+    clean();
+  });
   await check('night lyrics wrap, focus trap, close and restoration', () => {
     const trigger = $('[data-extra-action="lyrics"]');
     assert(!trigger.disabled, 'lyrics disabled at night');
