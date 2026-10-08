@@ -470,6 +470,9 @@ footer {
 .favorite:nth-child(10) { --card-color: #ffc3a0; }
 .favorite:nth-child(11) { --card-color: #d2def2; }
 .favorite:nth-child(12) { --card-color: #b9e8cf; }
+.favorite:nth-child(13) { --card-color: #b9e3e8; }
+
+.favorite:nth-child(n+10) { grid-column: span 6; }
 
 .favorite:nth-child(1),
 .favorite:nth-child(6) { grid-column: span 7; }
@@ -805,6 +808,7 @@ footer {
 .night-shift .favorite:nth-child(10) { --card-color: #603d50; }
 .night-shift .favorite:nth-child(11) { --card-color: #304565; }
 .night-shift .favorite:nth-child(12) { --card-color: #255851; }
+.night-shift .favorite:nth-child(13) { --card-color: #244e58; }
 .night-shift .favorite__icon { color: #111; }
 .night-shift .favorite--chess .favorite__icon { color: #fff; }
 .favorite__extra:disabled {

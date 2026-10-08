@@ -30,7 +30,7 @@ test('the title count follows the number of favorite entries', () => {
 });
 
 test('the initial collection contains every requested favorite exactly once', () => {
-  assert.equal(favorites.length, 12);
+  assert.equal(favorites.length, 13);
   assert.deepEqual(
     favorites.map(({ name }) => name),
     [
@@ -46,6 +46,7 @@ test('the initial collection contains every requested favorite exactly once', ()
       '日麻',
       '国际象棋',
       '心理咨询',
+      '追风者',
     ],
   );
   assert.equal(new Set(favorites.map(({ id }) => id)).size, favorites.length);
@@ -74,6 +75,7 @@ test('public references use verified https destinations', () => {
     'campus-bus',
     'yorushika',
     'mahjong',
+    'wind-chaser',
   ]);
   assert.equal(linked['yan-ge'][0].url, 'https://grahamyan.github.io/');
   assert.equal(linked['ma-nan'][0].url, 'https://ma.sjtu.edu.cn/info/1196/3174.htm');
@@ -81,6 +83,9 @@ test('public references use verified https destinations', () => {
   assert.equal(linked.yorushika[0].url, 'https://music.163.com/#/artist?id=12390232');
   assert.deepEqual(linked.mahjong, [
     { label: 'xsy 自制日麻资料馆', url: 'https://shiyixiao05.github.io/pairi-riichi-mahjong/#resources' },
+  ]);
+  assert.deepEqual(linked['wind-chaser'], [
+    { label: '追风者车型介绍', url: 'https://static.nfnews.com/content/202606/19/c12543203.html' },
   ]);
 
   for (const links of Object.values(linked)) {

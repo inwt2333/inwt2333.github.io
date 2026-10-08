@@ -182,6 +182,19 @@ export const favorites = [
     action: '召开内心会议',
     effect: 'counseling',
   },
+  {
+    id: 'wind-chaser',
+    name: '追风者',
+    kicker: 'THE WIND HAS A FARE',
+    icon: '🚲',
+    verdict: '风是免费的，追它按次计费。',
+    blurb: '哈啰 B10 自动变速共享单车。它负责顺着风换挡，xsy 负责逆着风看账单。',
+    action: '追一次风',
+    effect: 'wind-chaser',
+    links: [
+      { label: '追风者车型介绍', url: 'https://static.nfnews.com/content/202606/19/c12543203.html' },
+    ],
+  },
 ];
 
 export function makePageModel(items) {
@@ -411,6 +424,20 @@ export const interactionOutputs = {
     '此刻不做总结，也算一个好结尾。',
     '今天的待办：对自己说话客气一点。',
     '会议纪要：可以慢慢来。',
+  ],
+  'wind-chaser': [
+    '已自动变速，余额请求手动确认。',
+    '风追上了。账单也追上了。',
+    '档位：轻快。心情：先看看价格。',
+    '逆风路段已切换为嘴硬模式。',
+    '车辆正在追风，xsy 正在追车。',
+    '骑行开始，钱包进入伴飞状态。',
+    '自动换挡成功，自动还车失败。',
+    '坡道变轻松了，结账变严肃了。',
+    '导航说前方左转，风说随便。',
+    '已捕获一阵风，暂未找到停车点。',
+    '车轮负责转，脑内 BGM 负责燃。',
+    '追风结束，头发率先到达终点。',
   ],
 };
 

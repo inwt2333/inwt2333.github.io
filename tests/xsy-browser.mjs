@@ -86,12 +86,12 @@ async function run(width, reduced) {
     assert(Object.values(counts).every((size) => size === 0), `leaked resources ${JSON.stringify(counts)}`);
   };
   await check('mount, count and horizontal fit', () => {
-    assert($('[data-favorite-count]').textContent === '12', 'count');
-    assert(doc.title === 'xsy最喜欢的12样东西', 'title');
+    assert($('[data-favorite-count]').textContent === '13', 'count');
+    assert(doc.title === 'xsy最喜欢的13样东西', 'title');
     assert(doc.documentElement.scrollWidth === width, 'page overflow');
   });
   await check('new favorites change their props and composure report', async () => {
-    assert(doc.querySelectorAll('.favorite').length === 12, 'missing favorite cards');
+    assert(doc.querySelectorAll('.favorite').length === 13, 'missing favorite cards');
     assert($('[data-composure]').textContent === '100%', 'initial composure');
     const tile = $('.favorite--mahjong .favorite__icon img');
     assert(tile, 'mahjong should display a tile image');
@@ -142,7 +142,7 @@ async function run(width, reduced) {
     assert($('#exhibit-dialog').dataset.kind === 'slap', 'dialog replacement interrupted');
     click('[data-dialog-close]');
     assert($('#exhibit-dialog').dataset.kind === 'breakdown', 'pending eruption missing');
-    assert(doc.querySelectorAll('.breakdown__swarm span').length === 12, 'missing runaway exhibits');
+    assert(doc.querySelectorAll('.breakdown__swarm span').length === 13, 'missing runaway exhibits');
     assert(doc.body.classList.contains('has-broken'), 'aftermath missing');
     key(doc.activeElement, 'Escape');
     assert($('#exhibit-dialog').hidden, 'eruption cannot close');
@@ -325,7 +325,8 @@ async function run(width, reduced) {
     const setupStone = $('[data-curling-static-stone]');
     assert(setupStone, 'score mode did not lay out static stones');
     const setupRect = setupStone.getBoundingClientRect();
-    assert(Math.abs(setupRect.width - stoneRect.width) < 1, `setup and delivery stones use different pixel diameters (${setupRect.width}/${stoneRect.width})`);
+    const deliveryRect = $('[data-curling-stone]').getBoundingClientRect();
+    assert(Math.abs(setupRect.width - deliveryRect.width) < 1, `setup and delivery stones use different pixel diameters (${setupRect.width}/${deliveryRect.width})`);
     const houseRect = $('[data-curling-target]').getBoundingClientRect();
     assert(houseRect.width >= setupRect.width * 4, 'house is not visibly larger than a stone');
     assert($('[data-curling-score]').textContent.startsWith('红 '), 'before score missing');
@@ -457,6 +458,12 @@ async function run(width, reduced) {
     assert($('[data-slap-score]').textContent === '0', 'restart score');
     click('[data-dialog-close]');
     clean();
+  });
+  await check('wind chaser card cycles a ride response', () => {
+    const card = $('.favorite--wind-chaser');
+    assert(card?.querySelector('h2')?.textContent === '追风者', 'wind chaser card missing');
+    click('.favorite--wind-chaser .favorite__action');
+    assert(card.querySelector('.favorite__output').textContent.length > 0, 'ride response missing');
   });
   frame.remove();
 }
