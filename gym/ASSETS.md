@@ -1,11 +1,13 @@
 # Scene assets
 
-The scene, equipment and generated leather, wood, rubber and powder-coat microtextures are authored in this repository. All assets are served locally.
+The scene, equipment, wood, rubber and powder-coat microtextures are authored in this repository. All runtime assets are served locally.
 
 - Three.js 0.180.0 and its addons: MIT, license at `../assets/vendor/three/LICENSE`.
-- `studio.hdr`: [Studio Small 08](https://polyhaven.com/a/studio_small_08), Poly Haven, 1K HDR environment.
-- `alps_field.hdr`: [Alps Field](https://polyhaven.com/a/alps_field), Andreas Mischok / Poly Haven, 2K HDR background.
+- `studio-small.hdr`: [Studio Small 08](https://polyhaven.com/a/studio_small_08), Poly Haven. Downsampled in linear light from the 1K original to 256 × 128 RGBE with `tools/compact_gym_hdr.py`; loaded after the room becomes interactive.
+- `scenery.webp`: [Anime Mountain Valley by Mendalj](https://wall.alphacoders.com/big.php?i=1349920), [original image](https://images5.alphacoders.com/134/1349920.jpeg). This decorative illustration retains its artist's copyright and is not CC0. Resized to 2048 × 1152, desaturated and softened for a quiet view beyond the windows.
 - `textures/concrete-color.jpg`, `concrete-normal.jpg`: [Concrete Floor 03](https://polyhaven.com/a/concrete_floor_03), Poly Haven, 1K. The color map is desaturated and its contrast reduced for finished architectural concrete.
+- `textures/leather-*.webp`: [Fabric Leather 02](https://polyhaven.com/a/fabric_leather_02), Rob Tuytel / Poly Haven. 512 px diffuse, OpenGL normal and roughness. The diffuse map is neutralized and the roughness remapped for indoor upholstery.
+- `textures/plaster-*.webp`: [Painted Plaster Wall](https://polyhaven.com/a/painted_plaster_wall), Amal Kumar / Poly Haven. 512 px diffuse, OpenGL normal and roughness. Weathering contrast is reduced for an interior finish.
 
 Poly Haven assets are [CC0](https://polyhaven.com/license), including redistribution and modification.
 

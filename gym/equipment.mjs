@@ -15,7 +15,23 @@ export function createEquipment(scene, m) {
   }
   function box(parent, size, xyz, material = m.frame, radius = .025, rotation) {
     const r = Math.min(radius, ...size.map(v => v * .45));
-    return mesh(parent, get(`b${size}:${r}`, () => r ? new RoundedBoxGeometry(...size, 2, r) : new THREE.BoxGeometry(...size)), material, xyz, rotation);
+    const worldUV = material === m.wall || material === m.concrete || material === m.upholstery || material === m.upholsteryWarm;
+    const uvScale = material === m.wall || material === m.concrete ? .5 : 2;
+    const shape = get(`b${size}:${r}:${worldUV}:${uvScale}`, () => {
+      const result = r ? new RoundedBoxGeometry(...size, 2, r) : new THREE.BoxGeometry(...size);
+      if (worldUV) {
+        const p = result.attributes.position, n = result.attributes.normal, uv = result.attributes.uv;
+        const scale = uvScale;
+        for (let i = 0; i < p.count; i++) {
+          const x = Math.abs(n.getX(i)), y = Math.abs(n.getY(i)), z = Math.abs(n.getZ(i));
+          if (x > y && x > z) uv.setXY(i, p.getZ(i) * scale, p.getY(i) * scale);
+          else if (y > z) uv.setXY(i, p.getX(i) * scale, p.getZ(i) * scale);
+          else uv.setXY(i, p.getX(i) * scale, p.getY(i) * scale);
+        }
+      }
+      return result;
+    });
+    return mesh(parent, shape, material, xyz, rotation);
   }
   function cylinder(parent, radius, height, xyz, material = m.frame, rotation, top = radius, sides = 24) {
     return mesh(parent, get(`c${radius}:${height}:${top}:${sides}`, () => new THREE.CylinderGeometry(top, radius, height, sides)), material, xyz, rotation);

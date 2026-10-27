@@ -129,12 +129,12 @@ function route() {
   if (!station) {
     if (detail.open) detail.close();
     activeStation = null;
-    document.title = '私人训练馆 · Inwt';
+    document.title = '训练馆 · Inwt';
     return;
   }
   activeStation = station;
   renderDetail();
-  document.title = `${station.name} · 私人训练馆`;
+  document.title = `${station.name} · 训练馆`;
   if (!detail.open) {
     lastDetailTrigger = document.activeElement;
     detail.showModal();
@@ -308,6 +308,11 @@ $('#resume-room').addEventListener('click', () => menu.close());
 $('#close-menu').addEventListener('click', () => menu.close());
 const modalObserver = new MutationObserver(() => { room?.setPaused(paused()); if (paused()) hint(null); });
 for (const modal of [detail, entryDialog, menu]) modalObserver.observe(modal, { attributes: true, attributeFilter: ['open'] });
+// A room that finishes loading in an inactive Safari tab starts paused. Resume
+// its internal input state as well as its animation loop when the tab returns.
+document.addEventListener('visibilitychange', () => room?.setPaused(paused()));
+addEventListener('pageshow', () => room?.setPaused(paused()));
+addEventListener('focus', () => room?.setPaused(paused()));
 addEventListener('keydown', event => {
   if (event.key === 'Escape' && !detail.open && !entryDialog.open && !menu.open) {
     event.preventDefault();

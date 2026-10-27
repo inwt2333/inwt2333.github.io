@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 // Deterministic micro-textures: no per-frame noise, no third-party requests.
-export async function createMaterials(renderer) {
+export function createMaterials(renderer, onUpdate = () => {}) {
   const anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
   let seed = 1597;
   const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
@@ -33,13 +33,13 @@ export async function createMaterials(renderer) {
   const rubber = texture('rubber', 5);
   const material = (color, roughness = .6, metalness = 0, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness, metalness, ...extra });
   const m = {
-    frame: material('#252c2a', .38, .72, { bumpMap: powder, bumpScale: .004, envMapIntensity: 1.1 }),
+    frame: material('#252c2a', .4, .28, { bumpMap: powder, bumpScale: .0008, envMapIntensity: .9 }),
     frameLight: material('#65716c', .4, .75, { envMapIntensity: 1.05 }),
     chrome: material('#bec8c6', .24, 1, { envMapIntensity: 1.3 }),
     steel: material('#555d60', .43, .85),
     bolt: material('#9ca4a3', .27, 1),
-    upholstery: material('#242925', .74, 0, { bumpMap: leather, bumpScale: .004 }),
-    upholsteryWarm: material('#69513d', .8, 0, { bumpMap: leather, bumpScale: .004 }),
+    upholstery: material('#242b27', .8, 0),
+    upholsteryWarm: material('#78573d', .83, 0),
     seam: material('#4d5146', .76),
     rubber: material('#1b1e1d', .88, 0, { bumpMap: rubber, bumpScale: .009 }),
     plate: material('#282b2a', .5, .6, { bumpMap: powder, bumpScale: .005 }),
@@ -50,7 +50,7 @@ export async function createMaterials(renderer) {
     floor: material('#b9b4a7', .62, 0),
     floorRubber: material('#303333', .9, .02, { bumpMap: rubber, bumpScale: .025 }),
     concrete: material('#494b47', .9, 0, { bumpMap: powder, bumpScale: .03 }),
-    wall: material('#535950', .82, 0, { bumpMap: powder, bumpScale: .014 }),
+    wall: material('#6b7065', .95, 0),
     ceiling: material('#212725', .85),
     timber: material('#9b8060', .72, 0, { map: wood, bumpMap: wood, bumpScale: .012 }),
     fabric: material('#c3c0aa', .95, 0, { bumpMap: leather, bumpScale: .025 }),
@@ -64,13 +64,27 @@ export async function createMaterials(renderer) {
   const loader = new THREE.TextureLoader();
   // CC0 photographic concrete from Poly Haven, served from this site.
   const paths = ['concrete-color.jpg', 'concrete-normal.jpg'];
-  const maps = await Promise.all(paths.map(path => loader.loadAsync(`textures/${path}`).catch(() => null)));
-  for (const map of maps) if (map) {
+  paths.forEach((path, index) => {
+    const map = loader.load(`textures/${path}`, () => onUpdate(), undefined, () => {});
     map.wrapS = map.wrapT = THREE.RepeatWrapping;
     map.repeat.set(5, 5);
     map.anisotropy = anisotropy;
+    if (index === 0) { map.colorSpace = THREE.SRGBColorSpace; m.floor.map = map; }
+    if (index === 1) { m.floor.normalMap = map; m.floor.normalScale = new THREE.Vector2(.065, .065); }
+  });
+  // Photographic grain and roughness keep leather highlights broad and uneven;
+  // plaster uses its own pores rather than the powder-coat noise of metal.
+  function surface(prefix, targets, repeat, normalScale) {
+    for (const [suffix, slot] of [['diff', 'map'], ['nor_gl', 'normalMap'], ['rough', 'roughnessMap']]) {
+      const map = loader.load(`textures/${prefix}-${suffix}.webp`, () => onUpdate(), undefined, () => {});
+      map.wrapS = map.wrapT = THREE.RepeatWrapping;
+      map.repeat.set(repeat, repeat);
+      map.anisotropy = anisotropy;
+      if (slot === 'map') map.colorSpace = THREE.SRGBColorSpace;
+      for (const target of targets) { target[slot] = map; target.normalScale = new THREE.Vector2(normalScale, normalScale); }
+    }
   }
-  if (maps[0]) { maps[0].colorSpace = THREE.SRGBColorSpace; m.floor.map = maps[0]; }
-  if (maps[1]) { m.floor.normalMap = maps[1]; m.floor.normalScale = new THREE.Vector2(.065, .065); }
+  surface('leather', [m.upholstery, m.upholsteryWarm], 1.3, .22);
+  surface('plaster', [m.wall, m.concrete], 1, .24);
   return m;
 }

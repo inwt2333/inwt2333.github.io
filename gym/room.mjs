@@ -26,7 +26,7 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = .98;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.domElement.setAttribute('aria-label', '私人训练馆三维空间。拖动环顾，滚轮移动，WASD 行走。Tab 可选择器材，Esc 打开选项。');
+  renderer.domElement.setAttribute('aria-label', '训练馆三维空间。拖动环顾，滚轮移动，WASD 行走。Tab 可选择器材，Esc 打开选项。');
   container.prepend(renderer.domElement);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#8e9f9c');
@@ -42,21 +42,30 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
   camera.position.copy(startPosition);
   camera.rotation.set(pitch, yaw, 0);
 
+  // Start with a tiny procedural studio environment. The photographic HDR is
+  // upgraded in the background after the first frame, so entry is immediate.
   const pmrem = new THREE.PMREMGenerator(renderer);
-  const [hdr, outdoors] = await Promise.all(['studio.hdr', 'alps_field.hdr'].map(path => new HDRLoader().loadAsync(path).catch(() => null)));
-  if (hdr) { scene.environment = pmrem.fromEquirectangular(hdr).texture; hdr.dispose(); }
-  else { const studio = new RoomEnvironment(); scene.environment = pmrem.fromScene(studio, .04).texture; studio.dispose(); }
-  pmrem.dispose();
+  const studio = new RoomEnvironment();
+  scene.environment = pmrem.fromScene(studio, .04, .1, 100, { size: 64 }).texture;
+  studio.dispose();
+  new HDRLoader().load('studio-small.hdr', hdr => {
+    const previous = scene.environment;
+    const upgraded = pmrem.fromEquirectangular(hdr).texture;
+    scene.environment = upgraded;
+    previous.dispose();
+    hdr.dispose();
+    requestFrame();
+    setTimeout(() => pmrem.dispose(), 0);
+  }, undefined, () => pmrem.dispose());
   scene.environmentIntensity = .5;
   scene.environmentRotation.y = 1.5;
-  if (outdoors) {
-    outdoors.mapping = THREE.EquirectangularReflectionMapping;
-    scene.background = outdoors;
-    scene.backgroundIntensity = .75;
-    scene.backgroundBlurriness = 0;
-    scene.backgroundRotation.y = 3.4;
-  }
-  const m = await createMaterials(renderer);
+  // An illustrated view is placed beyond the glass, with subdued colors and
+  // enough distance to retain perspective as the viewer walks past the windows.
+  const scenery = new THREE.TextureLoader().load('scenery.webp', () => requestFrame());
+  scenery.colorSpace = THREE.SRGBColorSpace;
+  const view = new THREE.Mesh(new THREE.PlaneGeometry(68, 38.25), new THREE.MeshBasicMaterial({ map: scenery, color: '#b8c2c1', fog: false }));
+  view.position.set(-29, 8, .5); view.rotation.y = Math.PI / 2; scene.add(view);
+  const m = createMaterials(renderer, () => requestFrame());
   const equipment = createEquipment(scene, m);
   const { box, cylinder, tube, mesh } = equipment;
   const architecture = new THREE.Group(); scene.add(architecture);
@@ -92,7 +101,7 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
   box(architecture, [.42, .17, 20.8], [-9.87, .12, .5], m.concrete, .015);
 
   const mirror = new Reflector(new THREE.PlaneGeometry(11.8, 3.5), {
-    clipBias: .003, textureWidth: coarse ? 768 : 1536, textureHeight: coarse ? 512 : 768,
+    clipBias: .003, textureWidth: coarse ? 512 : 1024, textureHeight: coarse ? 384 : 512,
     color: 0xc1c8c3, multisample: 0,
   });
   mirror.position.set(-3.1, 2.95, -9.33); scene.add(mirror);
@@ -106,9 +115,9 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
   const sunlight = new THREE.DirectionalLight('#ffead0', 3.6);
   sunlight.position.set(-25, 17, -5); sunlight.target.position.set(2, 0, 2);
   sunlight.castShadow = true;
-  sunlight.shadow.mapSize.set(coarse ? 2048 : 4096, coarse ? 2048 : 4096);
+  sunlight.shadow.mapSize.set(coarse ? 1024 : 2048, coarse ? 1024 : 2048);
   Object.assign(sunlight.shadow.camera, { left: -17, right: 17, top: 17, bottom: -17, near: 1, far: 60 });
-  sunlight.shadow.normalBias = .025; sunlight.shadow.bias = -.00015; sunlight.shadow.radius = 5;
+  sunlight.shadow.normalBias = .025; sunlight.shadow.bias = -.00015; sunlight.shadow.radius = 3;
   scene.add(sunlight, sunlight.target);
   const windowLight = new THREE.RectAreaLight('#dcecf7', 1.2, 19, 4.4);
   windowLight.position.set(-9.7, 3.1, .3); windowLight.lookAt(2, 1.2, .3); scene.add(windowLight);
@@ -121,9 +130,8 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
   // Matte prints sit in real frames; their small picture lights belong to the room.
   const art = new THREE.Group(); scene.add(art);
   const artLoader = new THREE.TextureLoader();
-  await Promise.all(['miku', 'firefly', 'robin'].map(async (name, i) => {
-    const texture = await artLoader.loadAsync(`art/${name}.webp`).catch(() => null);
-    if (!texture) return;
+  ['miku', 'firefly', 'robin'].forEach((name, i) => {
+    const texture = artLoader.load(`art/${name}.webp`, () => requestFrame(), undefined, () => {});
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
     const x = 4.2 + i * 2.05;
@@ -136,7 +144,7 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
     box(art, [.58, .009, .06], [x, 4.59, -8.87], m.led, .003);
     const light = new THREE.SpotLight('#ffedcb', 9, 4, .55, .9, 2);
     light.position.set(x, 4.58, -8.7); light.target.position.set(x, 3.3, -9.08); scene.add(light, light.target);
-  }));
+  });
 
   const props = new THREE.Group(); scene.add(props);
   for (const [x, z] of [[-9, -7.8], [8.8, 7.5]]) {
@@ -182,9 +190,9 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
   // Noninteractive equipment (bench and dumbbell rack) uses the same batching.
   for (const group of scene.children) if (group.isGroup && ![architecture, props, glazing, contacts].includes(group) && !group.userData.station) batchStaticGroup(group);
 
-  const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: coarse ? 0 : 4 }));
+  const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: coarse ? 0 : 2 }));
   composer.addPass(new RenderPass(scene, camera));
-  const ao = new SSAOPass(scene, camera, 1, 1, coarse ? 8 : 16);
+  const ao = new SSAOPass(scene, camera, 1, 1, coarse ? 8 : 12);
   ao.kernelRadius = .16; ao.minDistance = .001; ao.maxDistance = .09;
   composer.addPass(ao);
   const outline = new OutlinePass(new THREE.Vector2(1, 1), scene, camera);
@@ -287,12 +295,13 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
     const width = container.clientWidth, height = container.clientHeight;
     renderer.setSize(width, height); camera.aspect = width / height;
     camera.fov = width < 600 ? 77 : 62; camera.updateProjectionMatrix(); composer.setSize(width, height);
+    ao.setSize(Math.ceil(width * pixelRatio * .65), Math.ceil(height * pixelRatio * .65));
     fxaa.uniforms.resolution.value.set(1 / (width * pixelRatio), 1 / (height * pixelRatio)); requestFrame();
   }
   renderer.domElement.addEventListener('pointerdown', event => {
     if (paused || isPaused() || event.button > 0) return;
     touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    renderer.domElement.setPointerCapture(event.pointerId);
+    try { renderer.domElement.setPointerCapture(event.pointerId); } catch { /* Safari can reject capture during a fast tab switch. */ }
     drag = { id: event.pointerId, x: event.clientX, y: event.clientY, startX: event.clientX, startY: event.clientY, moved: false, multi: touches.size > 1 };
     turnTarget = null; renderer.domElement.style.cursor = 'grabbing';
     clearTimeout(holdTimer);
@@ -330,6 +339,20 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
     renderer.domElement.style.cursor = selected ? 'pointer' : 'grab';
   });
   renderer.domElement.addEventListener('pointercancel', event => { clearTimeout(holdTimer); touches.delete(event.pointerId); drag = null; pinchDistance = null; });
+  // Safari may dispatch the final move/up on the window when pointer capture is
+  // unavailable. Keep the same drag alive outside the canvas in that case.
+  addEventListener('pointermove', event => {
+    if (!drag || drag.id !== event.pointerId || event.target === renderer.domElement || paused || isPaused()) return;
+    const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
+    if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) > 5) { drag.moved = true; clearTimeout(holdTimer); }
+    if (drag.moved) { yaw -= dx * .003; pitch = THREE.MathUtils.clamp(pitch - dy * .0027, -.65, .8); highlight(null); requestFrame(); }
+    drag.x = event.clientX; drag.y = event.clientY;
+  });
+  addEventListener('pointerup', event => {
+    if (!drag || drag.id !== event.pointerId || event.target === renderer.domElement) return;
+    clearTimeout(holdTimer); touches.delete(event.pointerId); drag = null; pinchDistance = null;
+    renderer.domElement.style.cursor = selected ? 'pointer' : 'grab';
+  });
   renderer.domElement.addEventListener('contextmenu', event => { event.preventDefault(); clearTimeout(holdTimer); if (!paused && !isPaused()) onMenu(); });
   renderer.domElement.addEventListener('pointerleave', event => { if (event.pointerType !== 'touch' && !drag) highlight(null); });
   renderer.domElement.addEventListener('wheel', event => {
@@ -338,18 +361,27 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
     walk(Math.sin(yaw) * amount, Math.cos(yaw) * amount); highlight(null); requestFrame();
   }, { passive: false });
   const movementKeys = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ShiftLeft', 'ShiftRight']);
+  const safariKeys = { w: 'KeyW', a: 'KeyA', s: 'KeyS', d: 'KeyD', arrowup: 'ArrowUp', arrowdown: 'ArrowDown', arrowleft: 'ArrowLeft', arrowright: 'ArrowRight', shift: 'ShiftLeft' };
   addEventListener('keydown', event => {
-    if (paused || isPaused() || !movementKeys.has(event.code) || event.ctrlKey || event.metaKey || event.altKey) return;
-    event.preventDefault(); keys.add(event.code); turnTarget = null; requestFrame();
+    const code = movementKeys.has(event.code) ? event.code : safariKeys[String(event.key || '').toLowerCase()];
+    if (paused || isPaused() || !code || event.ctrlKey || event.metaKey || event.altKey) return;
+    event.preventDefault(); keys.add(code); turnTarget = null; requestFrame();
   });
-  addEventListener('keyup', event => keys.delete(event.code));
+  addEventListener('keyup', event => {
+    const code = movementKeys.has(event.code) ? event.code : safariKeys[String(event.key || '').toLowerCase()];
+    if (code) keys.delete(code);
+  });
   addEventListener('blur', () => { keys.clear(); touches.clear(); drag = null; highlight(null); });
-  document.addEventListener('visibilitychange', () => { keys.clear(); if (!document.hidden) requestFrame(); });
+  document.addEventListener('visibilitychange', () => {
+    keys.clear();
+    if (!document.hidden) { queued = false; lastTime = performance.now(); requestFrame(); }
+  });
+  addEventListener('pageshow', () => { queued = false; lastTime = performance.now(); requestFrame(); });
   renderer.domElement.addEventListener('webglcontextlost', event => { event.preventDefault(); dead = true; onHover(null); onUnavailable(); });
   renderer.domElement.addEventListener('webglcontextrestored', () => location.reload());
   new ResizeObserver(resize).observe(container);
   scene.updateMatrixWorld(true); renderer.shadowMap.needsUpdate = true; resize();
-  await renderer.compileAsync(scene, camera); render();
+  render();
 
   return {
     reset() {
