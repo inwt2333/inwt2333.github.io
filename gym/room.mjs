@@ -59,12 +59,16 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
   }, undefined, () => pmrem.dispose());
   scene.environmentIntensity = .5;
   scene.environmentRotation.y = 1.5;
-  // An illustrated view is placed beyond the glass, with subdued colors and
-  // enough distance to retain perspective as the viewer walks past the windows.
-  const scenery = new THREE.TextureLoader().load('scenery.webp', () => requestFrame());
+  // The wallpaper wraps around the whole horizon at infinity. Unlike a finite
+  // plane, its sides cannot become visible when walking up to or along the glass.
+  const scenery = new THREE.TextureLoader().load('scenery.webp', () => {
+    scene.background = scenery;
+    requestFrame();
+  });
   scenery.colorSpace = THREE.SRGBColorSpace;
-  const view = new THREE.Mesh(new THREE.PlaneGeometry(68, 38.25), new THREE.MeshBasicMaterial({ map: scenery, color: '#b8c2c1', fog: false }));
-  view.position.set(-29, 8, .5); view.rotation.y = Math.PI / 2; scene.add(view);
+  scenery.mapping = THREE.EquirectangularReflectionMapping;
+  scene.backgroundIntensity = 1;
+  scene.backgroundRotation.y = .6;
   const m = createMaterials(renderer, () => requestFrame());
   const equipment = createEquipment(scene, m);
   const { box, cylinder, tube, mesh } = equipment;
