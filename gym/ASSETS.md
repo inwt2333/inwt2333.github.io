@@ -22,3 +22,9 @@ These character illustrations retain their original copyrights; they are not CC0
 `tools/make_gym_art.py` places the original illustrations on tinted print backgrounds and exports compact WebP textures. The print images include small artist / owner credits. Frames, matte borders and picture lights are modeled in the scene.
 
 No stock render or generated background replaces the navigable scene. Equipment picking, highlights, shadows and mirror reflections are rendered from the 3D geometry.
+
+## Journal muscle diagrams
+
+The front/back silhouettes and muscle paths in `anatomy.mjs` are original inline SVG illustrations authored in this repository. They add no external image or model requests. Highlights indicate broad muscle regions for each station; the combined leg station displays both the extension and adductor regions.
+
+Exercise-region references include [Mayo Clinic: seated row](https://www.mayoclinic.org/healthy-lifestyle/fitness/multimedia/seated-row/vid-20084669), [ACE: seated row](https://www.acefitness.org/resources/everyone/exercise-library/168/seated-row/) and [NASM: chest press machine](https://www.nasm.org/resource-center/exercise-library/chest-press-machine).

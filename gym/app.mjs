@@ -1,4 +1,5 @@
 import { stations, exercises, publishedEntries, exerciseName, byDate, dateLabel, localDate, cardioMinutes, validateJournal } from './data.mjs';
+import { musclePanel } from './anatomy.mjs';
 
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -78,7 +79,7 @@ function stationDetail(station) {
   const days = new Set(list.map(e => e.date)).size;
   const cardio = station.id === 'cardio';
   const max = cardio ? cardioMinutes(list) : Math.max(0, ...list.flatMap(e => e.loads.map(l => l.weight * (l.unit === 'lb' ? 0.45359237 : 1))));
-  return `<p class="eyebrow">${station.en} / TRAINING ARCHIVE</p><div class="detail-heading"><div><h2 id="detail-title">${station.name}</h2><p>${station.description}</p></div><button class="primary-button" type="button" data-new="${station.exercises[0]}"><span>＋</span> 记一笔</button></div><div class="detail-tabs">${stations.filter(s => s.exercises.length).map(s => `<a href="#${s.id}" ${station.id === s.id ? 'aria-current="page"' : ''}>${s.name}</a>`).join('')}</div><div class="detail-stat-strip"><div><strong>${days}</strong><span>个训练日</span></div><div><strong>${list.length}</strong><span>项训练记录</span></div><div><strong>${cardio ? max : max ? `${Number(max.toFixed(1))}` : '—'}</strong><span>${cardio ? '分钟 · 有氧累计' : 'kg · 最高记录重量（换算）'}</span></div></div>${comparison(station, list)}${list.length ? groupedHTML(list) : '<div class="empty-state">还没有这台器材的记录。<br>下一次，从第一笔开始。</div>'}<p class="detail-footnote">原始记录的磅（lb）与公斤（kg）分别保留。未写明组数按一组记录。最高重量仅按单位换算展示，不代表不同器械间的能力比较。${station.id === 'pull' ? '“高位下拉”和“高拉力背肌”按原动作名称分别保存。' : ''}</p>`;
+  return `<p class="eyebrow station-eyebrow"><span class="station-indicator"></span> ${station.en} <span class="eyebrow-divider">/</span> TRAINING JOURNAL</p><div class="detail-heading"><div><h2 id="detail-title">${station.name}</h2><p>${station.description}</p></div><button class="primary-button" type="button" data-new="${station.exercises[0]}"><span>＋</span> 记一笔</button></div><div class="detail-tabs">${stations.filter(s => s.exercises.length).map(s => `<a href="#${s.id}" ${station.id === s.id ? 'aria-current="page"' : ''}>${s.name}</a>`).join('')}</div><div class="detail-layout"><div class="training-journal"><div class="detail-stat-strip"><div><strong>${days}</strong><span>个训练日</span></div><div><strong>${list.length}</strong><span>项训练记录</span></div><div><strong>${cardio ? max : max ? `${Number(max.toFixed(1))}` : '—'}</strong><span>${cardio ? '分钟 · 有氧累计' : 'kg · 最高记录重量（换算）'}</span></div></div>${comparison(station, list)}<div class="journal-section-heading"><h3>训练记录</h3><span>每一次，都留下痕迹</span></div>${list.length ? groupedHTML(list) : '<div class="empty-state">还没有这台器材的记录。<br>下一次，从第一笔开始。</div>'}<p class="detail-footnote">原始记录的磅（lb）与公斤（kg）分别保留。未写明组数按一组记录。最高重量仅按单位换算展示，不代表不同器械间的能力比较。${station.id === 'pull' ? '“高位下拉”和“高拉力背肌”按原动作名称分别保存。' : ''}</p></div>${musclePanel(station)}</div>`;
 }
 
 function calendarDetail() {
@@ -119,6 +120,8 @@ function weightDetail() {
 
 function renderDetail() {
   const scrollTop = detail.scrollTop;
+  detail.dataset.zone = activeStation.zone;
+  detail.dataset.view = activeStation.exercises.length ? 'training' : activeStation.id;
   $('#detail-content').innerHTML = activeStation.id === 'weight' ? weightDetail() : activeStation.id === 'calendar' ? calendarDetail() : stationDetail(activeStation);
   detail.scrollTop = scrollTop;
 }
