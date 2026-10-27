@@ -296,6 +296,7 @@ def build_sitemap(posts):
         ('/', today),
         ('/essays.html', today),
         ('/gallery.html', today),
+        ('/gym/', today),
         ('/about.html', today),
     ] + [
         ('/' + p['url'], _date_key(p.get('date')))

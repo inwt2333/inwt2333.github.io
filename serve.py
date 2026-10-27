@@ -42,7 +42,7 @@ ALLOWED_GET = {
     '/photos.json', '/photos/manual.json', '/posts.json',
     '/feed.xml', '/sitemap.xml', '/robots.txt', '/favicon.ico',
 }
-ALLOWED_GET_PREFIX = ('/assets/', '/photos/web/', '/photos/thumb/', '/posts/', '/post/')
+ALLOWED_GET_PREFIX = ('/assets/', '/photos/web/', '/photos/thumb/', '/posts/', '/post/', '/gym/')
 
 
 def _get_allowed(path):

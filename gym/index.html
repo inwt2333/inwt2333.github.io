@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>私人训练馆 · Inwt</title>
+  <meta name="description" content="沉浸式私人训练馆。走进空间，触碰器材，留下训练和身体的变化。">
+  <meta name="theme-color" content="#101210">
+  <link rel="canonical" href="https://inwt233.cn/gym/">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">{"imports":{"three":"../assets/vendor/three/three.module.js"}}</script>
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <main id="scene" class="scene" aria-label="沉浸式私人健身房。拖动环顾，滚轮前后移动，WASD 漫游，Esc 打开选项。">
+    <div class="scene-loading" id="scene-loading" role="status"><span class="loader-line"></span><span>正在进入训练馆</span></div>
+    <div class="scene-fallback" id="scene-fallback" hidden><p>当前设备无法打开 3D 空间</p><div id="fallback-stations"></div></div>
+    <div class="scene-vignette" aria-hidden="true"></div>
+    <div class="interaction-caption" id="interaction-caption" role="status" aria-live="polite" hidden><span class="caption-line"></span><span id="interaction-text"></span><span class="caption-key" aria-hidden="true">↗</span></div>
+    <div id="keyboard-stations" class="keyboard-stations" aria-label="器材快捷入口"></div>
+  </main>
+  <a class="room-home" href="../index.html" aria-label="返回首页地铁图" title="返回首页地铁图"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5 8 12l7 7M8 12h13"/></svg><span>返回首页</span></a>
+  <dialog id="menu-dialog" class="menu-dialog" aria-labelledby="menu-title"><button type="button" class="close-button menu-close" id="close-menu" aria-label="继续探索">×</button><p class="eyebrow">PRIVATE GYM</p><h2 id="menu-title">稍作停留</h2><p class="menu-help">拖动鼠标环顾 · 滚轮前后移动<br>WASD / 方向键漫游 · 点击器材查看记录<br>Esc / 右键打开选项<br>手机：拖动环顾，双指缩放，轻点选中，再点打开<br>长按空白处打开选项</p><div class="menu-actions"><button type="button" id="resume-room">继续探索</button><button type="button" id="reset-view">回到入口</button><button type="button" id="add-entry">记一笔训练</button><a href="../index.html">离开训练馆 ↗</a></div><p class="field-note">新增记录保存在当前浏览器，可在器材详情中导出备份。</p></dialog>
+  <dialog id="detail-dialog" class="detail-dialog" aria-labelledby="detail-title"><div class="dialog-header"><a href="#room" class="dialog-back" aria-label="返回训练空间">← 返回训练馆</a><button type="button" class="close-button" id="close-detail" aria-label="关闭详情">×</button></div><div id="detail-content"></div><div class="archive-tools"><button type="button" id="export-data">导出记录 ↗</button><button type="button" id="import-data">导入备份</button><input type="file" id="import-file" accept="application/json,.json" hidden><span>记录保存在当前浏览器</span></div></dialog>
+  <dialog id="entry-dialog" class="entry-dialog" aria-labelledby="entry-title">
+    <div class="dialog-header"><span class="eyebrow">LEAVE A LITTLE PROGRESS</span><button type="button" class="close-button" id="close-entry" aria-label="关闭记录表单">×</button></div>
+    <h2 id="entry-title">记一笔训练</h2><p class="form-intro">不用完美，真实就好。</p>
+    <form id="entry-form">
+      <div class="form-row"><label>训练日期<input type="date" name="date" required></label><label>训练动作<select name="exercise" id="exercise-select"></select></label></div>
+      <div id="strength-fields"><div class="form-row"><label>重量<input type="number" name="weight" min="0.1" max="1000" step="0.1" required inputmode="decimal" placeholder="例如 27"></label><label>单位<select name="unit"><option value="lb">磅 · lb</option><option value="kg">公斤 · kg</option></select></label></div><div class="form-row"><label>每组次数<input type="number" name="reps" min="1" max="1000" step="1" required inputmode="numeric" placeholder="例如 12"></label><label>组数 <span class="optional">选填</span><input type="number" name="sets" min="1" max="100" step="1" inputmode="numeric" placeholder="留空按 1 组"></label></div></div>
+      <div id="cardio-fields" hidden><div class="form-row"><label>训练方式<select name="activity"><option>爬坡</option><option>跑步</option><option>快走</option><option>放松</option></select></label><label>时长 / 分钟<input type="number" name="minutes" min="0.1" max="1440" step="0.1" inputmode="decimal" disabled required placeholder="例如 20"></label></div><p class="field-note">爬坡与放松可以分开记，各自保留时长。</p></div>
+      <label>今天感觉怎么样？ <span class="optional">选填</span><textarea name="note" maxlength="500" rows="2" placeholder="比如：最后一组有点吃力，但完成了。"></textarea></label>
+      <p class="field-note">同一动作不同重量可以分别记一笔。保存到当前浏览器后，可在器材详情中导出备份。</p>
+      <p id="entry-error" class="form-error" role="alert"></p><button class="primary-button form-submit" type="submit">保存这次努力 <span aria-hidden="true">↗</span></button>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>
