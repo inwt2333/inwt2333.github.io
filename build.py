@@ -90,6 +90,13 @@ def build_index():
         }
         if meta.get('category'):
             post["category"] = meta['category']
+        # 随笔书架的可选外观元数据；未填写时由前端根据标题和摘要生成默认主题。
+        for key in ('motif', 'accent', 'note', 'cover_image'):
+            if meta.get(key):
+                value = meta[key]
+                if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+                    value = value[1:-1]
+                post[key] = value
         posts.append(post)
 
     # 按日期倒序（front matter 里的日期优先）；无有效日期的旧笔记沉底
