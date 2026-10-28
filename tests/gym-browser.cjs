@@ -53,6 +53,14 @@ const output = process.env.GYM_SCREENSHOT_DIR;
     assert.match(await page.locator('#detail-content').innerText(), /27 lb × 7 × 1/);
     await page.locator('#close-detail').click();
 
+    await station('leg-curl');
+    assert.equal(await page.locator('#detail-title').innerText(), '腿屈伸 / 腿弯曲');
+    assert.match(await page.locator('.journal-records').innerText(), /27 lb × 12 × 2/);
+    assert.equal(await page.locator('.history-group').count(), 1);
+    await page.locator('[data-anatomy-view="back"]').click();
+    assert.equal(await page.locator('[data-body-view="back"] [data-muscle="hamstrings"].is-primary').count(), 1);
+    await page.locator('#close-detail').click();
+
     await page.keyboard.press('Escape');
     await page.waitForSelector('#menu-dialog[open]');
     await page.locator('#add-entry').click();
@@ -164,7 +172,7 @@ const output = process.env.GYM_SCREENSHOT_DIR;
     assert.equal(await page.locator('#scene-fallback').isVisible(), false);
 
     const fallback = await browser.newPage();
-    await fallback.route('**/room.mjs', route => route.abort());
+    await fallback.route('**/room.mjs*', route => route.abort());
     await fallback.goto(base);
     await fallback.waitForSelector('#scene-fallback', { state: 'visible' });
     await fallback.locator('#fallback-stations a[href="#row"]').click();

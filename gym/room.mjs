@@ -11,7 +11,7 @@ import { HDRLoader } from '../assets/vendor/three/addons/loaders/HDRLoader.js';
 import { RoomEnvironment } from '../assets/vendor/three/addons/environments/RoomEnvironment.js';
 import { RectAreaLightUniformsLib } from '../assets/vendor/three/addons/lights/RectAreaLightUniformsLib.js';
 import { createMaterials } from './materials.mjs';
-import { createEquipment } from './equipment.mjs';
+import { createEquipment } from './equipment.mjs?v=leg-machine-1';
 import { batchStaticGroup } from './optimize.mjs';
 
 export async function createRoom({ container, onHover, onSelect, onMenu, onUnavailable, isPaused }) {

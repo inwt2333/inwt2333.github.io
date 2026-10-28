@@ -1,5 +1,5 @@
-import { stations, exercises, publishedEntries, exerciseName, byDate, dateLabel, localDate, cardioMinutes, validateJournal } from './data.mjs?v=journal-1028';
-import { musclePanel } from './anatomy.mjs?v=journal-1028';
+import { stations, exercises, publishedEntries, exerciseName, byDate, dateLabel, localDate, cardioMinutes, validateJournal } from './data.mjs?v=leg-machine-1';
+import { musclePanel } from './anatomy.mjs?v=leg-machine-1';
 
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -83,7 +83,7 @@ function stationDetail(station) {
   return `<div class="station-workspace">
     <div class="station-journal">
       <header class="station-hero">
-        <p class="station-eyebrow"><span>${cardio ? '有氧训练' : '力量训练'}</span><span>${String(index).padStart(2, '0')} / 08</span></p>
+        <p class="station-eyebrow"><span>${cardio ? '有氧训练' : '力量训练'}</span><span>${String(index).padStart(2, '0')} / ${String(stations.filter(s => s.exercises.length).length).padStart(2, '0')}</span></p>
         <h2 id="detail-title">${station.name}</h2>
         <div class="hero-bottom"><p>${station.en}</p><button class="primary-button" type="button" data-new="${station.exercises[0]}">记一笔 <span aria-hidden="true">＋</span></button></div>
       </header>
@@ -314,6 +314,7 @@ const descriptions = {
   pull: '拉力训练 · 查看背部训练记录', row: '坐姿划船 · 查看训练与进步',
   fly: '蝴蝶机 · 查看夹胸训练记录', chest: '胸部推举 · 查看训练记录',
   shoulder: '肩部推举 · 查看训练记录', abs: '腹肌训练 · 查看核心训练记录',
+  'leg-curl': '腿屈伸 / 腿弯曲 · 查看训练记录',
   legs: '腿部训练 · 查看腿部训练记录', cardio: '跑步机 · 记录有氧训练',
   weight: '体重秤 · 记录身体的变化', calendar: '训练手账 · 查看训练日历',
 };
@@ -350,7 +351,7 @@ addEventListener('keydown', event => {
   }
 });
 // Full-viewport scene. The journal remains independent of the GPU renderer.
-import('./room.mjs').then(({ createRoom }) => createRoom({
+import('./room.mjs?v=leg-machine-1').then(({ createRoom }) => createRoom({
   container: $('#scene'),
   onHover: hint,
   onMenu: () => menu.showModal(),

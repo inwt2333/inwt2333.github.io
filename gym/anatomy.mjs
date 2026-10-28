@@ -8,11 +8,12 @@ const profiles = {
   chest: { title: '胸部', primary: ['chest'], secondary: ['shoulders', 'triceps'], main: ['胸大肌'], assist: ['三角肌前束', '肱三头肌'], note: '坐式胸肌推举' },
   shoulder: { title: '肩部', primary: ['shoulders'], secondary: ['triceps'], main: ['三角肌前束 / 中束'], assist: ['肱三头肌'], note: '坐姿肩推' },
   abs: { title: '核心', primary: ['abs'], secondary: ['obliques'], main: ['腹直肌'], assist: ['腹斜肌群'], note: '坐式腹肌训练' },
-  legs: { title: '腿部', primary: ['quads', 'adductors', 'hamstrings'], secondary: [], main: ['股四头肌', '腘绳肌', '大腿内收肌群'], assist: [], note: '腿屈伸 / 腿弯曲 · 大腿内侧' },
+  legs: { title: '腿部', primary: ['quads', 'adductors'], secondary: [], main: ['股四头肌', '大腿内收肌群'], assist: [], note: '大腿伸展 / 大腿内侧' },
+  'leg-curl': { title: '腿部', primary: ['quads', 'hamstrings'], secondary: [], main: ['股四头肌', '腘绳肌'], assist: [], note: '腿屈伸 / 腿弯曲' },
   cardio: { title: '下肢', primary: ['quads', 'glutes', 'calves'], secondary: ['hamstrings'], main: ['大腿前侧', '臀部', '小腿'], assist: ['大腿后侧'], note: '步行 / 爬坡时参与的区域' },
 };
 
-const defaultViews = { pull: 'back', row: 'back', fly: 'front', chest: 'front', shoulder: 'front', abs: 'front', legs: 'front', cardio: 'back' };
+const defaultViews = { pull: 'back', row: 'back', fly: 'front', chest: 'front', shoulder: 'front', abs: 'front', legs: 'front', 'leg-curl': 'front', cardio: 'back' };
 const regionEnglish = { back: 'BACK', chest: 'CHEST', shoulders: 'SHOULDERS', core: 'CORE', legs: 'LEGS', cardio: 'ENDURANCE' };
 
 function figure(view, profile, visible) {

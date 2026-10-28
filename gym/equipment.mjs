@@ -208,6 +208,71 @@ export function createEquipment(scene, m) {
     for (const s of [-1, 1]) handle(g, [s * .52, .81, .47], [s * .52, 1.05, .49]);
   }, -.25, [1.8, 2.6]);
 
+  // Seated dual leg extension / curl: side stack, knee-axis cam and two rollers.
+  // Local +Z is the user's facing direction; the ankle roller sits below the knee.
+  station('leg-curl', [4.6, 0, 3.75], g => {
+    for (const x of [-.6, .65]) {
+      frame(g, [x, .15, -.7], [x, .15, 1.15], .12, .14);
+      foot(g, x, -.65); foot(g, x, 1.1);
+    }
+    frame(g, [-.6, .17, -.6], [1.1, .17, -.6], .12);
+    frame(g, [-.6, .17, .85], [.65, .17, .85], .12);
+    frame(g, [0, .2, -.45], [0, .83, .05], .14);
+    frame(g, [0, .2, .65], [0, .83, .4], .12);
+    box(g, [.71, .055, .79], [0, .83, .14], m.steel, .025);
+    pad(g, [.73, .15, .82], [0, .93, .14], [-.055, 0, 0], true);
+    frame(g, [0, .3, -.4], [0, 1.62, -.6], .13);
+    pad(g, [.64, .84, .18], [0, 1.4, -.42], [-.18, 0, 0], true);
+    // Backrest carriage, adjustment holes and a brass release pin.
+    frame(g, [0, 1.06, -.35], [0, 1.06, -.7], .075, .075, m.chrome);
+    for (let i = 0; i < 5; i++) bolt(g, [.08, 1.05, -.36 - i * .06], 'x', .014);
+    cylinder(g, .04, .12, [.13, 1.05, -.52], m.brass, [0, 0, Math.PI / 2]);
+    for (const s of [-1, 1]) {
+      frame(g, [s * .43, .25, .05], [s * .48, .96, .1], .07);
+      handle(g, [s * .48, .96, -.04], [s * .48, .96, .43]);
+    }
+    // Right-hand knee pivot with a perforated range-of-motion selector disc.
+    const pivot = [.62, .91, .6];
+    frame(g, [.65, .17, .55], pivot, .11);
+    cylinder(g, .31, .065, pivot, m.steel, [0, 0, Math.PI / 2], .31, 48);
+    cylinder(g, .23, .073, [.665, .91, .6], m.frameLight, [0, 0, Math.PI / 2], .23, 40);
+    for (let i = 0; i < 9; i++) {
+      const a = -.65 + i * .32;
+      cylinder(g, .018, .009, [.707, .91 + Math.cos(a) * .185, .6 + Math.sin(a) * .185], m.plastic, [0, 0, Math.PI / 2], .018, 10);
+    }
+    cylinder(g, .075, .17, [.7, .91, .6], m.chrome, [0, 0, Math.PI / 2]);
+    bolt(g, [.8, .91, .6], 'x', .052);
+    cylinder(g, .038, .1, [.76, 1.05, .72], m.brass, [0, 0, Math.PI / 2]);
+    frame(g, [.64, .91, .6], [.64, .36, 1.03], .085);
+    frame(g, [.64, .36, 1.03], [.64, .36, 1.32], .065, .065, m.chrome);
+    tube(g, [-.43, .36, 1.3], [.68, .36, 1.3], .036, m.chrome);
+    // Two separate ankle pads, stitched endcaps and exposed stainless axle.
+    for (const x of [-.2, .2]) {
+      cylinder(g, .135, .36, [x, .36, 1.3], m.upholsteryWarm, [0, 0, Math.PI / 2], .135, 32);
+      for (const s of [-1, 1]) cylinder(g, .128, .012, [x + s * .172, .36, 1.3], m.seam, [0, 0, Math.PI / 2]);
+    }
+    bolt(g, [-.45, .36, 1.3], 'x');
+    // Height-adjustable thigh restraint holds the knees down for seated curls.
+    frame(g, [-.5, .32, .48], [-.5, 1.2, .48], .065, .065, m.chrome);
+    for (let i = 0; i < 4; i++) bolt(g, [-.46, .84 + i * .07, .48], 'x', .012);
+    cylinder(g, .038, .12, [-.57, 1.02, .48], m.brass, [0, 0, Math.PI / 2]);
+    tube(g, [-.5, 1.18, .48], [.45, 1.18, .48], .033, m.chrome);
+    for (const x of [-.2, .2]) cylinder(g, .105, .34, [x, 1.18, .48], m.upholsteryWarm, [0, 0, Math.PI / 2], .105, 32);
+    // Side-mounted weight tower leaves the seat and leg mechanism unobstructed.
+    const tower = new THREE.Group(); tower.position.set(1.03, 0, -.39); g.add(tower);
+    box(tower, [.58, 1.68, .42], [0, 1.01, 0], m.frame, .065);
+    box(tower, [.44, 1.28, .035], [0, .93, .224], m.plastic, .02);
+    for (let i = 0; i < 14; i++) {
+      box(tower, [.39, .055, .3], [0, .3 + i * .063, .14], m.plate, .01);
+      cylinder(tower, .012, .01, [0, .3 + i * .063, .298], m.chrome, [Math.PI / 2, 0, 0], .012, 10);
+    }
+    for (const x of [-.15, .15]) tube(tower, [x, .24, .14], [x, 1.64, .14], .014, m.chrome);
+    cylinder(tower, .035, .13, [0, .68, .34], m.brass, [Math.PI / 2, 0, 0]);
+    pulley(g, [1.03, 1.68, -.28]); pulley(g, [1.03, .29, -.28]);
+    cable(g, [[1.03, 1.21, -.25], [1.03, 1.69, -.25], [1.1, 1.54, -.24], [1.1, .29, -.24], [.76, .25, .36], [.66, .72, .83]], .008);
+    foot(g, 1.05, -.65); foot(g, 1.05, .08);
+  }, 0, [2.8, 3]);
+
   function screen(parent, width, height, xyz, rotation) {
     const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 256;
     const c = canvas.getContext('2d');
