@@ -18,189 +18,132 @@
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
     <link rel="stylesheet" href="assets/fonts/fonts.css">
     <link rel="stylesheet" href="assets/site.css">
-    <style>
-        :root {
-            --bg: #0a0a0c;
-            --ink: #f5f5f7;
-            --soft: #96969f;
-            --grid: rgba(255,255,255,.045);
-            --panel: rgba(18,18,23,.72);
-            --line: rgba(255,255,255,.11);
-            --green: #30d158;
-            --cyan: #42f5e9;
-            --mono: 'Space Mono', ui-monospace, monospace;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { color-scheme: dark; }
-        body {
-            min-height: 100vh;
-            color: var(--ink);
-            background:
-                radial-gradient(circle at 72% 18%, rgba(66,245,233,.08), transparent 34%),
-                radial-gradient(var(--grid) 1px, transparent 1px),
-                var(--bg);
-            background-size: auto, 26px 26px, auto;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-        a { color: inherit; }
-
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            border-bottom: 1px solid var(--line);
-            background: rgba(10,10,12,.78);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-        }
-        .topbar-inner {
-            width: min(900px, calc(100% - 48px));
-            height: 58px;
-            margin: auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .brand { display: flex; align-items: center; text-decoration: none; font-weight: 700; letter-spacing: .08em; }
-        .back { color: var(--soft); text-decoration: none; font-size: .84rem; transition: color .2s; }
-        .back:hover { color: var(--ink); }
-
-        main { width: min(900px, calc(100% - 48px)); margin: auto; padding: 88px 0 96px; }
-        .eyebrow { color: var(--cyan); font: .66rem var(--mono); letter-spacing: .38em; }
-        h1 { margin-top: 18px; font-size: clamp(2.6rem, 8vw, 5rem); font-weight: 900; letter-spacing: .11em; line-height: 1.08; }
-        .intro { max-width: 36em; margin-top: 24px; color: var(--soft); font-size: .98rem; line-height: 2; }
-
-        .route {
-            position: relative;
-            margin-top: 72px;
-            padding: 0 0 24px 58px;
-        }
-        .route::before {
-            content: '';
-            position: absolute;
-            top: -24px;
-            bottom: -30px;
-            left: 15px;
-            width: 7px;
-            border-radius: 8px;
-            background: linear-gradient(var(--cyan), var(--green));
-            box-shadow: 0 0 24px rgba(66,245,233,.18);
-        }
-        .route::after {
-            content: '';
-            position: absolute;
-            left: 5px;
-            bottom: -42px;
-            width: 22px;
-            height: 22px;
-            border: 5px solid var(--green);
-            border-radius: 50%;
-            background: var(--bg);
-        }
-        .route-label { margin-bottom: 16px; color: var(--soft); font: .62rem var(--mono); letter-spacing: .2em; }
-
-        .friend-card {
-            position: relative;
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 28px;
-            align-items: center;
-            padding: 30px 32px;
-            overflow: hidden;
-            border: 1px solid var(--line);
-            border-radius: 20px;
-            background: linear-gradient(135deg, rgba(255,255,255,.055), var(--panel));
-            text-decoration: none;
-            box-shadow: 0 24px 70px rgba(0,0,0,.22);
-            transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
-        }
-        .friend-card::before {
-            content: '';
-            position: absolute;
-            top: 0; right: 0;
-            width: 150px; height: 150px;
-            background: radial-gradient(circle at top right, rgba(66,245,233,.13), transparent 68%);
-            pointer-events: none;
-        }
-        .friend-card::after {
-            content: '';
-            position: absolute;
-            top: 50%; left: -51px;
-            width: 18px; height: 18px;
-            border: 5px solid var(--cyan);
-            border-radius: 50%;
-            background: var(--bg);
-            transform: translateY(-50%);
-            box-shadow: 0 0 0 5px var(--bg);
-        }
-        .friend-card:hover { transform: translateY(-4px); border-color: rgba(66,245,233,.42); box-shadow: 0 28px 80px rgba(0,0,0,.3); }
-        .friend-card:focus-visible { outline: 2px solid var(--cyan); outline-offset: 5px; }
-        .friend-no { color: var(--cyan); font: .62rem var(--mono); letter-spacing: .2em; }
-        .friend-name { margin-top: 9px; font-size: clamp(1.45rem, 4vw, 2rem); font-weight: 800; letter-spacing: .05em; }
-        .friend-desc { margin-top: 9px; color: var(--soft); line-height: 1.7; }
-        .friend-url { margin-top: 20px; color: var(--cyan); font: .7rem var(--mono); letter-spacing: .08em; }
-        .arrow {
-            display: grid;
-            place-items: center;
-            width: 48px; height: 48px;
-            border: 1px solid var(--line);
-            border-radius: 50%;
-            font-size: 1.25rem;
-            transition: background .2s, transform .2s;
-        }
-        .friend-card:hover .arrow { background: rgba(66,245,233,.12); transform: translate(2px,-2px); }
-
-        .note { margin: 68px 0 0 58px; color: var(--soft); font-size: .82rem; line-height: 1.8; }
-        footer { margin-top: 88px; padding-top: 26px; border-top: 1px solid var(--line); color: var(--soft); font: .64rem var(--mono); letter-spacing: .16em; }
-
-        @media (max-width: 600px) {
-            .topbar-inner, main { width: min(100% - 32px, 900px); }
-            main { padding-top: 60px; }
-            h1 { font-size: 2.6rem; }
-            .intro { font-size: .92rem; }
-            .route { margin-top: 52px; padding-left: 40px; }
-            .route::before { left: 10px; width: 6px; }
-            .route::after { left: 1px; }
-            .friend-card { grid-template-columns: 1fr; gap: 22px; padding: 24px; }
-            .friend-card::after { left: -39px; }
-            .arrow { width: 42px; height: 42px; }
-            .note { margin-left: 40px; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .friend-card, .arrow { transition: none; }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/friends.css">
+    <script>try { const t = localStorage.getItem('theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (_) {}</script>
+    <script src="assets/friends.js" defer></script>
 </head>
 <body>
+    <a class="skip-link" href="#main">跳到友邻小站</a>
     <header class="topbar">
-        <div class="topbar-inner">
-            <a class="brand" href="index.html"><span class="site-mark" aria-hidden="true"></span>Inwt · 小站</a>
-            <a class="back" href="about.html">返回关于站 ←</a>
-        </div>
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span>Inwt · 小站</a>
+        <span class="topbar-center">THE NEIGHBOURHOOD / 联络站</span>
+        <nav aria-label="页面导航"><a href="index.html">返回线路图 ↗</a><button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换昼夜配色"><svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.4"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3 7 7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/></svg><svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 14.2A8.8 8.8 0 0 1 9.8 3.4a8.8 8.8 0 1 0 10.8 10.8z"/></svg></button></nav>
     </header>
-
-    <main>
-        <div class="eyebrow">FRIENDS · 换乘名录</div>
-        <h1>沿线友邻</h1>
-        <p class="intro">在各自的轨道上前行，偶尔交换沿途的风景。这里收录一些值得停靠的小站。</p>
-
-        <section class="route" aria-labelledby="route-title">
-            <div class="route-label" id="route-title">INTERCHANGE 01 · 友邻换乘线</div>
-            <a class="friend-card" href="http://andysgz.top" target="_blank" rel="noopener">
-                <div>
-                    <div class="friend-no">STATION 001</div>
-                    <div class="friend-name">Andy SGZ</div>
-                    <p class="friend-desc">随笔、作品与练琴记录。一个持续生长的个人站点。</p>
-                    <div class="friend-url">ANDYSGZ.TOP</div>
-                </div>
-                <span class="arrow" aria-hidden="true">↗</span>
-            </a>
+    <main id="main">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">FRIENDS ALONG THE LINE</p>
+                <h1>沿线友邻<span class="title-dot">.</span></h1>
+                <p class="hero-copy">在各自的轨道上前行，偶尔交换沿途的风景。<br>从这里出发，去朋友的小站坐一坐。</p>
+            </div>
+            <div class="hero-side" aria-label="两座友邻小站"><strong>02</strong><div><span class="mono">CONNECTED<br>BY CURIOSITY</span><span>因好奇，而相逢</span></div></div>
+        </header>
+        <section class="railway" aria-label="友邻联络线">
+            <div class="origin"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>INWT<span>本站出发</span></div>
+            <svg class="junction" viewBox="0 0 1120 82" preserveAspectRatio="none" aria-hidden="true"><path d="M560 0V16Q560 34 536 34H286Q262 34 262 58V82M560 16Q560 34 584 34H834Q858 34 858 58V82"/><path class="active-track" data-branch="andy" d="M560 0V16Q560 34 536 34H286Q262 34 262 58V82"/><path class="active-track" data-branch="chrmysle" d="M560 0V16Q560 34 584 34H834Q858 34 858 58V82"/><g class="connection-light" opacity="0"><circle r="3.5" fill="var(--amber)"/><animateMotion id="trip-andy" path="M560 0V16Q560 34 536 34H286Q262 34 262 58V82" dur="1.1s" begin="indefinite"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="1.1s" begin="trip-andy.begin" fill="freeze"/></g><g class="connection-light" opacity="0"><circle r="3.5" fill="var(--sage)"/><animateMotion id="trip-chrmysle" path="M560 0V16Q560 34 584 34H834Q858 34 858 58V82" dur="1.1s" begin="indefinite"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="1.1s" begin="trip-chrmysle.begin" fill="freeze"/></g></svg>
+            <div class="stations">
+                <a class="neighbor" data-neighbor="andy" href="http://andysgz.top" target="_blank" rel="noopener" aria-label="访问 Andy SGZ：随笔、作品与练琴记录（新窗口）">
+                    <svg class="station-scene" viewBox="0 0 520 260" aria-hidden="true">
+                        <ellipse cx="260" cy="224" rx="207" ry="13" class="platform"/>
+                        <path class="landscape" d="M9 177Q52 138 100 164T185 168M350 162Q404 123 461 163T516 157M35 192H92M429 185h65"/>
+                        <circle cx="397" cy="64" r="25" fill="var(--roof)" opacity=".32"/>
+                        <path class="landscape" d="M376 64h42M385 53h34M373 76h31"/>
+                        <path class="plants stroke" d="M73 211V142C43 155 44 180 73 182C99 170 99 150 73 142Z"/>
+                        <path class="stroke" fill="none" d="M73 164v48M73 183l-11-12M73 175l10-12"/>
+                        <path class="plants stroke" d="M433 212v-46c-23 4-31 23-8 31-6 10-2 13 8 15 21-4 25-18 10-24 14-10 6-20-10-22Z"/>
+                        <path class="stroke" fill="none" d="M433 181v34"/>
+                        <path class="solid stroke" d="M133 127H368V211H133Z"/>
+                        <path class="roof stroke" d="M117 128L154 83H328L382 128Z"/>
+                        <path class="roof-edge stroke" d="M117 128H382V135H117Z"/>
+                        <path class="stroke" fill="none" opacity=".5" d="M151 103h199M140 115h224M169 84l-29 43M207 84l-15 43M249 84v43M290 84l15 43M327 84l29 43"/>
+                        <path class="roof-edge stroke" d="M165 84V54H183V84"/>
+                        <path class="smoke" d="M173 44c-10-10 9-14 0-23M179 41c-5-7 10-10 5-17"/>
+                        <path class="solid stroke" d="M220 132v-19a30 30 0 0 1 60 0v19"/>
+                        <circle cx="250" cy="112" r="12" fill="var(--bg)" class="stroke"/>
+                        <path class="stroke" fill="none" d="M250 104v8l6 3"/>
+                        <rect x="151" y="150" width="38" height="42" rx="1" class="glass stroke"/>
+                        <rect x="307" y="150" width="38" height="42" rx="1" class="glass stroke"/>
+                        <path class="stroke" fill="none" d="M170 150v42M151 170h38M326 150v42M307 170h38"/>
+                        <path class="glass stroke" d="M229 211V165a21 21 0 0 1 42 0v46Z"/>
+                        <path class="stroke" fill="none" d="M250 146v65M230 177h40"/>
+                        <circle cx="256" cy="192" r="1.5" class="detail"/>
+                        <rect x="202" y="128" width="96" height="18" rx="2" class="solid stroke"/>
+                        <text x="250" y="140" text-anchor="middle" class="scene-label">ANDY SGZ</text>
+                        <path class="roof-edge stroke" d="M123 209H377V215H123Z"/>
+                        <path class="stroke" fill="none" d="M132 216v7M367 216v7"/>
+                        <path class="stroke" fill="var(--roof)" d="M90 193h28v6H90ZM94 199v12M114 199v12M90 183h28v6H90Z"/>
+                        <path class="stroke" fill="none" d="M399 211V123q0-8 8-8h10M416 115v8"/>
+                        <circle cx="416" cy="130" r="20" class="lamp-glow"/>
+                        <path class="glass stroke" d="M410 124h12l-2 11h-8Z"/>
+                        <path class="stroke solid" d="M351 72h37v21h-37ZM356 93v22M383 93v22"/>
+                        <path class="stroke" fill="none" d="M356 76v12M362 76v12M368 76v12M374 76v12M380 76v12"/>
+                        <path class="stroke" stroke-width="3" d="M359 75v8M371 75v8M377 75v8"/>
+                        <text x="369" y="63" text-anchor="middle" class="scene-micro">WORDS &amp; MELODIES</text>
+                        <path class="rail" d="M0 239H520"/>
+                        <path class="landscape" stroke-dasharray="3 13" stroke-width="8" d="M0 239H520"/>
+                        <circle cx="260" cy="239" r="12" fill="var(--bg)" stroke="var(--amber)" stroke-width="4"/><circle cx="260" cy="239" r="6" fill="var(--ink)"/>
+                        <path class="stroke" fill="none" d="M39 217v-30"/><circle cx="39" cy="184" r="4" class="signal-light"/>
+                    </svg>
+                    <div class="station-info">
+                        <div class="station-meta"><span class="station-no">STATION 001 / 文与乐</span><span>ANDYSGZ.TOP</span></div>
+                        <div class="station-title"><h2>Andy SGZ</h2><span class="visit-arrow" aria-hidden="true">↗</span></div>
+                        <p class="station-desc">随笔、作品与练琴记录。<br>一个持续生长的个人站点。</p>
+                        <div class="station-tags"><span>随笔</span><span>作品</span><span>练琴</span><p class="visit-copy">去小站坐坐 ↗</p></div>
+                    </div>
+                </a>
+                <a class="neighbor" data-neighbor="chrmysle" href="https://chrmysle.cn/" target="_blank" rel="noopener" aria-label="访问 Chrmysle：学习、札记、F1 与影像（新窗口）">
+                    <svg class="station-scene" viewBox="0 0 520 260" aria-hidden="true">
+                        <ellipse cx="260" cy="224" rx="207" ry="13" class="platform"/>
+                        <path class="landscape" d="M5 171l46-25 35 17 31-15 32 21M358 161l36-29 27 21 40-31 49 36M386 180h74M25 190h63"/>
+                        <circle cx="100" cy="64" r="24" fill="var(--foliage)" opacity=".45"/>
+                        <path class="landscape" d="M63 76h63M82 54h40"/>
+                        <path class="plants stroke" d="M79 209V143L57 175h10l-18 23h30l29 0-18-23h10Z"/>
+                        <path class="stroke" fill="none" d="M79 166v46"/>
+                        <path class="plants stroke" d="M445 210v-30l-14 15h5l-11 12h20l20 0-12-12h5l-13-15Z"/>
+                        <path class="stroke" fill="none" d="M445 192v20"/>
+                        <path class="solid stroke" d="M127 128H382V210H127Z"/>
+                        <path class="roof stroke" d="M116 121L385 99L397 111L124 135Z"/>
+                        <path class="roof-edge stroke" d="M124 135L397 111v7l-273 24Z"/>
+                        <path class="glass stroke" d="M143 151H283V198H143Z"/>
+                        <path class="stroke" fill="none" d="M178 151v47M213 151v47M248 151v47M143 175h140"/>
+                        <path fill="var(--building)" opacity=".4" d="M157 153l26 0-26 43h-12ZM208 153h9l-26 43h-10ZM265 153h14l-26 43h-14Z"/>
+                        <path class="glass stroke" d="M303 143H346V210H303Z"/>
+                        <path class="stroke" fill="none" d="M324 143v67M303 173h43"/>
+                        <circle cx="331" cy="188" r="1.5" class="detail"/>
+                        <path class="stroke solid" d="M180 90h161v25H180Z"/>
+                        <text x="260" y="106" text-anchor="middle" class="scene-label">CHRMYSLE</text>
+                        <path class="stroke" fill="none" d="M210 89v-9M310 89v-16"/>
+                        <path class="solid stroke" d="M228 80v-8a28 28 0 0 1 56 0v8Z"/>
+                        <path class="glass stroke" d="M235 69a21 21 0 0 1 42 0Z"/>
+                        <path class="stroke" fill="none" d="M256 48V35l9-5M256 35l-5-5M235 80h42"/>
+                        <circle cx="266" cy="29" r="2" class="detail"/>
+                        <path class="stroke" fill="none" d="M370 101V52"/>
+                        <g class="flag"><path class="solid stroke" d="M370 52h30v21h-30Z"/><path fill="var(--outline)" d="M370 52h10v7h-10ZM390 52h10v7h-10ZM380 59h10v7h-10ZM370 66h10v7h-10ZM390 66h10v7h-10Z"/></g>
+                        <text x="390" y="43" text-anchor="middle" class="scene-micro">STAY CURIOUS</text>
+                        <path class="stroke" fill="none" d="M108 210V123q0-8 8-8h10M126 115v8"/>
+                        <circle cx="126" cy="130" r="20" class="lamp-glow"/>
+                        <path class="glass stroke" d="M120 124h12l-2 11h-8Z"/>
+                        <path class="roof-edge stroke" d="M118 209H392V215H118Z"/>
+                        <path class="stroke" fill="none" d="M132 216v7M376 216v7M401 193h26v6h-26ZM405 199v12M423 199v12"/>
+                        <path class="rail" d="M0 239H520"/>
+                        <path class="landscape" stroke-dasharray="3 13" stroke-width="8" d="M0 239H520"/>
+                        <circle cx="260" cy="239" r="12" fill="var(--bg)" stroke="var(--sage)" stroke-width="4"/><circle cx="260" cy="239" r="6" fill="var(--ink)"/>
+                        <path class="stroke" fill="none" d="M478 217v-30"/><circle cx="478" cy="184" r="4" class="signal-light"/>
+                    </svg>
+                    <div class="station-info">
+                        <div class="station-meta"><span class="station-no">STATION 002 / 好奇心</span><span>CHRMYSLE.CN</span></div>
+                        <div class="station-title"><h2>Chrmysle</h2><span class="visit-arrow" aria-hidden="true">↗</span></div>
+                        <p class="station-desc">把好奇写成日常。<br>学习笔记、私人札记、F1 比赛记录与旅行照片。</p>
+                        <div class="station-tags"><span>学习</span><span>札记</span><span>F1</span><span>影像</span><p class="visit-copy">去小站坐坐 ↗</p></div>
+                    </div>
+                </a>
+            </div>
         </section>
-
-        <p class="note">下一站仍在铺轨。愿每一座认真生活的小站，都能被恰好经过的人看见。</p>
-        <footer>© INWT · EST. 2026</footer>
+        <aside class="dispatch" aria-labelledby="dispatch-title">
+            <div class="dispatch-message"><svg class="dispatch-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><rect x="5" y="10" width="30" height="21" rx="2"/><path d="m5 11 15 12 15-12M5 31l10-11M35 31 25 20M13 6h14M17 2h6"/></svg><div><h2 id="dispatch-title">远方，下一站见。</h2><p>如果你也有一座认真经营的小站，欢迎来信，交换沿途的风景。</p></div></div>
+            <a href="mailto:inwt233@163.com">给站长写封信 ↗</a>
+        </aside>
+        <footer class="page-footer"><span>© INWT · EST. 2026</span><span class="footer-sentence">线路有终点，好奇没有。</span><a href="index.html">回到 Inwt 小站 ↑</a></footer>
     </main>
 </body>
 </html>

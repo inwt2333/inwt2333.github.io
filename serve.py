@@ -38,7 +38,7 @@ PIN = f'{random.randint(0, 9999):04d}'  # 每次启动随机生成，打印在�
 # 手机预览可访问的范围：站点页面与其依赖，其余（.git、photos/src、脚本）一律 404
 ALLOWED_GET = {
     '/', '/index.html', '/essays.html', '/gallery.html', '/article.html',
-    '/about.html', '/404.html', '/locate.html',
+    '/about.html', '/friends.html', '/404.html', '/locate.html',
     '/photos.json', '/photos/manual.json', '/posts.json',
     '/feed.xml', '/sitemap.xml', '/robots.txt', '/favicon.ico',
 }

@@ -305,6 +305,7 @@ def build_sitemap(posts):
         ('/gallery.html', today),
         ('/gym/', today),
         ('/about.html', today),
+        ('/friends.html', today),
     ] + [
         ('/' + p['url'], _date_key(p.get('date')))
         for p in posts if p.get('category') == 'essay' and p.get('url')
