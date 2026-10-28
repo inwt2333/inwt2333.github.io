@@ -1,5 +1,5 @@
 import { stations, exercises, publishedEntries, exerciseName, byDate, dateLabel, localDate, cardioMinutes, validateJournal } from './data.mjs';
-import { musclePanel } from './anatomy.mjs';
+import { musclePanel } from './anatomy.mjs?v=atelier-1';
 
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -58,7 +58,7 @@ function groupedHTML(list) {
     if (!groups.has(entry.date)) groups.set(entry.date, []);
     groups.get(entry.date).push(entry);
   }
-  return [...groups].map(([date, records]) => `<section class="history-group"><div class="history-date"><h3>${dateLabel(date)}</h3><span>${date.slice(0, 4)} / ${records.length} 项记录</span></div>${records.map(recordHTML).join('')}</section>`).join('');
+  return [...groups].map(([date, records]) => `<section class="history-group"><div class="history-date"><h3>${dateLabel(date)}</h3><span>${date.slice(0, 4)} / ${records.length} 项记录</span></div><div class="history-records">${records.map(recordHTML).join('')}</div></section>`).join('');
 }
 
 function comparison(station, list) {
@@ -79,7 +79,29 @@ function stationDetail(station) {
   const days = new Set(list.map(e => e.date)).size;
   const cardio = station.id === 'cardio';
   const max = cardio ? cardioMinutes(list) : Math.max(0, ...list.flatMap(e => e.loads.map(l => l.weight * (l.unit === 'lb' ? 0.45359237 : 1))));
-  return `<p class="eyebrow station-eyebrow"><span class="station-indicator"></span> ${station.en} <span class="eyebrow-divider">/</span> TRAINING JOURNAL</p><div class="detail-heading"><div><h2 id="detail-title">${station.name}</h2><p>${station.description}</p></div><button class="primary-button" type="button" data-new="${station.exercises[0]}"><span>＋</span> 记一笔</button></div><div class="detail-tabs">${stations.filter(s => s.exercises.length).map(s => `<a href="#${s.id}" ${station.id === s.id ? 'aria-current="page"' : ''}>${s.name}</a>`).join('')}</div><div class="detail-layout"><div class="training-journal"><div class="detail-stat-strip"><div><strong>${days}</strong><span>个训练日</span></div><div><strong>${list.length}</strong><span>项训练记录</span></div><div><strong>${cardio ? max : max ? `${Number(max.toFixed(1))}` : '—'}</strong><span>${cardio ? '分钟 · 有氧累计' : 'kg · 最高记录重量（换算）'}</span></div></div>${comparison(station, list)}<div class="journal-section-heading"><h3>训练记录</h3><span>每一次，都留下痕迹</span></div>${list.length ? groupedHTML(list) : '<div class="empty-state">还没有这台器材的记录。<br>下一次，从第一笔开始。</div>'}<p class="detail-footnote">原始记录的磅（lb）与公斤（kg）分别保留。未写明组数按一组记录。最高重量仅按单位换算展示，不代表不同器械间的能力比较。${station.id === 'pull' ? '“高位下拉”和“高拉力背肌”按原动作名称分别保存。' : ''}</p></div>${musclePanel(station)}</div>`;
+  const index = stations.filter(s => s.exercises.length).findIndex(s => s.id === station.id) + 1;
+  return `<div class="station-workspace">
+    <div class="station-journal">
+      <header class="station-hero">
+        <p class="station-eyebrow"><span>${cardio ? '有氧训练' : '力量训练'}</span><span>${String(index).padStart(2, '0')} / 08</span></p>
+        <h2 id="detail-title">${station.name}</h2>
+        <div class="hero-bottom"><p>${station.en}</p><button class="primary-button" type="button" data-new="${station.exercises[0]}">记一笔 <span aria-hidden="true">＋</span></button></div>
+      </header>
+      <nav class="detail-tabs" aria-label="切换训练器材">${stations.filter(s => s.exercises.length).map(s => `<a href="#${s.id}" ${station.id === s.id ? 'aria-current="page"' : ''}>${s.name}</a>`).join('')}</nav>
+      <div class="detail-stat-strip">
+        <div><span>训练天数</span><strong>${days}<small>天</small></strong></div>
+        <div><span>训练记录</span><strong>${list.length}<small>项</small></strong></div>
+        <div><span>${cardio ? '累计有氧' : '最高记录重量'}</span><strong>${cardio ? max : max ? Number(max.toFixed(1)) : '—'}<small>${cardio ? 'min' : 'kg'}</small></strong></div>
+      </div>
+      <section class="journal-records" aria-labelledby="journal-heading">
+        <div class="journal-section-heading"><h3 id="journal-heading">训练手记</h3><span>SESSION HISTORY</span></div>
+        ${comparison(station, list)}
+        ${list.length ? groupedHTML(list) : '<div class="empty-state">还没有这台器材的记录。<br>下一次，从第一笔开始。</div>'}
+      </section>
+      <p class="detail-footnote">保留原始 lb / kg 单位，未写明组数按一组记录。最高重量仅作单位换算，不用于比较不同器械。${station.id === 'pull' ? '高位下拉与高拉力背肌分别保存。' : ''}</p>
+    </div>
+    ${musclePanel(station)}
+  </div>`;
 }
 
 function calendarDetail() {
@@ -123,6 +145,11 @@ function renderDetail() {
   detail.dataset.zone = activeStation.zone;
   detail.dataset.view = activeStation.exercises.length ? 'training' : activeStation.id;
   $('#detail-content').innerHTML = activeStation.id === 'weight' ? weightDetail() : activeStation.id === 'calendar' ? calendarDetail() : stationDetail(activeStation);
+  const selectedTab = $('.detail-tabs [aria-current="page"]');
+  if (selectedTab) {
+    const tabs = selectedTab.parentElement;
+    tabs.scrollLeft = selectedTab.offsetLeft - tabs.offsetLeft - (tabs.clientWidth - selectedTab.clientWidth) / 2;
+  }
   detail.scrollTop = scrollTop;
 }
 
@@ -208,6 +235,12 @@ $('#detail-content').addEventListener('click', event => {
   const button = event.target.closest('button');
   if (!button) return;
   if (button.dataset.new) return openEntry(button.dataset.new);
+  if (button.dataset.anatomyView) {
+    const panel = button.closest('.muscle-panel');
+    panel.querySelectorAll('[data-body-view]').forEach(view => { view.hidden = view.dataset.bodyView !== button.dataset.anatomyView; });
+    panel.querySelectorAll('[data-anatomy-view]').forEach(control => control.setAttribute('aria-pressed', String(control === button)));
+    return;
+  }
   if (button.dataset.month) {
     const [y, m] = month.split('-').map(Number);
     const date = new Date(y, m - 1 + Number(button.dataset.month), 1);

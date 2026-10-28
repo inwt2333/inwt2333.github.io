@@ -25,6 +25,8 @@ No stock render or generated background replaces the navigable scene. Equipment 
 
 ## Journal muscle diagrams
 
-The front/back silhouettes and muscle paths in `anatomy.mjs` are original inline SVG illustrations authored in this repository. They add no external image or model requests. Highlights indicate broad muscle regions for each station; the combined leg station displays both the extension and adductor regions.
+`anatomy/front.webp`, `anatomy/back.webp` and the traced masks in `anatomy/regions.mjs` are adapted from [js-rich-body-highlighter](https://github.com/crmapache/js-rich-body-highlighter/tree/107dafe86f91298d66a41ff1c7b7251b073983d8), MIT, © 2026 js-rich-body-highlighter contributors. The complete license is retained in `anatomy/LICENSE`. Source images are `src/assets/bodies/male-front-light.webp` and `male-back-light.webp`; masks come from the male definitions in `src/data/muscles/front.ts` and `back.ts`, with their pixel offsets converted at 25.4 / 96 to match the source SVG coordinate system. Only the images and mask data are used; no framework or library runtime is loaded.
+
+`anatomy.mjs` combines the illustration with semitransparent muscle tints, supplies Chinese labels and front/back controls, and adds an original inner-thigh mask for the combined extension/adductor station. These are broad exercise regions, rather than measured muscle activation.
 
 Exercise-region references include [Mayo Clinic: seated row](https://www.mayoclinic.org/healthy-lifestyle/fitness/multimedia/seated-row/vid-20084669), [ACE: seated row](https://www.acefitness.org/resources/everyone/exercise-library/168/seated-row/) and [NASM: chest press machine](https://www.nasm.org/resource-center/exercise-library/chest-press-machine).
