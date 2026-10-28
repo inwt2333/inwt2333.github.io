@@ -87,7 +87,6 @@ function stationDetail(station) {
         <h2 id="detail-title">${station.name}</h2>
         <div class="hero-bottom"><p>${station.en}</p><button class="primary-button" type="button" data-new="${station.exercises[0]}">记一笔 <span aria-hidden="true">＋</span></button></div>
       </header>
-      <nav class="detail-tabs" aria-label="切换训练器材">${stations.filter(s => s.exercises.length).map(s => `<a href="#${s.id}" ${station.id === s.id ? 'aria-current="page"' : ''}>${s.name}</a>`).join('')}</nav>
       <div class="detail-stat-strip">
         <div><span>训练天数</span><strong>${days}<small>天</small></strong></div>
         <div><span>训练记录</span><strong>${list.length}<small>项</small></strong></div>
@@ -145,11 +144,6 @@ function renderDetail() {
   detail.dataset.zone = activeStation.zone;
   detail.dataset.view = activeStation.exercises.length ? 'training' : activeStation.id;
   $('#detail-content').innerHTML = activeStation.id === 'weight' ? weightDetail() : activeStation.id === 'calendar' ? calendarDetail() : stationDetail(activeStation);
-  const selectedTab = $('.detail-tabs [aria-current="page"]');
-  if (selectedTab) {
-    const tabs = selectedTab.parentElement;
-    tabs.scrollLeft = selectedTab.offsetLeft - tabs.offsetLeft - (tabs.clientWidth - selectedTab.clientWidth) / 2;
-  }
   detail.scrollTop = scrollTop;
 }
 
