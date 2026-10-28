@@ -727,22 +727,12 @@ def build_photos():
         entry.update(exif_extra)
         entries.append(entry)
 
-    # src 中已不存在、但上次索引里有的照片：
-    # - src 有照片时视为已删除，清除条目并顺手删除其 web/thumb 产物
-    # - src 为空（例如换电脑克隆仓库后）时保留，避免误清索引
-    if files:
-        seen = {e['file'] for e in entries}
-        for fname in [f for f in old_entries if f not in seen]:
-            print(f"移除已删除的照片：{fname}")
-            for key in ('web', 'thumb'):
-                p = old_entries[fname].get(key)
-                if p and os.path.exists(p):
-                    os.remove(p)
-    else:
-        seen = {e['file'] for e in entries}
-        for fname, e in old_entries.items():
-            if fname not in seen:
-                entries.append(dict(e))
+    # 原图不入库，本机 src 可能只有部分设备上传的照片。
+    # 缺少原图或本轮处理失败均保留旧索引及 web/thumb，不能据此推断照片已删除。
+    seen = {e['file'] for e in entries}
+    for fname, e in old_entries.items():
+        if fname not in seen:
+            entries.append(dict(e))
 
     # 即使本机没有原图，也允许 manual.json 覆盖自动识别结果。
     for entry in entries:
