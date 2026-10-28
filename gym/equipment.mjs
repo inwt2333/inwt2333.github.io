@@ -131,7 +131,8 @@ export function createEquipment(scene, m) {
     obstacles.push({ x: xyz[0], z: xyz[2], w: bounds[0] / 2, d: bounds[1] / 2 });
     return group;
   }
-  station('pull', [-5.4, 0, -5.6], g => {
+  // Two aligned strength rows on a 3.7 m grid; the front aisle stays open.
+  station('pull', [-4.5, 0, -5.6], g => {
     chassis(g, { tall: true, noBack: true });
     for (const x of [-.62, .62]) frame(g, [x, 2.65, -.58], [x, 2.65, .75], .11);
     frame(g, [-.62, 2.65, .75], [.62, 2.65, .75], .11);
@@ -144,7 +145,7 @@ export function createEquipment(scene, m) {
     for (const x of [-.25, .25]) cylinder(g, .115, .38, [x, 1.02, .5], m.upholstery, [0, 0, Math.PI / 2]);
     tube(g, [-.5, 1.02, .5], [.5, 1.02, .5], .027, m.chrome);
   });
-  station('fly', [-1.55, 0, -5.4], g => {
+  station('fly', [-.8, 0, -5.6], g => {
     chassis(g);
     for (const s of [-1, 1]) {
       cylinder(g, .13, .14, [s * .49, 1.98, -.55], m.steel);
@@ -157,7 +158,7 @@ export function createEquipment(scene, m) {
       cable(g, [[s * .46, 1.77, -.53], [0, 1.73, -.43], [0, 1.22, -.4]]);
     }
   }, 0, [2.45, 2.15]);
-  station('shoulder', [2.35, 0, -5.5], g => {
+  station('shoulder', [2.9, 0, -5.6], g => {
     chassis(g, { warm: true });
     for (const s of [-1, 1]) {
       cylinder(g, .11, .16, [s * .61, 1.9, -.59], m.steel, [Math.PI / 2, 0, 0]);
@@ -167,7 +168,7 @@ export function createEquipment(scene, m) {
       cable(g, [[s * .6, 1.85, -.6], [0, 1.77, -.42], [0, 1.2, -.42]]);
     }
   });
-  station('chest', [6.1, 0, -5.25], g => {
+  station('chest', [6.6, 0, -5.6], g => {
     chassis(g, { warm: true });
     for (const s of [-1, 1]) {
       frame(g, [s * .61, 1.91, -.58], [s * .95, 1.36, .58], .1);
@@ -175,8 +176,8 @@ export function createEquipment(scene, m) {
       cylinder(g, .13, .13, [s * .61, 1.9, -.57], m.steel, [Math.PI / 2, 0, 0]);
       bolt(g, [s * .61, 1.9, -.48]);
     }
-  }, -.12);
-  station('row', [-2.2, 0, -.15], g => {
+  }, 0);
+  station('row', [-4.5, 0, -.2], g => {
     chassis(g, { noBack: true });
     pad(g, [.43, .5, .16], [0, 1.31, .04], [.12, 0, 0]);
     for (const s of [-1, 1]) {
@@ -187,8 +188,8 @@ export function createEquipment(scene, m) {
       for (let i = 0; i < 5; i++) box(g, [.25, .018, .012], [s * .4, .34 + i * .062, .17], m.steel, .003);
       bolt(g, [s * .45, 1.69, -.48]);
     }
-  }, -.12);
-  station('abs', [1.55, 0, .1], g => {
+  }, 0);
+  station('abs', [-.8, 0, -.2], g => {
     chassis(g);
     for (const s of [-1, 1]) {
       frame(g, [s * .61, 1.77, -.58], [s * .54, 1.96, .55], .09);
@@ -198,19 +199,19 @@ export function createEquipment(scene, m) {
     pad(g, [.69, .3, .27], [0, 1.35, .52], [.12, 0, 0]);
     frame(g, [0, .3, .75], [0, .38, 1.16], .1);
     cylinder(g, .13, 1.02, [0, .4, 1.13], m.upholstery, [0, 0, Math.PI / 2]);
-  }, -.12);
-  station('legs', [5.4, 0, .6], g => {
+  }, 0);
+  station('legs', [2.9, 0, -.2], g => {
     chassis(g, { warm: true });
     pad(g, [.7, .14, .82], [0, .84, .64], null, true);
     frame(g, [0, .78, .89], [0, .31, 1.35], .12);
     cylinder(g, .15, 1.13, [0, .4, 1.29], m.upholsteryWarm, [0, 0, Math.PI / 2]);
     cylinder(g, .11, .12, [.3, .78, .89], m.steel, [0, 0, Math.PI / 2]);
     for (const s of [-1, 1]) handle(g, [s * .52, .81, .47], [s * .52, 1.05, .49]);
-  }, -.25, [1.8, 2.6]);
+  }, 0, [1.8, 2.6]);
 
   // Seated dual leg extension / curl: side stack, knee-axis cam and two rollers.
   // Local +Z is the user's facing direction; the ankle roller sits below the knee.
-  station('leg-curl', [4.6, 0, 3.75], g => {
+  station('leg-curl', [6.6, 0, -.2], g => {
     for (const x of [-.6, .65]) {
       frame(g, [x, .15, -.7], [x, .15, 1.15], .12, .14);
       foot(g, x, -.65); foot(g, x, 1.1);
@@ -306,16 +307,16 @@ export function createEquipment(scene, m) {
     }
     cable(g, [[0, 1.44, -.65], [.04, 1.2, -.59], [.06, 1.23, -.49]], .005);
   }
-  station('cardio', [-7.3, 0, 0], treadmill, Math.PI / 2, [3, 1.8]);
-  station('cardio', [-7.3, 0, 3.5], treadmill, Math.PI / 2, [3, 1.8]);
+  station('cardio', [-8, 0, -4.8], treadmill, Math.PI / 2, [3, 1.8]);
+  station('cardio', [-8, 0, -.8], treadmill, Math.PI / 2, [3, 1.8]);
 
-  station('weight', [5.1, 0, 6.3], g => {
+  station('weight', [5.3, 0, 7.4], g => {
     box(g, [.8, .07, .82], [0, .07, 0], m.frameLight, .065);
     box(g, [.76, .015, .77], [0, .117, 0], m.plastic, .05);
     for (const x of [-.2, .2]) for (const z of [-.1, .22]) box(g, [.18, .008, .21], [x, .13, z], m.chrome, .022);
     box(g, [.31, .012, .14], [0, .132, -.22], m.screen, .02);
   }, -.1, [.9, .9]);
-  station('calendar', [7.9, 0, 4.35], g => {
+  station('calendar', [7.9, 0, 7.6], g => {
     box(g, [.95, .78, .9], [0, .42, 0], m.timber, .045);
     for (const x of [-.35, .35]) frame(g, [x, .8, -.2], [x, 1.13, -.2], .035, .035, m.chrome);
     const tablet = box(g, [.65, .9, .045], [0, 1.3, -.15], m.plastic, .035, [-.5, 0, 0]);
@@ -329,14 +330,14 @@ export function createEquipment(scene, m) {
   }, -.35, [1, 1]);
 
   // Adjustable bench, dumbbell rack, kettlebells and spare plates complete the room.
-  const bench = new THREE.Group(); bench.position.set(.5, 0, 5.7); bench.rotation.y = -.25; scene.add(bench);
+  const bench = new THREE.Group(); bench.position.set(0, 0, 5.5); bench.rotation.y = 0; scene.add(bench);
   frame(bench, [0, .2, -1], [0, .2, 1.1], .12);
   for (const z of [-.9, 1]) { frame(bench, [-.48, .12, z], [.48, .12, z], .1); foot(bench, -.48, z); foot(bench, .48, z); }
   frame(bench, [0, .2, -.7], [0, .65, -.3], .1);
   frame(bench, [0, .2, .7], [0, .66, .7], .1);
   pad(bench, [.66, .15, 1.4], [0, .73, -.25], [-.09, 0, 0]); pad(bench, [.66, .15, .53], [0, .67, .79]);
   cylinder(bench, .075, .85, [0, .61, .42], m.chrome, [0, 0, Math.PI / 2]);
-  const rack = new THREE.Group(); rack.position.set(8.55, 0, -1.2); rack.rotation.y = -Math.PI / 2; scene.add(rack);
+  const rack = new THREE.Group(); rack.position.set(8.55, 0, 4.2); rack.rotation.y = -Math.PI / 2; scene.add(rack);
   for (const x of [-1.4, 1.4]) { frame(rack, [x, .12, -.3], [x, 1.22, -.18], .1); frame(rack, [x, .12, -.3], [x, .12, .52], .12); foot(rack, x, .5); }
   for (const y of [.55, 1.12]) {
     box(rack, [3.1, .06, .55], [0, y, .04], m.frame, .02, [.14, 0, 0]);

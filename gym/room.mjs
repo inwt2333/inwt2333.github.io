@@ -11,7 +11,7 @@ import { HDRLoader } from '../assets/vendor/three/addons/loaders/HDRLoader.js';
 import { RoomEnvironment } from '../assets/vendor/three/addons/environments/RoomEnvironment.js';
 import { RectAreaLightUniformsLib } from '../assets/vendor/three/addons/lights/RectAreaLightUniformsLib.js';
 import { createMaterials } from './materials.mjs';
-import { createEquipment } from './equipment.mjs?v=leg-machine-1';
+import { createEquipment } from './equipment.mjs?v=layout-2';
 import { batchStaticGroup } from './optimize.mjs';
 
 export async function createRoom({ container, onHover, onSelect, onMenu, onUnavailable, isPaused }) {
@@ -34,7 +34,7 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
   const camera = new THREE.PerspectiveCamera(65, 1, .08, 180);
   camera.rotation.order = 'YXZ';
   const startPosition = new THREE.Vector3(6.7, 1.85, 8.7);
-  const startLook = new THREE.Vector3(-2, 1.1, -3.9);
+  const startLook = new THREE.Vector3(.6, 1.1, -2.8);
   const direction = startLook.clone().sub(startPosition).normalize();
   const initialYaw = Math.atan2(-direction.x, -direction.z);
   const initialPitch = Math.asin(direction.y);
@@ -151,7 +151,7 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
   });
 
   const props = new THREE.Group(); scene.add(props);
-  for (const [x, z] of [[-9, -7.8], [8.8, 7.5]]) {
+  for (const [x, z] of [[-9, -7.8], [9, 8.9]]) {
     cylinder(props, .38, .72, [x, .4, z], m.pot, null, .45);
     cylinder(props, .4, .025, [x, .77, z], m.soil);
     for (let i = 0; i < 11; i++) {
@@ -163,9 +163,9 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
     }
   }
   box(props, [.67, .09, .45], [7.9, .87, 4.5], m.fabric, .025, [0, -.15, 0]);
-  box(props, [.61, .06, .4], [7.9, .95, 4.5], m.fabric, .025, [0, -.12, 0]);
-  cylinder(props, .085, .3, [8.2, .99, 4.08], m.steel);
-  cylinder(props, .055, .04, [8.2, 1.16, 4.08], m.plastic);
+  box(props, [.61, .06, .4], [7.9, .95, 7.75], m.fabric, .025, [0, -.12, 0]);
+  cylinder(props, .085, .3, [8.2, .99, 7.33], m.steel);
+  cylinder(props, .055, .04, [8.2, 1.16, 7.33], m.plastic);
   for (let i = 0; i < 3; i++) cylinder(props, .28 - i * .035, .055, [8.9, .12 + i * .07, 1.9], m.plate);
   cylinder(props, .43, .06, [8.5, 5.0, -9.22], m.frameLight, [Math.PI / 2, 0, 0]);
   cylinder(props, .395, .063, [8.5, 5.0, -9.2], m.plastic, [Math.PI / 2, 0, 0]);
@@ -221,10 +221,10 @@ export async function createRoom({ container, onHover, onSelect, onMenu, onUnava
   let drag = null, pinchDistance = null, dead = false, holdTimer = null;
   const targetPosition = camera.position.clone();
   const collisionBounds = [...equipment.obstacles,
-    { x: .5, z: 5.7, w: .65, d: 1.35 },
-    { x: 8.55, z: -1.2, w: .65, d: 1.65 },
+    { x: 0, z: 5.5, w: .65, d: 1.35 },
+    { x: 8.55, z: 4.2, w: .65, d: 1.65 },
     { x: -9, z: -7.8, w: .45, d: .45 },
-    { x: 8.8, z: 7.5, w: .45, d: .45 },
+    { x: 9, z: 8.9, w: .45, d: .45 },
   ];
   function highlight(id) {
     if (id === selected) return;
