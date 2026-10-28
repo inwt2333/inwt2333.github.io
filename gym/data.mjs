@@ -6,7 +6,7 @@ export const stations = [
   { id: 'chest', name: '坐式胸肌', en: 'CHEST PRESS', zone: 'chest', color: '#bf8263', description: '向前推一点，也向前走一点。', exercises: ['chest'] },
   { id: 'shoulder', name: '坐姿肩推', en: 'SHOULDER PRESS', zone: 'shoulders', color: '#b99b5c', description: '包括那些有点吃力的时刻。', exercises: ['shoulder'] },
   { id: 'abs', name: '坐式腹肌', en: 'AB CRUNCH', zone: 'core', color: '#9381aa', description: '小小的动作，稳稳的核心。', exercises: ['abs'] },
-  { id: 'legs', name: '腿部训练', en: 'LEG STATION', zone: 'legs', color: '#718ba6', description: '大腿内侧 · 大腿伸展', exercises: ['adductor', 'extension'] },
+  { id: 'legs', name: '腿部训练', en: 'LEG STATION', zone: 'legs', color: '#718ba6', description: '大腿内侧 · 大腿伸展 · 腿屈伸 / 腿弯曲', exercises: ['adductor', 'extension', 'extension-curl'] },
   { id: 'cardio', name: '跑步机', en: 'SLOW & STEADY', zone: 'cardio', color: '#b99b5c', description: '爬坡、放松，还有多走的那几分钟。', exercises: ['cardio'] },
   { id: 'weight', name: '体重记录', en: 'BODY JOURNAL', zone: 'life', color: '#568b7a', description: '体重秤旁，留一点身体的变化。', exercises: [] },
   { id: 'calendar', name: '训练日历', en: 'SHOWING UP', zone: 'life', color: '#bf8263', description: '每一个来过的日子，都算数。', exercises: [] },
@@ -21,6 +21,7 @@ export const exercises = [
   { id: 'chest', name: '坐式胸肌', unit: 'kg' },
   { id: 'adductor', name: '大腿内侧', unit: 'kg' },
   { id: 'extension', name: '大腿伸展', unit: 'kg' },
+  { id: 'extension-curl', name: '腿屈伸 / 腿弯曲', unit: 'lb' },
   { id: 'shoulder', name: '坐姿肩推', unit: 'lb' },
   { id: 'cardio', name: '跑步机 / 爬坡', unit: null },
 ];
@@ -42,6 +43,13 @@ export const publishedEntries = [
   strength('published-11', '2026-10-26', 'high-pull', 35, 12, 3),
   strength('published-12', '2026-10-26', 'abs', 40, 12, 3),
   strength('published-13', '2026-10-26', 'extension', 40, 12),
+  strength('published-14', '2026-10-28', 'row', 27, 12, 3),
+  strength('published-15', '2026-10-28', 'shoulder', 17, 12, 3),
+  strength('published-16', '2026-10-28', 'lat', 27, 12, 3),
+  strength('published-17', '2026-10-28', 'abs', 40, 12, 3),
+  strength('published-18', '2026-10-28', 'extension-curl', 27, 12, 2),
+  strength('published-19', '2026-10-28', 'fly', 27, 12),
+  { id: 'published-20', date: '2026-10-28', exercise: 'cardio', segments: [{ name: '爬坡', minutes: 30 }], note: '距离 2.4 km' },
 ];
 
 export const exerciseName = id => exercises.find(e => e.id === id)?.name || id;

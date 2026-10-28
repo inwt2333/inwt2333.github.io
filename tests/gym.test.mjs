@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { publishedEntries, validateJournal, summary } from '../gym/data.mjs';
 
 test('handwritten journal defaults omitted sets to one and retains mixed loads and units', () => {
-  assert.deepEqual(summary(publishedEntries), { days: 2, strength: 12, minutes: 25 });
+  assert.deepEqual(summary(publishedEntries), { days: 3, strength: 18, minutes: 55 });
   const abs = publishedEntries.find(e => e.date === '2026-10-22' && e.exercise === 'abs');
   assert.deepEqual(abs.loads, [
     { weight: 35, unit: 'kg', reps: 12, sets: 1 },
@@ -13,6 +13,21 @@ test('handwritten journal defaults omitted sets to one and retains mixed loads a
   assert.equal(publishedEntries.find(e => e.exercise === 'shoulder').loads[0].sets, 1);
   assert.equal(publishedEntries.find(e => e.exercise === 'lat').loads[0].unit, 'lb');
   assert.equal(publishedEntries.find(e => e.exercise === 'high-pull').loads[0].unit, 'kg');
+});
+
+test('October 28 preserves the dual leg machine as one record and retains cardio distance', () => {
+  const day = publishedEntries.filter(e => e.date === '2026-10-28');
+  assert.equal(day.length, 7);
+  const load = exercise => day.find(e => e.exercise === exercise).loads[0];
+  assert.deepEqual(load('row'), { weight: 27, reps: 12, sets: 3, unit: 'lb' });
+  assert.deepEqual(load('shoulder'), { weight: 17, reps: 12, sets: 3, unit: 'lb' });
+  assert.deepEqual(load('lat'), { weight: 27, reps: 12, sets: 3, unit: 'lb' });
+  assert.deepEqual(load('abs'), { weight: 40, reps: 12, sets: 3, unit: 'kg' });
+  assert.deepEqual(load('extension-curl'), { weight: 27, reps: 12, sets: 2, unit: 'lb' });
+  assert.deepEqual(load('fly'), { weight: 27, reps: 12, sets: 1, unit: 'lb' });
+  const cardio = day.find(e => e.exercise === 'cardio');
+  assert.deepEqual(cardio.segments, [{ name: '爬坡', minutes: 30 }]);
+  assert.equal(cardio.note, '距离 2.4 km');
 });
 
 test('old local saves and backups migrate omitted sets to one without changing explicit sets', () => {

@@ -1,6 +1,6 @@
 import { regions } from './anatomy/regions.mjs';
 
-// Broad exercise regions. The combined leg station includes two movements.
+// Broad exercise regions across all movements recorded at each station.
 const profiles = {
   pull: { title: '背部', primary: ['lats'], secondary: ['upper_back', 'biceps'], main: ['背阔肌'], assist: ['上背部', '肱二头肌'], note: '高位下拉 / 高拉力背肌' },
   row: { title: '背部', primary: ['lats', 'upper_back'], secondary: ['biceps', 'shoulders'], main: ['背阔肌', '上背部肌群'], assist: ['肱二头肌', '三角肌后束'], note: '坐姿划船' },
@@ -8,7 +8,7 @@ const profiles = {
   chest: { title: '胸部', primary: ['chest'], secondary: ['shoulders', 'triceps'], main: ['胸大肌'], assist: ['三角肌前束', '肱三头肌'], note: '坐式胸肌推举' },
   shoulder: { title: '肩部', primary: ['shoulders'], secondary: ['triceps'], main: ['三角肌前束 / 中束'], assist: ['肱三头肌'], note: '坐姿肩推' },
   abs: { title: '核心', primary: ['abs'], secondary: ['obliques'], main: ['腹直肌'], assist: ['腹斜肌群'], note: '坐式腹肌训练' },
-  legs: { title: '腿部', primary: ['quads', 'adductors'], secondary: [], main: ['股四头肌', '大腿内收肌群'], assist: [], note: '大腿伸展 / 大腿内侧' },
+  legs: { title: '腿部', primary: ['quads', 'adductors', 'hamstrings'], secondary: [], main: ['股四头肌', '腘绳肌', '大腿内收肌群'], assist: [], note: '腿屈伸 / 腿弯曲 · 大腿内侧' },
   cardio: { title: '下肢', primary: ['quads', 'glutes', 'calves'], secondary: ['hamstrings'], main: ['大腿前侧', '臀部', '小腿'], assist: ['大腿后侧'], note: '步行 / 爬坡时参与的区域' },
 };
 
