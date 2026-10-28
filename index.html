@@ -150,9 +150,6 @@
 
         .line:hover { stroke-width: 11.5; opacity: 1; }
 
-        /* 线路交叉处的「过线」桥接：底层线路留出缺口 */
-        .bridge { fill: var(--bg); }
-
         @keyframes draw { to { stroke-dashoffset: 0; } }
         @keyframes haloIn { to { opacity: 0.07; } }
 
@@ -642,16 +639,6 @@
             h.setAttribute('class', 'halo');
             h.removeAttribute('id');
             svg.insertBefore(h, l);
-        });
-
-        /* ---------- 交叉处「过线」桥接：底层线路留缺口，上层线路跨越 ---------- */
-        // 黄线（垂直 x=940）上跨绿线（y=170）与红线（y=250）：在黄线光晕前插入底色缺口
-        const yellow = document.getElementById('line-yellow');
-        [[940, 170], [940, 250]].forEach(([x, y]) => {
-            const cap = document.createElementNS(SVGNS, 'circle');
-            cap.setAttribute('cx', x); cap.setAttribute('cy', y); cap.setAttribute('r', 10);
-            cap.setAttribute('class', 'bridge');
-            svg.insertBefore(cap, yellow.previousSibling);
         });
 
         /* ---------- 列车：车头 + 拖尾沿路径自动转向前进 ---------- */
