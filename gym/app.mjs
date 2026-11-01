@@ -1,4 +1,4 @@
-import { stations, exercises, publishedEntries, exerciseName, byDate, dateLabel, localDate, cardioMinutes, validateJournal } from './data.mjs?v=leg-machine-1';
+import { stations, exercises, publishedEntries, exerciseName, byDate, dateLabel, localDate, cardioMinutes, validateJournal } from './data.mjs?v=journal-oct31';
 import { musclePanel } from './anatomy.mjs?v=leg-machine-1';
 
 const $ = selector => document.querySelector(selector);
