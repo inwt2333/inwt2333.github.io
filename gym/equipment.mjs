@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from '../assets/vendor/three/addons/geometries/RoundedBoxGeometry.js';
+import { publishedEntries } from './data.mjs?v=journal-oct31';
 
 export function createEquipment(scene, m) {
   const geometry = new Map();
@@ -343,16 +344,44 @@ export function createEquipment(scene, m) {
     box(g, [.31, .012, .14], [0, .132, -.22], m.screen, .02);
   }, -.1, [.9, .9]);
   station('calendar', [7.9, 0, 7.6], g => {
-    box(g, [.95, .78, .9], [0, .42, 0], m.timber, .045);
-    for (const x of [-.35, .35]) frame(g, [x, .8, -.2], [x, 1.13, -.2], .035, .035, m.chrome);
-    const tablet = box(g, [.65, .9, .045], [0, 1.3, -.15], m.plastic, .035, [-.5, 0, 0]);
-    const map = document.createElement('canvas'); map.width = 512; map.height = 640;
-    const c = map.getContext('2d'); c.fillStyle = '#15201c'; c.fillRect(0, 0, 512, 640);
-    c.fillStyle = '#8e9a7d'; c.font = '35px monospace'; c.fillText('10 / 2026', 55, 90);
-    for (let y = 0; y < 5; y++) for (let x = 0; x < 7; x++) { c.fillStyle = (y === 3 && [0, 4].includes(x)) ? '#a2b58a' : '#334435'; c.fillRect(50 + x * 60, 160 + y * 75, 40, 40); }
+    box(g, [1.05, .72, .92], [0, .38, 0], m.timber, .055);
+    box(g, [.84, .055, .7], [0, .755, .02], m.fabric, .025);
+    for (const x of [-.35, .35]) frame(g, [x, .78, -.2], [x, 1.06, -.2], .04, .04, m.chrome);
+    const tablet = box(g, [.74, .98, .08], [0, 1.34, -.17], m.frameLight, .055, [-.5, 0, 0]);
+    box(tablet, [.68, .92, .025], [0, 0, .046], m.rubber, .04);
+    const map = document.createElement('canvas'); map.width = 640; map.height = 800;
+    const c = map.getContext('2d');
+    c.fillStyle = '#0b1413'; c.fillRect(0, 0, 640, 800);
+    c.fillStyle = '#e7ece4'; c.font = '600 42px sans-serif';
+    c.fillText(new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit' }).format(new Date()), 52, 94);
+    c.fillStyle = '#798982'; c.font = '22px sans-serif';
+    ['一','二','三','四','五','六','日'].forEach((d, i) => c.fillText(d, 62 + i * 77, 164));
+    const shanghaiNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+    const year = shanghaiNow.getFullYear(), month = shanghaiNow.getMonth();
+    const today = `${year}-${String(month + 1).padStart(2, '0')}-${String(shanghaiNow.getDate()).padStart(2, '0')}`;
+    const trained = new Set(publishedEntries.map(e => e.date));
+    try {
+      const saved = JSON.parse(localStorage.getItem('inwt-gym-journal-v1') || '{"entries":[]}');
+      for (const entry of saved.entries || []) if (entry.date) trained.add(entry.date);
+    } catch {}
+    const offset = (new Date(year, month, 1).getDay() + 6) % 7;
+    const days = new Date(year, month + 1, 0).getDate();
+    for (let d = 1; d <= days; d++) {
+      const index = offset + d - 1, col = index % 7, row = Math.floor(index / 7);
+      const x = 40 + col * 80, y = 196 + row * 82;
+      const date = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      c.fillStyle = date === today ? '#e9b86a' : trained.has(date) ? '#77c7a5' : '#263633';
+      c.beginPath(); c.roundRect(x, y, 54, 54, 10); c.fill();
+      c.fillStyle = date === today || trained.has(date) ? '#10201b' : '#c4d0c9';
+      c.font = '24px sans-serif'; c.textAlign = 'center'; c.fillText(String(d), x + 27, y + 35);
+    }
+    c.textAlign = 'left'; c.fillStyle = '#77c7a5'; c.beginPath(); c.roundRect(44, 700, 16, 16, 4); c.fill();
+    c.fillStyle = '#9aa9a0'; c.font = '18px sans-serif'; c.fillText('训练日', 70, 715);
+    c.fillStyle = '#e9b86a'; c.beginPath(); c.roundRect(174, 700, 16, 16, 4); c.fill();
+    c.fillStyle = '#9aa9a0'; c.fillText('今天 · UTC+8', 200, 715);
     const texture = new THREE.CanvasTexture(map); texture.colorSpace = THREE.SRGBColorSpace;
-    const display = new THREE.Mesh(new THREE.PlaneGeometry(.57, .79), new THREE.MeshStandardMaterial({ map: texture, emissiveMap: texture, emissive: '#fff', emissiveIntensity: .6, roughness: .25 }));
-    display.position.z = .027; tablet.add(display);
+    const display = new THREE.Mesh(new THREE.PlaneGeometry(.64, .8), new THREE.MeshStandardMaterial({ map: texture, emissiveMap: texture, emissive: '#fff', emissiveIntensity: .7, roughness: .22, metalness: .08 }));
+    display.position.set(0, .01, .063); tablet.add(display);
   }, -.35, [1, 1]);
 
   // Adjustable bench, dumbbell rack, kettlebells and spare plates complete the room.
