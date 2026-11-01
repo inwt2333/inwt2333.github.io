@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { publishedEntries, validateJournal, summary } from '../gym/data.mjs';
 
 test('handwritten journal defaults omitted sets to one and retains mixed loads and units', () => {
-  assert.deepEqual(summary(publishedEntries), { days: 3, strength: 18, minutes: 55 });
+  assert.deepEqual(summary(publishedEntries), { days: 5, strength: 27, minutes: 106 });
   const abs = publishedEntries.find(e => e.date === '2026-10-22' && e.exercise === 'abs');
   assert.deepEqual(abs.loads, [
     { weight: 35, unit: 'kg', reps: 12, sets: 1 },
@@ -28,6 +28,33 @@ test('October 28 preserves the dual leg machine as one record and retains cardio
   const cardio = day.find(e => e.exercise === 'cardio');
   assert.deepEqual(cardio.segments, [{ name: '爬坡', minutes: 30 }]);
   assert.equal(cardio.note, '距离 2.4 km');
+});
+
+test('October 30 and 31 preserve load changes, effort note, and cardio distance', () => {
+  const day30 = publishedEntries.filter(e => e.date === '2026-10-30');
+  assert.equal(day30.length, 6);
+  const chest = day30.find(e => e.exercise === 'chest');
+  assert.deepEqual(chest.loads, [
+    { weight: 15, unit: 'kg', reps: 12, sets: 2 },
+    { weight: 5, unit: 'kg', reps: 1, sets: 1 },
+  ]);
+  assert.equal(chest.note, '吃力');
+  assert.deepEqual(day30.find(e => e.exercise === 'high-pull').loads, [
+    { weight: 25, unit: 'kg', reps: 12, sets: 1 },
+    { weight: 30, unit: 'kg', reps: 12, sets: 2 },
+  ]);
+  assert.deepEqual(day30.find(e => e.exercise === 'cardio'), {
+    id: 'published-26', date: '2026-10-30', exercise: 'cardio',
+    segments: [{ name: '爬坡', minutes: 26 }], note: '距离 2.4 km',
+  });
+
+  const day31 = publishedEntries.filter(e => e.date === '2026-10-31');
+  assert.equal(day31.length, 5);
+  assert.deepEqual(day31.find(e => e.exercise === 'extension-curl').loads[0],
+    { weight: 27, unit: 'lb', reps: 12, sets: 3 });
+  assert.equal(day31.find(e => e.exercise === 'abs').loads[0].weight, 45);
+  assert.equal(day31.find(e => e.exercise === 'cardio').note, '距离 2.1 km');
+  assert.deepEqual(summary(publishedEntries), { days: 5, strength: 27, minutes: 106 });
 });
 
 test('old local saves and backups migrate omitted sets to one without changing explicit sets', () => {
