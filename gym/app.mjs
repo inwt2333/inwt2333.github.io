@@ -351,7 +351,7 @@ addEventListener('keydown', event => {
   }
 });
 // Full-viewport scene. The journal remains independent of the GPU renderer.
-import('./room.mjs?v=layout-2').then(({ createRoom }) => createRoom({
+import('./room.mjs?v=machines-3').then(({ createRoom }) => createRoom({
   container: $('#scene'),
   onHover: hint,
   onMenu: () => menu.showModal(),
