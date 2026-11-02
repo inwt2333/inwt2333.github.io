@@ -68,7 +68,9 @@ def test_friends_railway_is_a_curved_vertical_route_on_all_screen_sizes():
     assert ".railway::before" in css
     assert "cubic-bezier" in css
     assert "grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr)" in css
-    assert "radial-gradient(ellipse" in css
+    assert "C54 12 54 20 50 30" in css
+    assert ".neighbor:nth-child(odd) { grid-column: 1; }" in css
+    assert ".neighbor:nth-child(even) { grid-column: 3; }" in css
 
 
 def test_koitown_station_uses_orange_koi_and_centered_signage():

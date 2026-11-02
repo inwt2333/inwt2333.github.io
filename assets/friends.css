@@ -66,7 +66,7 @@ h1 .title-dot { display: none; }
 .hero-side .mono { letter-spacing: 1.4px; font-size: 8px; }
 .railway { position: relative; margin: 38px auto 0; max-width: 980px; }
 .railway::before { content: ''; position: absolute; z-index: 0; top: 30px; bottom: 32px; left: 50%; width: 4px; border-radius: 50%; background: var(--yellow); opacity: .78; transform: translateX(-50%); box-shadow: 0 0 18px color-mix(in srgb, var(--yellow) 22%, transparent); }
-.railway::after { content: ''; position: absolute; z-index: 0; inset: 30px 0 32px; pointer-events: none; background: radial-gradient(ellipse 48% 210px at 50% 28%, transparent 97%, var(--yellow) 98% 99%, transparent 100%), radial-gradient(ellipse 48% 210px at 50% 72%, transparent 97%, var(--yellow) 98% 99%, transparent 100%); opacity: .85; }
+.railway::after { content: ''; position: absolute; z-index: 0; inset: 30px 0 32px; pointer-events: none; opacity: .82; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M50 0 C54 12 54 20 50 30 C46 40 46 48 50 58 C54 68 54 78 50 88 L50 100' fill='none' stroke='%23ffd60a' stroke-width='0.45'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
 .origin { width: fit-content; margin: auto; display: flex; align-items: center; gap: 9px; font: 9px var(--mono); letter-spacing: 1px; }
 .origin span { color: var(--muted); font: 10px 'Noto Sans SC', sans-serif; letter-spacing: 1px; }
 .origin svg { width: 30px; height: 30px; color: var(--yellow); }
