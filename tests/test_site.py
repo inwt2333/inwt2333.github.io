@@ -63,14 +63,16 @@ def test_friends_page_lists_every_neighbour_as_a_safe_external_link():
         assert f'id="trip-{branch}"' in html
 
 
-def test_friends_railway_is_a_curved_vertical_route_on_all_screen_sizes():
+def test_friends_railway_is_straight_and_stations_step_down_along_it():
     css = (ROOT / "assets" / "friends.css").read_text(encoding="utf-8")
     assert ".railway::before" in css
     assert "cubic-bezier" in css
     assert "grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr)" in css
-    assert "C54 12 54 20 50 30" in css
+    assert ".railway::after" not in css
     assert ".neighbor:nth-child(odd) { grid-column: 1; }" in css
     assert ".neighbor:nth-child(even) { grid-column: 3; }" in css
+    assert ".neighbor:nth-child(2) { margin-top: 42px; }" in css
+    assert ".neighbor:nth-child(3) { margin-top: 84px; }" in css
 
 
 def test_koitown_station_uses_orange_koi_and_centered_signage():
