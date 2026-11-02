@@ -51,3 +51,36 @@ def test_xsy_has_one_accessible_exhibit_dialog():
     assert 'role="dialog"' in html
     assert 'aria-modal="true"' in html
     assert 'id="exhibit-dialog-title"' in html
+
+
+def test_friends_page_lists_every_neighbour_as_a_safe_external_link():
+    html = (ROOT / "friends.html").read_text(encoding="utf-8")
+    assert html.count('class="neighbor"') == 3
+    for href in ("http://andysgz.top", "https://chrmysle.cn/", "https://koitown.cn/"):
+        assert f'href="{href}" target="_blank" rel="noopener"' in html
+    for branch in ("andy", "koitown", "chrmysle"):
+        assert f'data-branch="{branch}"' in html
+        assert f'id="trip-{branch}"' in html
+
+
+def test_friends_railway_is_straight_and_stations_step_down_along_it():
+    css = (ROOT / "assets" / "friends.css").read_text(encoding="utf-8")
+    assert ".railway::before" in css
+    assert "cubic-bezier" in css
+    assert "grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr)" in css
+    assert ".railway::after" not in css
+    assert ".neighbor:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }" in css
+    assert ".neighbor:nth-child(2) { grid-column: 3; grid-row: 2 / span 2; }" in css
+    assert ".neighbor:nth-child(3) { grid-column: 1; grid-row: 3 / span 2; }" in css
+    assert "grid-template-rows: repeat(4, 1fr)" in css
+    assert "row-gap: 24px" in css
+    assert ".neighbor:nth-child(2) { margin-top:" not in css
+    assert ".neighbor:nth-child(3) { margin-top:" not in css
+
+
+def test_koitown_station_uses_orange_koi_and_centered_signage():
+    html = (ROOT / "friends.html").read_text(encoding="utf-8")
+    css = (ROOT / "assets" / "friends.css").read_text(encoding="utf-8")
+    assert '<text x="260" y="162" text-anchor="middle" class="scene-label">KOITOWN</text>' in html
+    assert ".station-scene .koi { fill: #f28c38;" in css
+    assert "grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr)" in css

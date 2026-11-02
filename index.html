@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inwt · 小站</title>
-    <meta name="description" content="Inwt 的小站：随笔、摄影集、古典乐与 AI 学习，所有线路终点都是热爱。">
+    <meta name="description" content="Inwt 的小站：随笔、摄影集、古典乐与日常训练，所有线路终点都是热爱。">
     <link rel="canonical" href="https://inwt233.cn/">
     <meta name="theme-color" content="#0a0a0c" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f2f2f5" media="(prefers-color-scheme: light)">
@@ -14,7 +14,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://inwt233.cn/">
     <meta property="og:title" content="Inwt · 小站">
-    <meta property="og:description" content="随笔、摄影集、古典乐与 AI 学习，所有线路终点都是热爱。">
+    <meta property="og:description" content="随笔、摄影集、古典乐与日常训练，所有线路终点都是热爱。">
     <meta property="og:image" content="https://inwt233.cn/assets/og.png">
     <meta property="og:locale" content="zh_CN">
     <meta name="twitter:card" content="summary_large_image">
@@ -36,7 +36,7 @@
         "name": "Inwt · 小站",
         "alternateName": "Inwt Railway",
         "url": "https://inwt233.cn/",
-        "description": "随笔、摄影集、古典乐与 AI 学习，所有线路终点都是热爱。"
+        "description": "随笔、摄影集、古典乐与日常训练，所有线路终点都是热爱。"
     }
     </script>
 
@@ -316,7 +316,7 @@
             right: 40px;
             bottom: 70px;
             z-index: 5;
-            width: 286px;
+            width: min(360px, calc(100vw - 48px));
             padding: 14px 16px 15px;
             border: 1px solid var(--panel-line);
             border-radius: 14px;
@@ -332,12 +332,14 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 12px;
             margin-bottom: 10px;
             color: var(--soft);
-            font: 0.62rem var(--mono);
-            letter-spacing: 0.12em;
+            font: 0.58rem var(--mono);
+            letter-spacing: 0.06em;
+            white-space: nowrap;
         }
-        .platform-kicker span { margin-left: auto; letter-spacing: 0.08em; }
+        .platform-kicker span { flex: none; margin-left: auto; letter-spacing: 0.04em; }
         .platform-main { display: grid; gap: 10px; }
         .platform-item { display: grid; grid-template-columns: 4px minmax(0, 1fr); gap: 10px; align-items: stretch; text-decoration: none; color: var(--ink); }
         .platform-item:hover .platform-title { color: var(--green); }
@@ -525,15 +527,6 @@
             <text class="st-sub" x="912" y="366" text-anchor="end">演出与作品</text>
         </a>
 
-        <!-- 站点：AI-Learning（学园线） -->
-        <a class="station st-green" data-line="green" href="https://inwt233.gitbook.io/ai-learning" target="_blank" rel="noopener" aria-label="AI-Learning（新窗口）" style="--d: 1.4s">
-            <circle class="hit" cx="820" cy="170" r="40"/>
-            <circle class="ring" cx="820" cy="170" r="15" stroke="#30d158"/>
-            <circle class="core" cx="820" cy="170" r="8"/>
-            <text class="st-name" x="820" y="140" text-anchor="middle">AI-Learning</text>
-            <text class="st-sub" x="820" y="210" text-anchor="middle">学习笔记</text>
-        </a>
-
         <!-- 站点：训练馆（学园线） -->
         <a class="station st-green" data-line="green" href="gym/" aria-label="进入训练馆" style="--d: 1.8s">
             <circle class="hit" cx="620" cy="170" r="35"/>
@@ -585,7 +578,7 @@
         <div class="legend-row" data-line="red"><i style="--c: var(--red)" aria-hidden="true"></i>随笔线<span>ESSAYS</span></div>
         <div class="legend-row" data-line="cyan"><i style="--c: var(--cyan)" aria-hidden="true"></i>光影线<span>GALLERY</span></div>
         <div class="legend-row" data-line="yellow"><i style="--c: var(--yellow)" aria-hidden="true"></i>乐律线<span>CLASSIC</span></div>
-        <div class="legend-row" data-line="green"><i style="--c: var(--green)" aria-hidden="true"></i>学园线<span>AI·LEARN</span></div>
+        <div class="legend-row" data-line="green"><i style="--c: var(--green)" aria-hidden="true"></i>学园线<span>TRAINING</span></div>
     </aside>
 
     <aside class="platform-panel" id="platform-panel" aria-label="今日站台">
