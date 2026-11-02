@@ -316,7 +316,7 @@
             right: 40px;
             bottom: 70px;
             z-index: 5;
-            width: 286px;
+            width: min(360px, calc(100vw - 48px));
             padding: 14px 16px 15px;
             border: 1px solid var(--panel-line);
             border-radius: 14px;
@@ -332,12 +332,14 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 12px;
             margin-bottom: 10px;
             color: var(--soft);
-            font: 0.62rem var(--mono);
-            letter-spacing: 0.12em;
+            font: 0.58rem var(--mono);
+            letter-spacing: 0.06em;
+            white-space: nowrap;
         }
-        .platform-kicker span { margin-left: auto; letter-spacing: 0.08em; }
+        .platform-kicker span { flex: none; margin-left: auto; letter-spacing: 0.04em; }
         .platform-main { display: grid; gap: 10px; }
         .platform-item { display: grid; grid-template-columns: 4px minmax(0, 1fr); gap: 10px; align-items: stretch; text-decoration: none; color: var(--ink); }
         .platform-item:hover .platform-title { color: var(--green); }
