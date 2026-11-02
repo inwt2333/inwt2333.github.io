@@ -1,6 +1,6 @@
 // 手写记录按 2026 年归档。保留原单位，未写明组数按一组记录。
 export const stations = [
-  { id: 'pull', name: '拉力训练', en: 'PULL STATION', zone: 'back', color: '#568b7a', description: '高位下拉 · 高拉力背肌', exercises: ['lat', 'high-pull'] },
+  { id: 'pull', name: '拉力训练', en: 'PULL STATION', zone: 'back', color: '#568b7a', description: '高位下拉 · 高拉力背肌 · 中立握下拉', exercises: ['lat', 'high-pull', 'neutral-lat'] },
   { id: 'row', name: '坐姿划船', en: 'SEATED ROW', zone: 'back', color: '#568b7a', description: '一拉一放，慢慢积累。', exercises: ['row'] },
   { id: 'fly', name: '蝴蝶机', en: 'PEC DECK', zone: 'chest', color: '#bf8263', description: '把每一次夹胸都记下来。', exercises: ['fly'] },
   { id: 'chest', name: '坐式胸肌', en: 'CHEST PRESS', zone: 'chest', color: '#bf8263', description: '向前推一点，也向前走一点。', exercises: ['chest'] },
@@ -15,6 +15,7 @@ export const stations = [
 
 export const exercises = [
   { id: 'lat', name: '高位下拉', unit: 'lb' },
+  { id: 'neutral-lat', name: '高位中立握下拉', unit: 'kg' },
   { id: 'row', name: '坐姿划船', unit: 'lb' },
   { id: 'fly', name: '蝴蝶机', unit: 'lb' },
   { id: 'high-pull', name: '高拉力背肌', unit: 'kg' },
@@ -62,6 +63,13 @@ export const publishedEntries = [
   strength('published-29', '2026-10-31', 'fly', 27, 12, 3),
   strength('published-30', '2026-10-31', 'abs', 45, 12, 3),
   { id: 'published-31', date: '2026-10-31', exercise: 'cardio', segments: [{ name: '爬坡', minutes: 25 }], note: '距离 2.1 km' },
+  strength('published-32', '2026-11-02', 'row', 27, 12, 3),
+  { id: 'published-33', date: '2026-11-02', exercise: 'abs', loads: [{ weight: 45, unit: 'kg', reps: 12, sets: 2 }, { weight: 50, unit: 'kg', reps: 12, sets: 1 }], note: '' },
+  { id: 'published-34', date: '2026-11-02', exercise: 'chest', loads: [{ weight: 15, unit: 'kg', reps: 12, sets: 2 }, { weight: 15, unit: 'kg', reps: 9, sets: 1 }], note: '吃力' },
+  strength('published-35', '2026-11-02', 'extension', 50, 12, 3),
+  strength('published-36', '2026-11-02', 'fly', 27, 12, 3),
+  strength('published-37', '2026-11-02', 'neutral-lat', 30, 12, 2),
+  { id: 'published-38', date: '2026-11-02', exercise: 'cardio', segments: [{ name: '爬坡', minutes: 30 }], note: '距离 2.5 km' },
 ];
 
 export const exerciseName = id => exercises.find(e => e.id === id)?.name || id;

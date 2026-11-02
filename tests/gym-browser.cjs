@@ -106,7 +106,7 @@ const output = process.env.GYM_SCREENSHOT_DIR;
     await page.locator('#export-data').click();
     const download = await downloadPromise;
     const backup = JSON.parse(await fs.readFile(await download.path(), 'utf8'));
-    assert.equal(backup.entries.length, 33);
+    assert.equal(backup.entries.length, 40);
     assert.equal(backup.weights.length, 2);
     const importPayload = { name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) };
     await page.locator('#import-file').setInputFiles(importPayload);

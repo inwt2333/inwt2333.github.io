@@ -1,9 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { publishedEntries, validateJournal, summary } from '../gym/data.mjs';
+import { publishedEntries, stations, validateJournal, summary } from '../gym/data.mjs';
+
+test('November 2 retains changing loads, final chest set and neutral grip pulldown', () => {
+  const day = publishedEntries.filter(e => e.date === '2026-11-02');
+  assert.equal(day.length, 7);
+  const entry = exercise => day.find(e => e.exercise === exercise);
+  assert.deepEqual(entry('abs').loads, [
+    { weight: 45, unit: 'kg', reps: 12, sets: 2 },
+    { weight: 50, unit: 'kg', reps: 12, sets: 1 },
+  ]);
+  assert.deepEqual(entry('chest').loads, [
+    { weight: 15, unit: 'kg', reps: 12, sets: 2 },
+    { weight: 15, unit: 'kg', reps: 9, sets: 1 },
+  ]);
+  assert.equal(entry('chest').note, '吃力');
+  assert.deepEqual(entry('neutral-lat').loads, [{ weight: 30, unit: 'kg', reps: 12, sets: 2 }]);
+  assert.ok(stations.find(s => s.id === 'pull').exercises.includes('neutral-lat'));
+  assert.equal(entry('extension').loads[0].weight, 50);
+  assert.deepEqual(entry('cardio').segments, [{ name: '爬坡', minutes: 30 }]);
+  assert.equal(entry('cardio').note, '距离 2.5 km');
+});
 
 test('handwritten journal defaults omitted sets to one and retains mixed loads and units', () => {
-  assert.deepEqual(summary(publishedEntries), { days: 5, strength: 27, minutes: 106 });
+  assert.deepEqual(summary(publishedEntries), { days: 6, strength: 33, minutes: 136 });
   const abs = publishedEntries.find(e => e.date === '2026-10-22' && e.exercise === 'abs');
   assert.deepEqual(abs.loads, [
     { weight: 35, unit: 'kg', reps: 12, sets: 1 },
@@ -54,7 +74,7 @@ test('October 30 and 31 preserve load changes, effort note, and cardio distance'
     { weight: 27, unit: 'lb', reps: 12, sets: 3 });
   assert.equal(day31.find(e => e.exercise === 'abs').loads[0].weight, 45);
   assert.equal(day31.find(e => e.exercise === 'cardio').note, '距离 2.1 km');
-  assert.deepEqual(summary(publishedEntries), { days: 5, strength: 27, minutes: 106 });
+  assert.deepEqual(summary(publishedEntries), { days: 6, strength: 33, minutes: 136 });
 });
 
 test('old local saves and backups migrate omitted sets to one without changing explicit sets', () => {
