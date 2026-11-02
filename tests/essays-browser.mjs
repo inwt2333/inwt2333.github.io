@@ -113,6 +113,7 @@ async function run(width, height, reduced) {
   $('#reader-close').click();
   // Exhaustively verify all books without spending minutes on duplicate animations.
   win.qaReducedMotion = true;
+  let continuations = 0;
   for (let b = 0; b < books.length; b++) {
     books[b].click();
     await until(() => $('#reader-book .cover-page'));
@@ -120,6 +121,7 @@ async function run(width, height, reduced) {
     let text = '';
     let count = 0;
     let sawEnd = false;
+    let previousBody = null;
     do {
       for (const page of doc.querySelectorAll('#reader-book>.reader-page')) {
         if (page.inert) continue;
@@ -128,6 +130,31 @@ async function run(width, height, reduced) {
         assert(content && content.clientHeight > 0, 'unbounded paper');
         if (content.querySelector('.end-page')) sawEnd = true;
         if (!content.querySelector('.cover-page,.note-page,.end-page') && content.textContent.trim()) {
+          const body = content.querySelector('.body-content');
+          assert(body, 'missing prose container');
+          const first = body.firstElementChild;
+          if (previousBody && first?.tagName === 'P' && !first.querySelector('img,table,pre')) {
+            const style = win.getComputedStyle(first);
+            const needed = parseFloat(style.lineHeight) + parseFloat(style.marginTop) + previousBody.gap;
+            assert(previousBody.space < needed + 3, 'paragraph moved to next page leaving usable lines: ' + posts[b].title);
+          }
+          for (const paragraph of body.querySelectorAll('p')) {
+            const style = win.getComputedStyle(paragraph);
+            if (paragraph.classList.contains('paragraph-continuation')) {
+              continuations++;
+              assert(parseFloat(style.textIndent) === 0, 'continued paragraph indented again');
+            } else {
+              assert(Math.abs(parseFloat(style.textIndent) - 2 * parseFloat(style.fontSize)) < 1, 'paragraph needs two-character indentation');
+            }
+          }
+          const last = body.lastElementChild;
+          previousBody = null;
+          if (last?.tagName === 'P' && !last.querySelector('img,table,pre')) {
+            previousBody = {
+              space: content.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom,
+              gap: parseFloat(win.getComputedStyle(last).fontSize)
+            };
+          }
           const clone = content.cloneNode(true);
           clone.querySelectorAll('.running-head').forEach(el => el.remove());
           text += normalize(clone.textContent);
@@ -147,6 +174,7 @@ async function run(width, height, reduced) {
     assert($('#book-reader').hidden && !$('.library-shell').inert, 'close did not restore shelf');
     assert(doc.activeElement === books[b], 'keyboard focus was not restored');
   }
+  assert(continuations > 0, 'paragraphs never flow across pages');
   books[0].click();
   await until(() => $('#reader-book .cover-page'));
   doc.querySelector('[data-section="body"]').click();
@@ -170,7 +198,7 @@ async function run(width, height, reduced) {
   assert($('#reader-book .reader-page.is-visible .page-inner').clientHeight > 0, 'resize reflow');
   doc.dispatchEvent(new win.KeyboardEvent('keydown', {key:'Escape',bubbles:true}));
   assert($('#book-reader').hidden, 'Escape close');
-  results.push('PASS ' + width + '×' + height + ' / reduced=' + reduced + ': shelves fit, book fills screen, flip commit timing, 14 exact bodies, no prose overflow, bookmarks, keyboard, swipe, resize, focus, links');
+  results.push('PASS ' + width + '×' + height + ' / reduced=' + reduced + ': shelves fit, book fills screen, flip commit timing, 14 exact bodies, continuous paragraphs, indentation, no prose overflow, bookmarks, keyboard, swipe, resize, focus, links');
   output.textContent = results.join('\n');
   frame.remove();
 }

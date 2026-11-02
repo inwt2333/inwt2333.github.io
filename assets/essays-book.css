@@ -38,6 +38,10 @@
 .reader-page>.page-inner { height:100%; overflow:auto; overscroll-behavior:contain; }
 .reader-page .cover-page,.reader-page .note-page,.reader-page .end-page { min-height:100%; }
 .reader-page p,.reader-page li { font-size:clamp(18px,1.4vw,23px); line-height:1.95; }
+.body-content { display:flow-root; }
+.body-content p { text-indent:2em; }
+.body-content p.paragraph-continuation { text-indent:0; }
+.body-content>p:last-child { margin-bottom:0; }
 .reader-page ul,.reader-page ol { padding-left:1.4em; margin-bottom:1em; }
 .reader-page table { border-collapse:collapse; font-size:.8rem; width:100%; }
 .reader-page td,.reader-page th { border:1px solid var(--line); padding:5px; }

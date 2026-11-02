@@ -216,13 +216,13 @@
         measure.className = 'reader-page page-measure';
         measure.style.width = leftPage.getBoundingClientRect().width + 'px';
         measure.style.height = leftPage.getBoundingClientRect().height + 'px';
-        measure.innerHTML = '<div class="page-inner"><div class="running-head">' + esc(essays[bookIndex].date) + ' / ' + esc(essays[bookIndex].title) + '</div><div class="measure-content"></div></div>';
+        measure.innerHTML = '<div class="page-inner"><div class="running-head">' + esc(essays[bookIndex].date) + ' / ' + esc(essays[bookIndex].title) + '</div><div class="body-content measure-content"></div></div>';
         reader.appendChild(measure);
         var target = measure.querySelector('.measure-content');
         var inner = measure.querySelector('.page-inner');
         var chunks = [], current = '';
         function fits(html) { target.innerHTML = html; return inner.scrollHeight <= inner.clientHeight + 1; }
-        function flush() { if (current) { chunks.push({kind:'body', html:'<div class="running-head">' + esc(essays[bookIndex].date) + ' / ' + esc(essays[bookIndex].title) + '</div>' + current}); current = ''; } }
+        function flush() { if (current) { chunks.push({kind:'body', html:'<div class="running-head">' + esc(essays[bookIndex].date) + ' / ' + esc(essays[bookIndex].title) + '</div><div class="body-content">' + current + '</div>'}); current = ''; } }
         function fragment(node, start, end) {
             var walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
             var texts = [], text, total = 0;
@@ -235,32 +235,38 @@
                 if (end >= item.start && end <= item.start + item.node.length) { range.setEnd(item.node, end - item.start); break; }
             }
             var clone = node.cloneNode(false);
+            if (start > 0 && node.tagName === 'P') clone.classList.add('paragraph-continuation');
             clone.appendChild(range.cloneContents());
             return clone.outerHTML;
         }
         Array.from(root.children).forEach(function (node) {
             var html = node.outerHTML;
             if (fits(current + html)) { current += html; return; }
-            flush();
-            if (fits(html)) { current = html; return; }
-            // Split oversized prose with DOM ranges, preserving inline emphasis and links.
+            // Prose flows into the space left on this page before continuing on the next.
+            // Keep media and structural blocks together when they fit on a fresh page.
             var length = node.textContent.length;
-            if (length && !node.querySelector('img,table,pre') && !/^(TABLE|PRE|FIGURE)$/.test(node.tagName)) {
+            var canSplit = length && !node.querySelector('img,table,pre') && !/^(TABLE|PRE|FIGURE)$/.test(node.tagName);
+            if (canSplit && (node.tagName === 'P' || !fits(html))) {
                 var offset = 0;
                 while (offset < length) {
                     var lo = 1, hi = length - offset, best = 0;
                     while (lo <= hi) {
                         var mid = Math.floor((lo + hi) / 2);
-                        if (fits(fragment(node, offset, offset + mid))) { best = mid; lo = mid + 1; } else hi = mid - 1;
+                        if (fits(current + fragment(node, offset, offset + mid))) { best = mid; lo = mid + 1; } else hi = mid - 1;
                     }
+                    if (!best && current) { flush(); continue; }
                     best = Math.max(1, best);
-                    current = fragment(node, offset, offset + best);
+                    // Avoid cutting a Unicode surrogate pair at the page boundary.
+                    if (best > 1 && /[\uD800-\uDBFF]/.test(node.textContent.charAt(offset + best - 1))) best--;
+                    current += fragment(node, offset, offset + best);
                     offset += best;
                     if (offset < length) flush();
                 }
             } else {
                 // A tall image/table/code block stays intact and can scroll within its page.
-                current = html; flush();
+                flush();
+                current = html;
+                if (!fits(html)) flush();
             }
         });
         flush();
