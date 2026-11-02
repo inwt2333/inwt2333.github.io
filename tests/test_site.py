@@ -67,5 +67,13 @@ def test_friends_railway_is_a_curved_vertical_route_on_all_screen_sizes():
     css = (ROOT / "assets" / "friends.css").read_text(encoding="utf-8")
     assert ".railway::before" in css
     assert "cubic-bezier" in css
-    assert "grid-template-columns: 1fr" in css
-    assert "--station-side" in css
+    assert "grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr)" in css
+    assert "radial-gradient(ellipse" in css
+
+
+def test_koitown_station_uses_orange_koi_and_centered_signage():
+    html = (ROOT / "friends.html").read_text(encoding="utf-8")
+    css = (ROOT / "assets" / "friends.css").read_text(encoding="utf-8")
+    assert '<text x="260" y="162" text-anchor="middle" class="scene-label">KOITOWN</text>' in html
+    assert ".station-scene .koi { fill: #f28c38;" in css
+    assert "grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr)" in css
