@@ -114,8 +114,9 @@ h1 .title-dot { display: none; }
 .flag { transform-box: fill-box; transform-origin: left center; transition: transform .3s; }
 .station-info { padding: 22px 24px; border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--rule)); border-radius: 10px; background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 5%, var(--panel)), var(--panel) 62%); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: border-color .3s, transform .35s cubic-bezier(.2,.75,.25,1); }
 .neighbor { width: 100%; align-self: center; }
-.neighbor:nth-child(odd) { grid-column: 1; }
-.neighbor:nth-child(even) { grid-column: 3; }
+.neighbor:nth-child(1) { grid-column: 1; grid-row: 1; }
+.neighbor:nth-child(2) { grid-column: 3; grid-row: 2; }
+.neighbor:nth-child(3) { grid-column: 1; grid-row: 3; }
 .neighbor::before { content: ''; position: absolute; z-index: 2; top: 42%; width: 13px; height: 13px; border: 3px solid var(--accent); border-radius: 50%; background: var(--bg); box-shadow: 0 0 0 5px var(--bg), 0 0 16px color-mix(in srgb, var(--accent) 28%, transparent); }
 .neighbor:nth-child(odd)::before { right: -32px; }
 .neighbor:nth-child(even)::before { left: -32px; }

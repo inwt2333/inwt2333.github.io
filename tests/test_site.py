@@ -69,8 +69,9 @@ def test_friends_railway_is_straight_and_stations_step_down_along_it():
     assert "cubic-bezier" in css
     assert "grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr)" in css
     assert ".railway::after" not in css
-    assert ".neighbor:nth-child(odd) { grid-column: 1; }" in css
-    assert ".neighbor:nth-child(even) { grid-column: 3; }" in css
+    assert ".neighbor:nth-child(1) { grid-column: 1; grid-row: 1; }" in css
+    assert ".neighbor:nth-child(2) { grid-column: 3; grid-row: 2; }" in css
+    assert ".neighbor:nth-child(3) { grid-column: 1; grid-row: 3; }" in css
     assert "grid-template-rows: repeat(3, auto)" in css
     assert "row-gap: 150px" in css
     assert ".neighbor:nth-child(2) { margin-top:" not in css
