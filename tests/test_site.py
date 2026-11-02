@@ -71,8 +71,10 @@ def test_friends_railway_is_straight_and_stations_step_down_along_it():
     assert ".railway::after" not in css
     assert ".neighbor:nth-child(odd) { grid-column: 1; }" in css
     assert ".neighbor:nth-child(even) { grid-column: 3; }" in css
-    assert ".neighbor:nth-child(2) { margin-top: 160px; }" in css
-    assert ".neighbor:nth-child(3) { margin-top: 320px; }" in css
+    assert "grid-template-rows: repeat(3, auto)" in css
+    assert "row-gap: 150px" in css
+    assert ".neighbor:nth-child(2) { margin-top:" not in css
+    assert ".neighbor:nth-child(3) { margin-top:" not in css
 
 
 def test_koitown_station_uses_orange_koi_and_centered_signage():
