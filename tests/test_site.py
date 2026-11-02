@@ -51,3 +51,21 @@ def test_xsy_has_one_accessible_exhibit_dialog():
     assert 'role="dialog"' in html
     assert 'aria-modal="true"' in html
     assert 'id="exhibit-dialog-title"' in html
+
+
+def test_friends_page_lists_every_neighbour_as_a_safe_external_link():
+    html = (ROOT / "friends.html").read_text(encoding="utf-8")
+    assert html.count('class="neighbor"') == 3
+    for href in ("http://andysgz.top", "https://chrmysle.cn/", "https://koitown.cn/"):
+        assert f'href="{href}" target="_blank" rel="noopener"' in html
+    for branch in ("andy", "koitown", "chrmysle"):
+        assert f'data-branch="{branch}"' in html
+        assert f'id="trip-{branch}"' in html
+
+
+def test_friends_railway_is_a_curved_vertical_route_on_all_screen_sizes():
+    css = (ROOT / "assets" / "friends.css").read_text(encoding="utf-8")
+    assert ".railway::before" in css
+    assert "cubic-bezier" in css
+    assert "grid-template-columns: 1fr" in css
+    assert "--station-side" in css
