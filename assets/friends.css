@@ -116,8 +116,8 @@ h1 .title-dot { display: none; }
 .neighbor { width: 100%; align-self: center; }
 .neighbor:nth-child(odd) { grid-column: 1; }
 .neighbor:nth-child(even) { grid-column: 3; }
-.neighbor:nth-child(2) { margin-top: 42px; }
-.neighbor:nth-child(3) { margin-top: 84px; }
+.neighbor:nth-child(2) { margin-top: 160px; }
+.neighbor:nth-child(3) { margin-top: 320px; }
 .neighbor::before { content: ''; position: absolute; z-index: 2; top: 42%; width: 13px; height: 13px; border: 3px solid var(--accent); border-radius: 50%; background: var(--bg); box-shadow: 0 0 0 5px var(--bg), 0 0 16px color-mix(in srgb, var(--accent) 28%, transparent); }
 .neighbor:nth-child(odd)::before { right: -32px; }
 .neighbor:nth-child(even)::before { left: -32px; }
