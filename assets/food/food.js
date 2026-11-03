@@ -1,6 +1,10 @@
+import {foodCandidates, drawWithoutRepeat, boardPage} from './discovery.mjs';
 'use strict';
 const $ = id => document.getElementById(id);
-let meals = [], activeMeal, photoIndex = 0;
+let meals = [], activeMeal, photoIndex = 0, boardIndex = 0;
+let drawState = {}, selectedFood = null, drawing = false, drawToken = 0;
+const fortune = $('fortune-dialog');
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const menu = $('menu-dialog'), receipt = $('receipt-dialog'), viewer = $('viewer');
 function element(tag, className, text) {
     const node = document.createElement(tag);
@@ -70,7 +74,7 @@ viewer.addEventListener('keydown', event => {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); step(event.key === 'ArrowLeft' ? -1 : 1); }
 });
 $('full-photo').addEventListener('error', () => { $('full-photo').alt = '照片暂时无法加载，可以切换到下一张'; });
-for (const dialog of [menu, receipt, viewer]) {
+for (const dialog of [menu, receipt, viewer, fortune]) {
     dialog.querySelector('[data-close]').addEventListener('click', () => dialog.close());
     dialog.addEventListener('click', event => {
         if (event.target !== dialog) return;
@@ -79,16 +83,78 @@ for (const dialog of [menu, receipt, viewer]) {
     });
 }
 $('menu-open').addEventListener('click', () => menu.showModal());
-function render() {
-    $('board').replaceChildren(); $('archive').replaceChildren();
-    $('menu-count').textContent = meals.length ? `${meals.length} 日 · ${meals.reduce((n,m) => n + m.photos.length, 0)} 张留念` : '一餐一记 · 慢慢收藏';
-    for (const meal of meals.slice(0, 3)) {
+function renderBoard() {
+    $('board').replaceChildren();
+    for (const meal of boardPage(meals, boardIndex)) {
         const button = element('button', 'memory');
         button.setAttribute('aria-label', `查看 ${meal.date} 的用餐小票`);
         button.append(image(cover(meal)), time(meal.date));
         button.addEventListener('click', () => showMeal(meal));
         $('board').append(button);
     }
+    $('board-controls').hidden = meals.length <= 3;
+    $('board-page').textContent = `${boardIndex + 1} / ${Math.ceil(meals.length / 3)}`;
+}
+function changeBoard(direction) {
+    boardIndex = (boardIndex + direction + Math.ceil(meals.length / 3)) % Math.ceil(meals.length / 3);
+    renderBoard();
+}
+$('board-prev').addEventListener('click', () => changeBoard(-1));
+$('board-next').addEventListener('click', () => changeBoard(1));
+$('board-controls').addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); changeBoard(event.key === 'ArrowLeft' ? -1 : 1); }
+});
+let touchStart;
+$('board').addEventListener('touchstart', event => { touchStart = event.touches.length === 1 ? {x: event.touches[0].clientX, y: event.touches[0].clientY} : null; }, {passive: true});
+$('board').addEventListener('touchend', event => {
+    if (!touchStart || meals.length <= 3) return;
+    const dx = event.changedTouches[0].clientX - touchStart.x, dy = event.changedTouches[0].clientY - touchStart.y;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) changeBoard(dx < 0 ? 1 : -1);
+    touchStart = null;
+}, {passive: true});
+async function drawFood() {
+    if (drawing || !meals.length) return;
+    drawing = true;
+    const token = ++drawToken;
+    $('draw-again').disabled = $('draw-receipt').disabled = true;
+    $('fortune-result').hidden = true;
+    $('draw-status').textContent = '摇一摇签筒，让美味替你做个决定…';
+    fortune.classList.add('drawing');
+    if (!reducedMotion.matches) await new Promise(resolve => setTimeout(resolve, 650));
+    if (token !== drawToken || !fortune.open) return;
+    const pool = foodCandidates(meals), draw = drawWithoutRepeat(pool.map(item => item.id), drawState);
+    drawState = draw.state;
+    selectedFood = pool.find(item => item.id === draw.value);
+    const {meal, photo, dish} = selectedFood;
+    const result = $('fortune-result');
+    result.replaceChildren();
+    const shot = image(photo, true); shot.loading = 'eager'; result.append(shot);
+    result.append(element('h3', 'fortune-dish', dish?.name || '一份未命名的美味'));
+    const details = [meal.date, photo.location];
+    if (dish?.price !== '' && dish?.price != null) details.push(`¥${Number(dish.price).toFixed(2)}`);
+    result.append(element('p', 'muted', details.filter(Boolean).join(' · ')));
+    if (dish?.note) result.append(element('p', 'fortune-note', dish.note));
+    $('draw-status').textContent = '这一签，留给你的胃。';
+    result.hidden = false;
+    fortune.classList.remove('drawing');
+    drawing = false;
+    $('draw-again').disabled = $('draw-receipt').disabled = false;
+}
+$('draw-open').addEventListener('click', () => { fortune.showModal(); drawFood(); });
+$('draw-again').addEventListener('click', drawFood);
+$('draw-receipt').addEventListener('click', () => {
+    if (!selectedFood || drawing) return;
+    showMeal(selectedFood.meal);
+    const index = selectedFood.meal.photos.indexOf(selectedFood.photo);
+    $('receipt-photos').children[index]?.scrollIntoView({block: 'start', behavior: 'instant'});
+});
+fortune.addEventListener('close', () => { ++drawToken; drawing = false; fortune.classList.remove('drawing'); });
+function render() {
+    $('board').replaceChildren(); $('archive').replaceChildren();
+    $('draw-open').disabled = !meals.length;
+    $('draw-open').title = meals.length ? '随机抽取一道吃过的美味' : '等第一份美味入席后再来抽签';
+    $('menu-count').textContent = meals.length ? `${meals.length} 日 · ${meals.reduce((n,m) => n + m.photos.length, 0)} 张留念` : '一餐一记 · 慢慢收藏';
+    renderBoard();
     let month;
     for (const meal of meals) {
         const key = meal.date.slice(0,7);
@@ -109,6 +175,7 @@ async function refresh() {
         const response = await fetch('food.json', {cache: 'no-store'});
         if (!response.ok) throw new Error(response.status);
         const data = await response.json();
+        boardIndex = Math.min(boardIndex, Math.max(0, Math.ceil(data.length / 3) - 1));
         meals = data.filter(m => m.photos?.length).sort((a,b) => b.date.localeCompare(a.date));
         render();
     } catch {
