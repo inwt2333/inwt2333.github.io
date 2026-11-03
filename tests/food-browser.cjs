@@ -18,6 +18,21 @@ const path = require('node:path');
   await page.route('**/food.json',route=>route.fulfill({json:fixture}));
   await page.reload();await page.waitForSelector('.memory');
   assert.equal(await page.locator('.memory').count(),3);
+  for (const size of [{width:2560,height:1440},{width:3840,height:2160},{width:3440,height:1440}]) {
+   await page.setViewportSize(size);
+   const layout = await page.evaluate(() => {
+    const scene = document.querySelector('.scene').getBoundingClientRect();
+    const backdrop = getComputedStyle(document.body,'::before');
+    return {width:scene.width,height:scene.height,background:backdrop.backgroundImage,position:backdrop.position,
+     overflow:document.documentElement.scrollWidth>innerWidth};
+   });
+   assert(layout.width > 1920,'large displays must not retain the 1920px scene cap');
+   assert(layout.height <= size.height+1,'wide screens keep all scene controls in view');
+   assert.match(layout.background,/desktop\.webp/,'image fills remaining viewport around the proportional scene');
+   assert.equal(layout.position,'fixed');
+   assert.equal(layout.overflow,false);
+   await page.screenshot({path:path.join(out,`wide-${size.width}.png`)});
+  }
   for(const size of [{width:1440,height:900},{width:390,height:844},{width:600,height:900},{width:768,height:1024}]) {
    await page.setViewportSize(size);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no horizontal overflow');
