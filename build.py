@@ -303,6 +303,7 @@ def build_sitemap(posts):
         ('/', today),
         ('/essays.html', today),
         ('/gallery.html', today),
+        ('/food.html', today),
         ('/gym/', today),
         ('/about.html', today),
         ('/friends.html', today),
@@ -763,3 +764,5 @@ if __name__ == '__main__':
     build_feed(posts)
     build_sitemap(posts)
     build_photos()
+    from food_build import build_food
+    build_food()

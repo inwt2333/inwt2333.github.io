@@ -17,13 +17,14 @@
 仅限局域网内使用；Ctrl+C 停止。首次运行若弹出防火墙提示，请选择「允许」。
 """
 import json
+import hashlib
 import os
 import random
 import socket
 import subprocess
 import sys
 import threading
-import time
+from pathlib import Path
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -38,11 +39,11 @@ PIN = f'{random.randint(0, 9999):04d}'  # 每次启动随机生成，打印在�
 # 手机预览可访问的范围：站点页面与其依赖，其余（.git、photos/src、脚本）一律 404
 ALLOWED_GET = {
     '/', '/index.html', '/essays.html', '/gallery.html', '/article.html',
-    '/about.html', '/friends.html', '/404.html', '/locate.html',
+    '/food.html', '/food.json', '/about.html', '/friends.html', '/404.html', '/locate.html',
     '/photos.json', '/photos/manual.json', '/posts.json',
     '/feed.xml', '/sitemap.xml', '/robots.txt', '/favicon.ico',
 }
-ALLOWED_GET_PREFIX = ('/assets/', '/photos/web/', '/photos/thumb/', '/posts/', '/post/', '/gym/')
+ALLOWED_GET_PREFIX = ('/food/web/', '/food/thumb/', '/assets/', '/photos/web/', '/photos/thumb/', '/posts/', '/post/', '/gym/')
 
 
 def _get_allowed(path):
@@ -110,6 +111,7 @@ UPLOAD_PAGE = """<!doctype html>
 <body>
     <div class="eyebrow mono">DIRECT UPLOAD</div>
     <h1>照片直传</h1>
+    <a href="/food-edit" style="color:#cdb88e;font-size:14px;margin:10px 0 20px">编辑已有美食照片 →</a>
     <p class="sub">输入电脑终端显示的 4 位配对码连接，<br>照片原样上传（保留拍摄定位），传完自动构建，git push 即可发布。</p>
 
     <div class="pin-row">
@@ -117,6 +119,11 @@ UPLOAD_PAGE = """<!doctype html>
         <input id="pin" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
     </div>
 
+    <label for="collection" style="margin-bottom:20px">上传到
+        <select id="collection" style="font:inherit;padding:10px;background:#242426;color:white;border-radius:8px">
+            <option value="photos">摄影集</option><option value="food">深夜食堂</option>
+        </select>
+    </label>
     <label class="btn" for="file">
         <span class="icon">📷</span>
         <p>点击选择照片</p>
@@ -133,6 +140,8 @@ const pin = document.getElementById('pin');
 const go = document.getElementById('go');
 const list = document.getElementById('list');
 const summary = document.getElementById('summary');
+const collection = document.getElementById('collection');
+if (new URLSearchParams(location.search).get('collection') === 'food') collection.value = 'food';
 const pinOk = () => /^\\d{4}$/.test(pin.value);
 
 function refresh() {
@@ -150,13 +159,17 @@ input.addEventListener('change', () => {
 go.addEventListener('click', async () => {
     if (!pinOk()) { summary.textContent = '请先输入配对码。'; return; }
     go.disabled = true; go.textContent = '上传中…';
+    const destination = collection.value;
+    collection.disabled = true;
     let ok = 0, fail = 0, badPin = false;
     for (const f of input.files) {
         const row = document.createElement('div');
-        row.innerHTML = `<span>${f.name}</span><span class="doing">…</span>`;
+        const filename = document.createElement('span'); filename.textContent = f.name;
+        const status = document.createElement('span'); status.className = 'doing'; status.textContent = '…';
+        row.append(filename, status);
         list.appendChild(row);
         try {
-            const r = await fetch('/upload?name=' + encodeURIComponent(f.name) + '&pin=' + pin.value,
+            const r = await fetch('/upload?name=' + encodeURIComponent(f.name) + '&collection=' + destination + '&pin=' + pin.value,
                                   { method: 'POST', body: f });
             if (r.status === 403) { badPin = true; throw new Error(403); }
             if (!r.ok) throw new Error(r.status);
@@ -171,15 +184,17 @@ go.addEventListener('click', async () => {
     let total = '';
     if (!badPin) {
         try {
-            const r = await fetch('/upload?done=1&pin=' + pin.value, { method: 'POST' });
-            if (r.status === 403) throw new Error(403);
+            const r = await fetch('/upload?done=1&collection=' + destination + '&pin=' + pin.value, { method: 'POST' });
+            if (!r.ok) throw new Error(r.status);
             const j = await r.json();
-            total = `相册现共 <b>${j.total}</b> 张（${j.located} 张有定位）`;
+            if (!j.ok) throw new Error('build');
+            total = destination === 'food' ? `深夜食堂现共 <b>${j.total}</b> 张照片 · <b>${j.meals}</b> 张小票` : `相册现共 <b>${j.total}</b> 张（${j.located} 张有定位）`;
         } catch (e) { total = '构建未完成，请在电脑上手动运行 build.py'; }
         summary.innerHTML = `上传完成：<b>${ok}</b> 张成功${fail ? `，<b style="color:#ff453a">${fail}</b> 张失败` : ''}。<br>${total}<br>在电脑上 <span class="mono">git add -A && git commit && git push</span> 即可发布。`;
     } else {
         summary.innerHTML = '<b style="color:#ff453a">配对码不正确</b>，请核对电脑终端显示的 4 位数字。';
     }
+    collection.disabled = false;
     go.textContent = '已完成，可再选一批'; go.disabled = false;
     input.value = ''; go.style.display = 'none';
 });
@@ -200,22 +215,25 @@ def lan_ip():
 
 
 # 上传停止 4 秒后自动构建（手机端页面被切后台导致“完成”信号丢失时也能触发）
-_build_timer = None
+_build_timers = {}
 _build_lock = threading.Lock()
+_execution_lock = threading.Lock()
 
 
-def run_build():
-    r = subprocess.run([sys.executable, 'build.py'], cwd=ROOT, capture_output=True, text=True)
+def run_build(collection='photos'):
+    with _execution_lock:
+        r = subprocess.run([sys.executable, 'food_build.py' if collection == 'food' else 'build.py'], cwd=ROOT, capture_output=True, text=True)
     print(r.stdout or r.stderr, flush=True)
 
 
-def schedule_build():
-    global _build_timer
+def schedule_build(collection='photos'):
     with _build_lock:
-        if _build_timer:
-            _build_timer.cancel()
-        _build_timer = threading.Timer(4.0, run_build)
-        _build_timer.start()
+        timer = _build_timers.get(collection)
+        if timer:
+            timer.cancel()
+        timer = threading.Timer(4.0, run_build, args=(collection,))
+        _build_timers[collection] = timer
+        timer.start()
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -237,6 +255,17 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urlparse(self.path)
+        if parsed.path == '/food-edit':
+            self._send(200, (Path(ROOT)/'tools/food-editor.html').read_text(encoding='utf-8'), 'text/html; charset=utf-8')
+            return
+        if parsed.path == '/api/food-edit':
+            if self.headers.get('X-Edit-Pin') != PIN:
+                self._send(403, json.dumps({'error': '配对码不正确'}), 'application/json')
+                return
+            from food_editor import read_state
+            with _execution_lock:
+                self._send(200, json.dumps(read_state(ROOT)), 'application/json')
+            return
         if parsed.path == '/upload':
             self._send(200, UPLOAD_PAGE, 'text/html; charset=utf-8')
             return
@@ -248,8 +277,31 @@ class Handler(SimpleHTTPRequestHandler):
             return
         super().do_GET()
 
+    def _edit_food(self):
+        if self.headers.get('X-Edit-Pin') != PIN:
+            self._send(403, json.dumps({'error': '配对码不正确'}), 'application/json')
+            return
+        from food_editor import save_edits, EditConflict
+        try:
+            length = int(self.headers.get('Content-Length', '0'))
+            if not 0 < length <= 2 * 1024 * 1024:
+                raise ValueError('保存内容为空或过大')
+            payload = json.loads(self.rfile.read(length))
+            with _execution_lock:
+                state = save_edits(ROOT, payload)
+            self._send(200, json.dumps(state), 'application/json')
+        except EditConflict as error:
+            self._send(409, json.dumps({'error': str(error)}), 'application/json')
+        except (ValueError, UnicodeDecodeError) as error:
+            self._send(400, json.dumps({'error': str(error)}), 'application/json')
+        except Exception:
+            self._send(500, json.dumps({'error': '保存或构建失败，原有说明已保留，请检查终端后重试。'}), 'application/json')
+
     def do_POST(self):
         parsed = urlparse(self.path)
+        if parsed.path == '/api/food-edit':
+            self._edit_food()
+            return
         if parsed.path != '/upload':
             self._send(404, '{"ok":false}', 'application/json')
             return
@@ -259,15 +311,27 @@ class Handler(SimpleHTTPRequestHandler):
             self._send(403, json.dumps({'ok': False, 'error': '配对码不正确'}), 'application/json')
             return
 
+        collection = query.get('collection', ['photos'])[0]
+        if collection not in ('photos', 'food'):
+            self._send(400, '{"ok":false}', 'application/json')
+            return
+        src_dir = SRC_DIR if collection == 'photos' else os.path.join(ROOT, 'food', 'src')
+
         if query.get('done'):
             # 手机端的“完成”信号：立即构建（若自动构建已在计时则取消）
             with _build_lock:
-                if _build_timer:
-                    _build_timer.cancel()
+                timer = _build_timers.pop(collection, None)
+                if timer:
+                    timer.cancel()
             print('—— 收到完成信号，开始构建 ——', flush=True)
-            r = subprocess.run([sys.executable, 'build.py'], cwd=ROOT, capture_output=True, text=True)
+            with _execution_lock:
+                r = subprocess.run([sys.executable, 'food_build.py' if collection == 'food' else 'build.py'], cwd=ROOT, capture_output=True, text=True)
             print(r.stdout or r.stderr, flush=True)
             try:
+                if collection == 'food':
+                    meals = json.load(open(os.path.join(ROOT, 'food.json'), encoding='utf-8'))
+                    self._send(200, json.dumps({'ok': r.returncode == 0, 'total': sum(len(m['photos']) for m in meals), 'meals': len(meals)}), 'application/json')
+                    return
                 photos = json.load(open(os.path.join(ROOT, 'photos.json'), encoding='utf-8'))
                 located = sum(1 for p in photos if p.get('lat') is not None)
                 self._send(200, json.dumps({'ok': r.returncode == 0, 'total': len(photos), 'located': located}), 'application/json')
@@ -290,16 +354,24 @@ class Handler(SimpleHTTPRequestHandler):
             return
         data = self.rfile.read(length)
 
-        os.makedirs(SRC_DIR, exist_ok=True)
-        target = os.path.join(SRC_DIR, name)
-        if os.path.exists(target) and os.path.getsize(target) != len(data):
-            # 同名但内容不同（如相机计数器循环），加时间戳避免覆盖
+        os.makedirs(src_dir, exist_ok=True)
+        target = os.path.join(src_dir, name)
+        digest = hashlib.sha256(data).hexdigest()
+        collision = os.path.exists(target) and Path(target).read_bytes() != data
+        # Other devices sync the index, not originals. Respect their identities too.
+        index_path = Path(ROOT) / 'food.json'
+        if collection == 'food' and index_path.exists():
+            indexed = json.loads(index_path.read_text(encoding='utf-8'))
+            previous = next((p for meal in indexed for p in meal['photos'] if p['file'] == name), None)
+            if previous and previous.get('sha256') != digest:
+                collision = True
+        if collision:
             base, e = os.path.splitext(name)
-            target = os.path.join(SRC_DIR, f"{base}_{int(time.time())}{e}")
+            target = os.path.join(src_dir, f"{base}_{digest[:16]}{e}")
         with open(target, 'wb') as f:
             f.write(data)
         print(f'已保存 {os.path.basename(target)}（{len(data) / 1e6:.1f}MB）', flush=True)
-        schedule_build()
+        schedule_build(collection)
         self._send(200, json.dumps({'ok': True, 'saved': os.path.basename(target)}), 'application/json')
 
 
@@ -312,6 +384,8 @@ def main():
 
   本机预览   http://127.0.0.1:{PORT}/gallery.html
   手机直传   http://{ip}:{PORT}/upload      <- 手机与电脑连同一 Wi-Fi，浏览器打开
+
+  美食编辑   http://127.0.0.1:{PORT}/food-edit
 
   本次配对码（手机页面上输入）：{PIN}
   手机也可以打开 http://{ip}:{PORT}/gallery.html 先预览当前相册。

@@ -1,0 +1,74 @@
+// Uses an isolated local service and temporary metadata; never changes the user's journal.
+const {chromium} = require('playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const {spawn} = require('node:child_process');
+(async()=>{
+ const root=process.cwd(), tmp=fs.mkdtempSync(path.join(os.tmpdir(),'food-editor-test-'));
+ fs.mkdirSync(path.join(tmp,'food')); fs.mkdirSync(path.join(tmp,'tools'));
+ fs.copyFileSync('food.json',path.join(tmp,'food.json'));
+ fs.writeFileSync(path.join(tmp,'food/manual.json'),'{"photos":{},"meals":{}}');
+ fs.copyFileSync('food.html',path.join(tmp,'food.html'));
+ fs.copyFileSync('tools/food-editor.html',path.join(tmp,'tools/food-editor.html'));
+ fs.symlinkSync(path.join(root,'assets'),path.join(tmp,'assets'));
+ for(const folder of ['web','thumb'])fs.symlinkSync(path.join(root,'food',folder),path.join(tmp,'food',folder));
+ const server=spawn('.venv/bin/python',['-u','-c',`import serve; serve.ROOT=${JSON.stringify(tmp)}; serve.SRC_DIR=${JSON.stringify(path.join(tmp,'photos/src'))}; serve.PORT=8201; serve.PIN='1234'; serve.main()`],{stdio:['ignore','pipe','pipe']});
+ let logs='';server.stdout.on('data',c=>logs+=c);server.stderr.on('data',c=>logs+=c);
+ let browser;
+ try{
+  for(let n=0;n<50;n++) {try {if((await fetch('http://127.0.0.1:8201/food-edit')).ok)break;}catch{} await new Promise(r=>setTimeout(r,100));}
+  browser=await chromium.launch({headless:true});
+  const page=await browser.newPage({viewport:{width:1440,height:1000}}), errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('http://127.0.0.1:8201/food-edit');
+  await page.locator('#pin').fill('9999');await page.locator('#unlock button').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('不正确'));
+  await page.locator('#pin').fill('1234');await page.locator('#unlock button').click();await page.waitForSelector('.edit-card');
+  const card=page.locator('.edit-card').first();const filename=await card.getAttribute('data-file');
+  const originalDate=await card.locator('[name=date]').inputValue();
+  await card.locator('.dish-input').first().fill('牛肉面 <em>原样文字</em>');
+  await card.locator('.price-input').first().fill('18.50');
+  await card.locator('.add-dish').click();
+  await card.locator('.dish-input').nth(1).fill('小笼包');
+  await card.locator('.price-input').nth(1).fill('0');
+  await card.locator('.add-dish').click();
+  await card.locator('.dish-input').nth(2).fill('热茶');
+  await card.locator('[name=location]').fill('上海 · 街角小店');
+  await card.locator('.dish-note-input').first().fill('这道菜很好吃');
+  await page.locator('.meal-note').first().fill('雨天的晚餐\n下次还来。');
+
+  await page.screenshot({path:'/tmp/food-editor-desktop.png',fullPage:true});
+  await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('已保存到本地'));
+  const state=await (await page.request.get('http://127.0.0.1:8201/api/food-edit',{headers:{'X-Edit-Pin':'1234'}})).json();
+  assert.deepEqual(state.photos.find(p=>p.file===filename).dishes,[{name:'牛肉面 <em>原样文字</em>',price:'18.50',note:'这道菜很好吃'},{name:'小笼包',price:'0',note:''},{name:'热茶',price:'',note:''}]);
+  await page.setViewportSize({width:390,height:844});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  await page.screenshot({path:'/tmp/food-editor-mobile.png',fullPage:true});
+  const publicPage=await browser.newPage();await publicPage.goto('http://127.0.0.1:8201/food.html');await publicPage.locator('.memory').first().click();
+  assert.equal(await publicPage.locator('.dish-name').first().innerText(),'牛肉面 <em>原样文字</em>');
+  assert.equal(await publicPage.locator('.dish-name em').count(),0);
+  assert.deepEqual(await publicPage.locator('.dish-price').allTextContents(),['¥18.50','¥0.00']);
+  assert.equal(await publicPage.locator('.dish-location').innerText(),'上海 · 街角小店');
+  assert.match(await publicPage.locator('#meal-note').innerText(),/下次还来/);
+  await page.locator('#search').fill('街角');assert.equal(await page.locator('.edit-card:visible').count(),1);
+  await page.locator('#search').fill('');
+  const edited=page.locator(`.edit-card[data-file="${filename}"]`);
+  for(const field of ['date','location'])await edited.locator(`[name=${field}]`).fill('');
+  while(await edited.locator('.remove-dish').count()) await edited.locator('.remove-dish').first().click();
+  await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('已保存到本地'));
+  assert.equal(await page.locator(`.edit-card[data-file="${filename}"] [name=date]`).inputValue(),originalDate);
+  const input=page.locator('.meal-note').first();
+  await input.fill('保存失败也要保留');
+  await page.route('**/api/food-edit',route=>route.request().method()==='POST'?route.fulfill({status:500,json:{error:'测试保存失败'}}):route.continue());
+  await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent==='测试保存失败');
+  assert.equal(await input.inputValue(),'保存失败也要保留');assert.equal(await page.locator('#save').isEnabled(),true);
+  await page.unroute('**/api/food-edit');
+  const latest=await (await page.request.get('http://127.0.0.1:8201/api/food-edit',{headers:{'X-Edit-Pin':'1234'}})).json();
+  await page.request.post('http://127.0.0.1:8201/api/food-edit',{headers:{'X-Edit-Pin':'1234'},data:{revision:latest.revision,photos:[],meals:[{date:latest.meals[0].date,note:'另一页保存的记录'}]}});
+  await page.locator('#save').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('另一个页面'));
+  assert.equal(await input.inputValue(),'保存失败也要保留');
+  assert.deepEqual(errors,[]);
+  console.log('PASS editor PIN, save/rebuild, public captions, clear/reset, search, responsive layout, failed-save retention and conflict protection.');
+ }catch(e){console.error(logs);throw e;}finally{if(browser)await browser.close();server.kill('SIGTERM');await new Promise(r=>server.once('exit',r));fs.rmSync(tmp,{recursive:true,force:true});}
+})().catch(e=>{console.error(e);process.exit(1)});

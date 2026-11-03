@@ -1,0 +1,96 @@
+[
+  {
+    "id": "2026-11-02",
+    "date": "2026-11-02",
+    "title": "",
+    "note": "芒果 + 抹茶慕斯 + 海盐奥利奥奶芙 + 伯爵红茶奶冻",
+    "cover": "IMG_4796.HEIC",
+    "photos": [
+      {
+        "file": "IMG_4796.HEIC",
+        "sha256": "50fde3e3b34fecbccd934f9e887b18ceb1be433142da0de793dd77c8cbb4610b",
+        "web": "food/web/364c4b45456ed42246e3.webp",
+        "thumb": "food/thumb/364c4b45456ed42246e3.webp",
+        "ratio": 0.75,
+        "source_date": "2026-11-02",
+        "date": "2026-11-02",
+        "location": "源麦甜（闵行店）",
+        "dish": "饱饱碗",
+        "note": "",
+        "dishes": [
+          {
+            "name": "饱饱碗",
+            "price": "29",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2026-11-01",
+    "date": "2026-11-01",
+    "title": "",
+    "note": "肖世屹母亲爱心便当",
+    "cover": "IMG_4781.HEIC",
+    "photos": [
+      {
+        "file": "IMG_4781.HEIC",
+        "sha256": "55ae945bcb3f854b5dee2895d85fc341f4d6ca7d9a99a0d02d4404fa00822991",
+        "web": "food/web/eef7c209a1bfdb0c0306.webp",
+        "thumb": "food/thumb/eef7c209a1bfdb0c0306.webp",
+        "ratio": 0.75,
+        "source_date": "2026-11-01",
+        "date": "2026-11-01",
+        "location": "",
+        "dish": "铁锅炖、梅干菜红烧肉、凉菜",
+        "note": "",
+        "dishes": [
+          {
+            "name": "铁锅炖",
+            "price": "",
+            "note": ""
+          },
+          {
+            "name": "梅干菜红烧肉",
+            "price": "",
+            "note": ""
+          },
+          {
+            "name": "凉菜",
+            "price": "",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2026-10-31",
+    "date": "2026-10-31",
+    "title": "",
+    "note": "很正宗的云南饵丝，不过我吃不太惯，到后面有点糊嘴",
+    "cover": "IMG_4771.HEIC",
+    "photos": [
+      {
+        "file": "IMG_4771.HEIC",
+        "sha256": "ad54f1860e155d4ff9016ea9d17d6662bb18fc63d30d142f19bd3cddd086c0cb",
+        "web": "food/web/0661bd25fd00eb100637.webp",
+        "thumb": "food/thumb/0661bd25fd00eb100637.webp",
+        "ratio": 0.75,
+        "source_date": "2026-10-31",
+        "date": "2026-10-31",
+        "location": "豆濮园",
+        "dish": "稀豆粉饵丝",
+        "note": "",
+        "dishes": [
+          {
+            "name": "稀豆粉饵丝",
+            "price": "33.86",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  }
+]
