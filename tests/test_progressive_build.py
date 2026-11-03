@@ -28,7 +28,7 @@ class ProgressiveBuildTest(unittest.TestCase):
         source = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in ['build.py', 'food_build.py', 'posts.json', 'photos.json', 'food.json', 'essays.html', 'gallery.html', 'food.html']:
+            for name in ['build.py', 'food_build.py', 'music_build.py', 'posts.json', 'photos.json', 'food.json', 'essays.html', 'gallery.html', 'food.html']:
                 shutil.copy2(source / name, root / name)
             shutil.copytree(source / 'posts', root / 'posts')
             result = subprocess.run([sys.executable, 'build.py'], cwd=root, capture_output=True)

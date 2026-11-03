@@ -43,7 +43,7 @@ ALLOWED_GET = {
     '/photos.json', '/photos/manual.json', '/posts.json',
     '/feed.xml', '/sitemap.xml', '/robots.txt', '/favicon.ico',
 }
-ALLOWED_GET_PREFIX = ('/food/web/', '/food/thumb/', '/assets/', '/photos/web/', '/photos/thumb/', '/posts/', '/post/', '/gym/')
+ALLOWED_GET_PREFIX = ('/music/', '/food/web/', '/food/thumb/', '/assets/', '/photos/web/', '/photos/thumb/', '/posts/', '/post/', '/gym/')
 
 
 def _get_allowed(path):
@@ -255,6 +255,20 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urlparse(self.path)
+        if parsed.path == '/music-edit':
+            assets = Path(ROOT) / 'assets/music'
+            version = hashlib.sha256((assets/'editor.css').read_bytes() + (assets/'editor.js').read_bytes()).hexdigest()[:12]
+            page = (Path(ROOT)/'tools/music-editor.html').read_text(encoding='utf-8').replace('__EDITOR_ASSET_VERSION__', version)
+            self._send(200, page, 'text/html; charset=utf-8')
+            return
+        if parsed.path == '/api/music-edit':
+            if self.headers.get('X-Edit-Pin') != PIN:
+                self._send(403, json.dumps({'error': '配对码不正确'}), 'application/json')
+                return
+            from music_editor import read_state
+            with _execution_lock:
+                self._send(200, json.dumps(read_state(ROOT)), 'application/json')
+            return
         if parsed.path == '/food-edit':
             self._send(200, (Path(ROOT)/'tools/food-editor.html').read_text(encoding='utf-8'), 'text/html; charset=utf-8')
             return
@@ -297,8 +311,36 @@ class Handler(SimpleHTTPRequestHandler):
         except Exception:
             self._send(500, json.dumps({'error': '保存或构建失败，原有说明已保留，请检查终端后重试。'}), 'application/json')
 
+    def _music_request(self, recognize_only=False):
+        if self.headers.get('X-Edit-Pin') != PIN:
+            self._send(403, json.dumps({'error': '配对码不正确'}), 'application/json')
+            return
+        from music_editor import save_edit, recognize, EditConflict
+        try:
+            length = int(self.headers.get('Content-Length', '0'))
+            if not 0 < length <= 256 * 1024:
+                raise ValueError('内容为空或过大。')
+            payload = json.loads(self.rfile.read(length))
+            if not isinstance(payload, dict):
+                raise ValueError('内容格式不正确。')
+            if recognize_only:
+                state = recognize(payload.get('text'))
+            else:
+                with _execution_lock:
+                    state = save_edit(ROOT, payload)
+            self._send(200, json.dumps(state), 'application/json')
+        except EditConflict as error:
+            self._send(409, json.dumps({'error': str(error)}), 'application/json')
+        except (ValueError, UnicodeDecodeError) as error:
+            self._send(400, json.dumps({'error': str(error)}), 'application/json')
+        except Exception:
+            self._send(500, json.dumps({'error': '操作失败，当前输入已保留，请检查终端后重试。'}), 'application/json')
+
     def do_POST(self):
         parsed = urlparse(self.path)
+        if parsed.path in ('/api/music-edit', '/api/music-recognize'):
+            self._music_request(parsed.path == '/api/music-recognize')
+            return
         if parsed.path == '/api/food-edit':
             self._edit_food()
             return
@@ -386,6 +428,8 @@ def main():
   手机直传   http://{ip}:{PORT}/upload      <- 手机与电脑连同一 Wi-Fi，浏览器打开
 
   美食编辑   http://127.0.0.1:{PORT}/food-edit
+  音乐编辑   http://127.0.0.1:{PORT}/music-edit
+  留声室     http://127.0.0.1:{PORT}/music/
 
   本次配对码（手机页面上输入）：{PIN}
   手机也可以打开 http://{ip}:{PORT}/gallery.html 先预览当前相册。

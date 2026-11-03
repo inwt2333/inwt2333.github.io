@@ -367,6 +367,11 @@ def build_sitemap(posts):
         ('/essays.html', today),
         ('/gallery.html', today),
         ('/food.html', today),
+        ('/music/', today),
+        ('/music/classical/', today),
+        ('/music/chinese/', today),
+        ('/music/western/', today),
+        ('/music/japanese/', today),
         ('/gym/', today),
         ('/about.html', today),
         ('/friends.html', today),
@@ -829,4 +834,6 @@ if __name__ == '__main__':
     build_photos()
     from food_build import build_food
     build_food()
+    from music_build import build_music
+    build_music()
     build_fallbacks(posts)

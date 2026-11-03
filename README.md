@@ -139,6 +139,22 @@ python -m venv .venv
 
 `node tests/food-resilience.cjs` 检查 Chromium / WebKit 下食堂的索引和照片重试、后台刷新焦点保留、弹窗返回与无脚本记录。`node tests/food-editor-browser.cjs` 在独立临时目录中启动编辑服务，检查配对码、保存、冲突保护及失败时保留输入，支持 Windows 与 macOS/Linux。全部 Python 构建与服务测试可用 `python -m unittest discover -s tests -p 'test_*.py'` 执行。
 
+## 留声室：收藏音乐与听后记
+
+首页乐律线新增「留声室」入口，`/music/` 为门厅，`/music/classical/`、`/music/chinese/`、`/music/western/`、`/music/japanese/` 为四个独立听音室。古典馆使用提供的木质房间背景，其他馆暂以 CSS 光影呈现；之后可在 `assets/music/music.css` 替换各馆背景。背景来源见 `assets/music/ASSETS.md`。
+
+运行 `.venv/Scripts/python serve.py`（macOS/Linux 为 `.venv/bin/python serve.py`），打开终端打印的 `/music-edit`，输入同一服务的 4 位配对码：
+
+1. 点「＋ 新增」，粘贴网易云单首歌曲链接或分享文字，自动识别曲名、歌手、专辑、封面与时长；也可点击「识别歌曲」。支持完整链接、hash 路由、歌曲 ID 与网易云短链接。识别失败时保留输入，可使用完整歌曲链接并手工填写信息。
+2. 选择听音室，添加逗号分隔的标签、聆听日期和听后记。另有独立的「歌曲摘录」字段（最多 600 字），用于展示你挑选的短句；已有听后记不会自动改写。作品信息中可填写作曲家、P 主、作品编号、关联作品、指挥与演奏版本。自动识别不会覆盖正在手工编辑的字段。
+3. 可设为该馆精选；每馆最多一张精选，未指定时显示最近添加的收藏。右侧实时预览唱片内页。
+4. 点「保存并更新预览」，内容写入 `music/library.json`，并生成公开的 `music/collection.json` 与五个页面。保存后刷新对应听音室查看。已有记录支持搜索、修改、删除，并通过文件版本检查避免覆盖另一个编辑页的修改。
+5. 检查预览后，按原 Git 流程提交与发布。这里保存的所有字段都用于公开展示；不存放私密备注。编辑入口不加入公开导航与站点地图，线上静态页面不提供写入接口。
+
+线上点选唱片可查看 A 面曲目信息和 B 面听后记，另有歌曲摘录区和标签筛选。宽屏且高度足够时，摘录显示在唱片下方的同一画面；窄屏则作为下方板块。A/B 面及不同长度的听后记共用固定的主画面高度；长内容在各自阅读区滚动，唱片位置不变。四间听音室使用各自的阅读字体组合，并回退到系统字体。有网易云歌曲 ID 的收藏会显示网易云官方内嵌播放器，默认不自动播放，并保留较小的原曲目入口以应对版权、地区或嵌入限制。封面按需加载，失败时显示素色封套。曲目信息识别依赖网易云当前返回结果，不需要账号或 Cookie，不获取音频文件。
+
+`python music_build.py` 可单独重建留声室，`python build.py` 也会构建音乐页。修改页面骨架请编辑 `music_build.py`，页面共享样式与交互位于 `assets/music/`。验证：`python -m unittest discover -s tests -p 'test_music_editor.py'`；配置 Playwright 后运行 `node tests/music-browser.cjs`，浏览器测试使用临时目录，不改动实际收藏。
+
 ## 隐私边界
 
 - 公开身份只有 **Inwt**；`resume/` 为私有路径，无入口链接 + noindex，请勿在任何公开页面添加指向它的链接。
