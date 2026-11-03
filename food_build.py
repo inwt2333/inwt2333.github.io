@@ -52,17 +52,22 @@ def build_food(root=None):
         web, thumb = folder/'web'/f'{stem}.webp', folder/'thumb'/f'{stem}.webp'
         try:
             with Image.open(src) as image:
-                shot, *_ = _read_exif(image)
+                shot, lat, lng, _ = _read_exif(image)
                 shot = shot or image.getexif().get(36867)
                 w, h = ImageOps.exif_transpose(image).size
                 if not all(p.exists() and p.stat().st_mtime >= src.stat().st_mtime for p in (web, thumb)):
                     _make_sizes(image, str(web), str(thumb))
                 previous = photos.get(src.name, {})
-                photos[src.name] = {
+                photo = {
                     'file': src.name, 'sha256': hashlib.sha256(src.read_bytes()).hexdigest(), 'web': web.relative_to(root).as_posix(),
                     'thumb': thumb.relative_to(root).as_posix(), 'ratio': round(w/h, 4),
                     'source_date': _date(shot) or previous.get('source_date') or today,
                 }
+                if lat is not None and lng is not None and -90 <= lat <= 90 and -180 <= lng <= 180:
+                    photo['lat'], photo['lng'] = round(lat, 6), round(lng, 6)
+                elif previous.get('lat') is not None and previous.get('lng') is not None:
+                    photo['lat'], photo['lng'] = previous['lat'], previous['lng']
+                photos[src.name] = photo
         except Exception as error:
             print(f'美食照片处理失败 {src.name}: {error}')
     groups = {}
@@ -72,6 +77,10 @@ def build_food(root=None):
         photo['date'] = day
         for field in ('location', 'dish', 'note'):
             photo[field] = str(override.get(field, photo.get(field, '')) or '')
+        # Do not publish precise coordinates for photographs without a named place.
+        if not photo['location']:
+            photo.pop('lat', None)
+            photo.pop('lng', None)
         raw = override.get('dishes')
         if raw is None:
             raw = [override['dish']] if 'dish' in override else photo.get('dishes', [photo.get('dish', '')])

@@ -3,10 +3,37 @@ import tempfile
 import unittest
 from pathlib import Path
 import sys
-from PIL import Image
+from PIL import Image, TiffImagePlugin
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 class FoodBuildTest(unittest.TestCase):
+    def test_gps_only_for_named_places_and_preserved_without_originals(self):
+        import food_build
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / 'food/src'
+            source.mkdir(parents=True)
+            gps = Image.Exif()
+            gps[0x8825] = {
+                1: 'N', 2: tuple(TiffImagePlugin.IFDRational(v, 1) for v in (31, 14, 0)),
+                3: 'E', 4: tuple(TiffImagePlugin.IFDRational(v, 1) for v in (121, 28, 0)),
+            }
+            for name, exif in [('named.jpg', gps), ('unnamed.jpg', gps), ('missing.jpg', Image.Exif())]:
+                Image.new('RGB', (40, 60)).save(source / name, exif=exif)
+            (root / 'food/manual.json').write_text(json.dumps({'photos': {
+                'named.jpg': {'location': '测试餐厅'},
+                'missing.jpg': {'location': '另一家店'},
+            }}))
+            food_build.build_food(root)
+            photos = {p['file']: p for meal in json.loads((root / 'food.json').read_text()) for p in meal['photos']}
+            self.assertEqual((photos['named.jpg']['lat'], photos['named.jpg']['lng']), (31.233333, 121.466667))
+            self.assertNotIn('lat', photos['unnamed.jpg'])
+            self.assertNotIn('lat', photos['missing.jpg'])
+            for file in source.iterdir(): file.unlink()
+            food_build.build_food(root)
+            photos = {p['file']: p for meal in json.loads((root / 'food.json').read_text()) for p in meal['photos']}
+            self.assertEqual((photos['named.jpg']['lat'], photos['named.jpg']['lng']), (31.233333, 121.466667))
+
     def test_dates_merge_preserve_and_override(self):
         import food_build
         with tempfile.TemporaryDirectory() as tmp:

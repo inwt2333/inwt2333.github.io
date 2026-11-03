@@ -12,6 +12,21 @@ export function drawWithoutRepeat(values, state = {}, random = Math.random) {
     const value = choices[Math.floor(random() * choices.length)];
     return {value, state: {remaining: remaining.filter(item => item !== value), last: value}};
 }
-export function boardPage(meals, page) {
-    return Array.from({length: Math.min(3, meals.length)}, (_, i) => meals[(page * 3 + i) % meals.length]);
+export function randomBoardPhotos(meals, previous = [], random = Math.random) {
+    const all = meals.flatMap(meal => meal.photos.map(photo => ({
+        id: JSON.stringify([meal.date, photo.file]), meal, photo
+    })));
+    const pick = (items, count) => {
+        const available = [...items], result = [];
+        while (result.length < count && available.length) {
+            result.push(available.splice(Math.floor(random() * available.length), 1)[0]);
+        }
+        return result;
+    };
+    const fresh = all.filter(item => !previous.includes(item.id));
+    const selected = pick(fresh, Math.min(3, all.length));
+    if (selected.length < Math.min(3, all.length)) {
+        selected.push(...pick(all.filter(item => !selected.some(chosen => chosen.id === item.id)), 3 - selected.length));
+    }
+    return selected;
 }

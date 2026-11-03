@@ -2,27 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>https://inwt233.cn/</loc>
-        <lastmod>2026-10-16</lastmod>
+        <lastmod>2026-11-03</lastmod>
     </url>
     <url>
         <loc>https://inwt233.cn/essays.html</loc>
-        <lastmod>2026-10-16</lastmod>
+        <lastmod>2026-11-03</lastmod>
     </url>
     <url>
         <loc>https://inwt233.cn/gallery.html</loc>
-        <lastmod>2026-10-16</lastmod>
+        <lastmod>2026-11-03</lastmod>
     </url>
     <url>
-        <loc>https://inwt233.cn/about.html</loc>
-        <lastmod>2026-10-16</lastmod>
+        <loc>https://inwt233.cn/food.html</loc>
+        <lastmod>2026-11-03</lastmod>
     </url>
     <url>
         <loc>https://inwt233.cn/gym/</loc>
-        <lastmod>2026-10-27</lastmod>
+        <lastmod>2026-11-03</lastmod>
+    </url>
+    <url>
+        <loc>https://inwt233.cn/about.html</loc>
+        <lastmod>2026-11-03</lastmod>
     </url>
     <url>
         <loc>https://inwt233.cn/friends.html</loc>
-        <lastmod>2026-10-29</lastmod>
+        <lastmod>2026-11-03</lastmod>
     </url>
     <url>
         <loc>https://inwt233.cn/post/2026-10-15-金门，旅游的诚意/</loc>
@@ -80,5 +84,4 @@
         <loc>https://inwt233.cn/post/2024-06-10-十八万岁/</loc>
         <lastmod>2024-06-10</lastmod>
     </url>
-  <url><loc>https://inwt233.cn/food.html</loc><lastmod>2026-11-03</lastmod></url>
 </urlset>

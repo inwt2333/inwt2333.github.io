@@ -306,7 +306,7 @@ def build_fallbacks(posts):
         records.append('<article><h2>' + html_escape(meal.get('date') or '')
                        + '</h2><p>' + html_escape(meal.get('note') or '') + '</p><div>'
                        + ''.join(shots) + '</div></article>')
-    _replace_generated(FOOD_PAGE, 'FOOD LINKS', '<noscript><style>.board,.fortune-jar,.menu-book{display:none}</style>'
+    _replace_generated(FOOD_PAGE, 'FOOD LINKS', '<noscript><style>.board,.board-shuffle,.map-ticket,.fortune-hotspot,.menu-book{display:none}</style>'
                        + '<section class="food-fallback" aria-label="用餐记录"><h2>食味簿</h2>'
                        + ''.join(records) + '</section></noscript>')
 
