@@ -11,3 +11,7 @@ photos/.admin-cache/
 
 __pycache__/
 tools/fonts-src/
+
+# 美食原片仅保存在导入设备
+food/src/*
+!food/src/.gitkeep
