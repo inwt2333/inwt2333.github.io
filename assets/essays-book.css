@@ -177,3 +177,14 @@ body.reader-open .library-shell,body.reader-open>.page-nav { opacity:.15; }
     .nav-links { gap:12px; }
     .nav-links a { font-size:12px; }
 }
+
+.library-fallback { padding: 20px 0 40px; }
+.library-fallback > p { color: var(--ink-soft); font-size: .85rem; margin-bottom: 18px; }
+.library-fallback ol { list-style: none; padding: 0; }
+.library-fallback li { border-top: 1px solid var(--line); }
+.library-fallback a { display: grid; gap: 8px; padding: 20px 0; text-decoration: none; color: var(--ink); }
+.library-fallback time { font: 11px 'Space Mono', monospace; color: var(--ink-soft); }
+.library-fallback strong { font-size: 1.05rem; }
+.library-fallback span { color: var(--ink-soft); font-size: .85rem; line-height: 1.9; }
+.library-fallback a:hover strong { color: var(--seal); }
+.state button { margin-left: 12px; border: 1px solid var(--line); border-radius: 5px; padding: 7px 12px; background: transparent; color: var(--seal); font: inherit; cursor: pointer; }

@@ -52,7 +52,7 @@ function recordHTML(entry) {
 }
 
 function groupedHTML(list) {
-  if (!list.length) return '<div class="empty-state">这个月还没有训练记录。<br>从下一次来这里开始。</div>';
+  if (!list.length) return '<div class="empty-state">这个月还没有训练记录。</div>';
   const groups = new Map();
   for (const entry of list) {
     if (!groups.has(entry.date)) groups.set(entry.date, []);
@@ -71,7 +71,7 @@ function comparison(station, list) {
   if (!loads.every(l => l.unit === loads[0].unit && l.weight === loads[0].weight)) return '';
   const reps = sessions.map(s => s.reduce((n, l) => n + l.reps * l.sets, 0));
   const change = reps[0] - reps[1];
-  return `<div class="comparison"><strong>${loads[0].weight} ${loads[0].unit}，${change > 0 ? `多完成了 ${change} 次。` : change === 0 ? '又一次，稳稳完成。' : '这次少一些，也如实留下。'}</strong><br>${dateLabel(dates[1])}：${reps[1]} 次 → ${dateLabel(dates[0])}：${reps[0]} 次。这里只比较记录完整、重量相同的训练。</div>`;
+  return `<div class="comparison"><strong>${loads[0].weight} ${loads[0].unit}，${change > 0 ? `多完成了 ${change} 次。` : change === 0 ? '又一次，稳稳完成。' : '这次少一些，也如实留下。'}</strong><br>${dateLabel(dates[1])}：${reps[1]} 次 → ${dateLabel(dates[0])}：${reps[0]} 次。（相同重量）</div>`;
 }
 
 function stationDetail(station) {
@@ -95,9 +95,9 @@ function stationDetail(station) {
       <section class="journal-records" aria-labelledby="journal-heading">
         <div class="journal-section-heading"><h3 id="journal-heading">训练手记</h3><span>SESSION HISTORY</span></div>
         ${comparison(station, list)}
-        ${list.length ? groupedHTML(list) : '<div class="empty-state">还没有这台器材的记录。<br>下一次，从第一笔开始。</div>'}
+        ${list.length ? groupedHTML(list) : '<div class="empty-state">还没有这台器材的记录。</div>'}
       </section>
-      <p class="detail-footnote">保留原始 lb / kg 单位，未写明组数按一组记录。最高重量仅作单位换算，不用于比较不同器械。${station.id === 'pull' ? '高位下拉与高拉力背肌分别保存。' : ''}</p>
+
     </div>
     ${musclePanel(station)}
   </div>`;
@@ -117,7 +117,7 @@ function calendarDetail() {
     const trained = days.has(date);
     grid += `<${trained ? 'button type="button"' : 'span'} class="calendar-day ${trained ? 'has-training' : ''} ${selectedDate === date ? 'is-selected' : ''} ${date === localDate() ? 'is-today' : ''}" ${trained ? `data-day="${date}" aria-label="${dateLabel(date)}，查看训练记录" aria-pressed="${selectedDate === date}"` : ''}>${d}</${trained ? 'button' : 'span'}>`;
   }
-  return `<p class="eyebrow">SHOWING UP / THE CALENDAR</p><div class="detail-heading"><div><h2 id="detail-title">来过的日子，都算数。</h2><p>一格一格，收集认真生活的证据。</p></div><button class="primary-button" type="button" data-new="row">＋ 记一笔</button></div><div class="calendar-toolbar"><button type="button" data-month="-1" aria-label="上一个月">←</button><h3>${year} / ${String(m).padStart(2, '0')}</h3><button type="button" data-month="1" aria-label="下一个月">→</button></div><div class="calendar-grid">${grid}</div><p class="calendar-legend">绿色是训练过的日子。点击日期查看当天记录；再次点击查看整月。</p>${groupedHTML(list)}<p class="detail-footnote">最初两次手记按 2026 年 10 月 22 日、26 日归档。</p>`;
+  return `<p class="eyebrow">SHOWING UP / THE CALENDAR</p><div class="detail-heading"><div><h2 id="detail-title">训练日历</h2></div><button class="primary-button" type="button" data-new="row">＋ 记一笔</button></div><div class="calendar-toolbar"><button type="button" data-month="-1" aria-label="上一个月">←</button><h3>${year} / ${String(m).padStart(2, '0')}</h3><button type="button" data-month="1" aria-label="下一个月">→</button></div><div class="calendar-grid">${grid}</div><p class="calendar-legend">绿色 · 训练日</p>${groupedHTML(list)}`;
 }
 
 function weightChart(list) {
@@ -136,7 +136,7 @@ function weightDetail() {
   const list = weights();
   const last = list.at(-1);
   const delta = list.length >= 2 ? Number((last.kg - list[0].kg).toFixed(1)) : null;
-  return `<p class="eyebrow">BODY JOURNAL / A LITTLE CHANGE</p><div class="detail-heading"><div><h2 id="detail-title">身体，也有自己的节奏。</h2><p>留下数字和感受，慢慢看变化。</p></div></div><div class="detail-stat-strip"><div><strong>${last ? last.kg : '—'}</strong><span>kg · 最近一次</span></div><div><strong>${delta === null ? '—' : `${delta > 0 ? '+' : ''}${delta}`}</strong><span>kg · 相比最初记录</span></div><div><strong>${list.length}</strong><span>天体重记录</span></div></div>${list.length ? weightChart(list) : '<div class="empty-state"><strong>— kg</strong>先留白，等你来写。<br>记下第一次体重后，这里会慢慢长出一条曲线。</div>'}${list.length === 1 ? '<p class="field-note">已留下第一个坐标。记录第二天的体重后，将显示趋势曲线。</p>' : ''}<form class="weight-form" id="weight-form"><div class="form-row"><label>记录日期<input name="date" type="date" value="${localDate()}" required></label><label>体重 / kg<input name="kg" type="number" min="10" max="500" step="0.1" placeholder="填写真实体重" inputmode="decimal" required></label></div><label>随手记 <span class="optional">选填</span><input name="note" maxlength="500" placeholder="比如：晨起空腹，状态不错。"></label><p class="field-note">同一天再次保存，会更新当天体重。记录仅保存在当前浏览器。</p><p class="form-error" id="weight-error" role="alert"></p><button class="primary-button" type="submit">留下今天的坐标 <span>↗</span></button></form>${list.length ? `<table class="weight-table"><thead><tr><th scope="col">日期</th><th scope="col">体重</th><th scope="col">随手记</th><th scope="col"><span class="sr-only">操作</span></th></tr></thead><tbody>${[...list].reverse().map(w => `<tr><td>${w.date}</td><td>${w.kg} kg</td><td>${escape(w.note) || '—'}</td><td><button type="button" class="delete-entry" data-delete-weight="${w.date}" aria-label="删除 ${w.date} 的体重记录">删除</button></td></tr>`).join('')}</tbody></table>` : ''}`;
+  return `<p class="eyebrow">BODY JOURNAL / A LITTLE CHANGE</p><div class="detail-heading"><div><h2 id="detail-title">体重记录</h2></div></div><div class="detail-stat-strip"><div><strong>${last ? last.kg : '—'}</strong><span>kg · 最近一次</span></div><div><strong>${delta === null ? '—' : `${delta > 0 ? '+' : ''}${delta}`}</strong><span>kg · 相比最初记录</span></div><div><strong>${list.length}</strong><span>天体重记录</span></div></div>${list.length ? weightChart(list) : '<div class="empty-state"><strong>— kg</strong>暂无体重记录。</div>'}${list.length === 1 ? '<p class="field-note">两次记录后显示趋势。</p>' : ''}<form class="weight-form" id="weight-form"><div class="form-row"><label>记录日期<input name="date" type="date" value="${localDate()}" required></label><label>体重 / kg<input name="kg" type="number" min="10" max="500" step="0.1" placeholder="" inputmode="decimal" required></label></div><label>随手记 <span class="optional">选填</span><input name="note" maxlength="500" placeholder="比如：晨起空腹，状态不错。"></label><p class="field-note">仅保存在当前浏览器，同日保存将更新。</p><p class="form-error" id="weight-error" role="alert"></p><button class="primary-button" type="submit">保存体重 <span>↗</span></button></form>${list.length ? `<table class="weight-table"><thead><tr><th scope="col">日期</th><th scope="col">体重</th><th scope="col">随手记</th><th scope="col"><span class="sr-only">操作</span></th></tr></thead><tbody>${[...list].reverse().map(w => `<tr><td>${w.date}</td><td>${w.kg} kg</td><td>${escape(w.note) || '—'}</td><td><button type="button" class="delete-entry" data-delete-weight="${w.date}" aria-label="删除 ${w.date} 的体重记录">删除</button></td></tr>`).join('')}</tbody></table>` : ''}`;
 }
 
 function renderDetail() {

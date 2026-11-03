@@ -9,6 +9,8 @@ import urllib.request
 from datetime import datetime
 from email.utils import format_datetime
 from xml.sax.saxutils import escape
+from html import escape as html_escape
+from urllib.parse import urlencode
 
 SITE_URL = 'https://inwt233.cn'
 
@@ -17,6 +19,9 @@ OUTPUT_FILE = 'posts.json'
 FEED_FILE = 'feed.xml'
 SITEMAP_FILE = 'sitemap.xml'
 POST_PAGES_DIR = 'post'
+ESSAYS_PAGE = 'essays.html'
+GALLERY_PAGE = 'gallery.html'
+FOOD_PAGE = 'food.html'
 
 PHOTOS_DIR = 'photos'
 PHOTOS_SRC = os.path.join(PHOTOS_DIR, 'src')
@@ -222,15 +227,15 @@ def build_post_pages(posts):
         md.reset()
         content_html = md.convert(_strip_front_matter(raw))
 
-        title = escape(post['title'])
-        desc = escape(post.get('summary') or 'Inwt 的随笔。')[:150]
+        title = html_escape(post['title'])
+        desc = html_escape((post.get('summary') or 'Inwt 的随笔。')[:150])
         page = (POST_PAGE_TEMPLATE
                 .replace('__SITE__', SITE_URL)
-                .replace('__SLUG__', f'{POST_PAGES_DIR}/{slug}')
+                .replace('__SLUG__', html_escape(f'{POST_PAGES_DIR}/{slug}'))
                 .replace('__TITLE__', title)
                 .replace('__DESCRIPTION__', desc)
-                .replace('__DATE__', escape(post.get('date') or ''))
-                .replace('__FILE__', escape(post['file']))
+                .replace('__DATE__', html_escape(post.get('date') or ''))
+                .replace('__FILE__', html_escape(post['file']))
                 .replace('__CONTENT__', content_html))
 
         out_dir = os.path.join(POST_PAGES_DIR, slug)
@@ -246,6 +251,64 @@ def build_post_pages(posts):
                 shutil.rmtree(os.path.join(POST_PAGES_DIR, slug), ignore_errors=True)
 
     print(f"静态文章页构建完成！共 {len(essays)} 篇。位于 {POST_PAGES_DIR}/<slug>/")
+
+
+def _replace_generated(path, name, content):
+    """Replace only a labelled generated region, preserving hand-edited layout."""
+    with open(path, 'r', encoding='utf-8', newline='') as stream:
+        page = stream.read()
+    start, end = f'<!-- BEGIN {name} -->', f'<!-- END {name} -->'
+    if page.count(start) != 1 or page.count(end) != 1:
+        raise ValueError(f'{path}: missing or duplicated {name} markers')
+    before, rest = page.split(start, 1)
+    _, after = rest.split(end, 1)
+    newline = '\r\n' if '\r\n' in page else '\n'
+    result = before + start + newline + content.replace('\n', newline) + newline + end + after
+    if result != page:
+        with open(path, 'w', encoding='utf-8', newline='') as stream:
+            stream.write(result)
+
+
+def build_fallbacks(posts):
+    """Keep public content reachable before JavaScript and during index failure."""
+    essays = sorted((p for p in posts if p.get('category') == 'essay'),
+                    key=lambda p: (_date_key(p.get('date')), p['file']), reverse=True)
+    items = []
+    for post in essays:
+        href = post.get('url') or 'article.html?' + urlencode({'file': post['file'], 'title': post['title'], 'date': post.get('date', '')})
+        items.append('<li><a href="' + html_escape(href) + '"><time>'
+                     + html_escape(post.get('date') or '') + '</time><strong>'
+                     + html_escape(post['title']) + '</strong><span>'
+                     + html_escape(post.get('summary') or '') + '</span></a></li>')
+    _replace_generated(ESSAYS_PAGE, 'ESSAY LINKS', '<div class="library-fallback"><ol>'
+                       + '\n'.join(items) + '</ol></div>')
+
+    photos = _load_json(PHOTOS_JSON, [])
+    thumbnails = []
+    for photo in photos:
+        label = photo.get('title') or ' · '.join(filter(None, [photo.get('city') or photo.get('location'), str(photo.get('date') or '')[:10]])) or '沿途风景'
+        if photo.get('web') and photo.get('thumb'):
+            thumbnails.append('<a href="' + html_escape(photo['web']) + '"><img src="'
+                              + html_escape(photo['thumb']) + '" loading="lazy" alt="'
+                              + html_escape(label) + '"><span>' + html_escape(label) + '</span></a>')
+    _replace_generated(GALLERY_PAGE, 'PHOTO LINKS', '<section class="photo-fallback" id="photo-fallback" aria-label="摄影集"><h1>沿途的风景</h1>'
+                       + '<div class="photo-fallback-grid">'
+                       + '\n'.join(thumbnails) + '</div></section>')
+    meals = _load_json('food.json', [])
+    records = []
+    for meal in meals:
+        shots = []
+        for photo in meal.get('photos', []):
+            label = photo.get('dish') or meal.get('date') or '美食留念'
+            shots.append('<a href="' + html_escape(photo['web']) + '"><img src="'
+                         + html_escape(photo['thumb']) + '" alt="' + html_escape(label)
+                         + '" loading="lazy"><span>' + html_escape(label) + '</span></a>')
+        records.append('<article><h2>' + html_escape(meal.get('date') or '')
+                       + '</h2><p>' + html_escape(meal.get('note') or '') + '</p><div>'
+                       + ''.join(shots) + '</div></article>')
+    _replace_generated(FOOD_PAGE, 'FOOD LINKS', '<noscript><style>.board,.fortune-jar,.menu-book{display:none}</style>'
+                       + '<section class="food-fallback" aria-label="用餐记录"><h2>食味簿</h2>'
+                       + ''.join(records) + '</section></noscript>')
 
 
 # ---------------- RSS 订阅 ----------------
@@ -766,3 +829,4 @@ if __name__ == '__main__':
     build_photos()
     from food_build import build_food
     build_food()
+    build_fallbacks(posts)

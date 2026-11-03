@@ -18,16 +18,13 @@
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-    <!-- 字体（非阻塞：加载失败时优雅回退系统字体） -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap"></noscript>
+    <link rel="stylesheet" href="assets/fonts/fonts.css">
     <!-- 地图组件（自托管，避免第三方 CDN 在部分地区不可用） -->
     <link rel="stylesheet" href="assets/vendor/leaflet.css">
     <link rel="stylesheet" href="assets/vendor/MarkerCluster.css">
     <script src="assets/vendor/leaflet.js"></script>
     <script src="assets/vendor/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="assets/site.css">
     <style>
         :root {
             --bg: #0a0a0c;
@@ -50,6 +47,7 @@
         }
 
         button { font-family: inherit; cursor: pointer; }
+        [hidden] { display: none !important; }
         img { -webkit-user-drag: none; }
 
         .mono { font-family: var(--mono); }
@@ -435,7 +433,7 @@
             padding: 20px 0 0;
         }
 
-        .row { display: flex; gap: 3px; }
+        .row { display: flex; gap: 3px; max-width: 100%; overflow: hidden; }
 
         .cell {
             position: relative;
@@ -543,6 +541,17 @@
             border-radius: 10px;
             cursor: zoom-in;
         }
+        .ph-pop .ph-pop-thumb:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+        .map-message { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--soft); text-align: center; }
+        .map-message strong { color: var(--ink); font-size: 1.05rem; }
+        .map-notice {
+            position: absolute; top: 72px; left: 58px; right: 16px; z-index: 1000;
+            width: fit-content; max-width: calc(100% - 74px); padding: 10px 14px;
+            border: 1px solid var(--line); border-radius: 10px; background: rgba(10, 10, 12, 0.92);
+            color: var(--soft); font-size: 0.75rem; line-height: 1.7;
+        }
+        .map-notice[hidden] { display: none; }
+        .map-notice button { color: var(--ink); border: 0; border-bottom: 1px solid currentColor; background: none; margin-left: 12px; font: inherit; }
         .ph-pop-title { color: var(--ink); font-weight: 600; font-size: 0.85rem; margin-top: 8px; }
         .ph-pop-meta { color: var(--soft); font-size: 0.74rem; margin-top: 3px; }
 
@@ -637,6 +646,22 @@
             user-select: none;
         }
 
+        .lb-image-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.86rem;
+        }
+        .lb-image-status[hidden] { display: none; }
+        .lb-image-status button {
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 999px;
+            padding: 7px 13px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
         .lb-cap {
             width: 100%;
             max-width: 900px;
@@ -706,6 +731,13 @@
 
         .empty .empty-icon { font-size: 2.4rem; margin-bottom: 14px; }
         .empty strong { color: var(--ink); font-size: 1.12rem; display: block; margin-bottom: 8px; }
+
+        .photo-fallback { max-width: 1500px; margin: 0 auto; padding: 100px 20px 40px; }
+        .photo-fallback h1 { font-size: 2rem; margin-bottom: 12px; }
+        .photo-fallback p { color: var(--soft); margin-bottom: 24px; }
+        .photo-fallback-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 16px; }
+        .photo-fallback-grid a { color: var(--soft); text-decoration: none; font-size: .75rem; }
+        .photo-fallback-grid img { display: block; width: 100%; height: 180px; object-fit: cover; margin-bottom: 8px; border-radius: 6px; }
 
         .empty code, .page-footer code {
             font-family: var(--mono);
@@ -801,7 +833,7 @@
 
     <main id="album">
         <div id="grid-view">
-            <div class="collection-toolbar" id="collection-toolbar">
+            <div class="collection-toolbar" id="collection-toolbar" hidden>
                 <div class="collection-heading">
                     <span class="collection-kicker">GRID VIEW</span>
                     <div class="collection-tabs" role="tablist" aria-label="网格分类方式">
@@ -810,14 +842,124 @@
                     </div>
                 </div>
                 <nav class="place-index" id="place-index" aria-label="地点索引" hidden></nav>
-                <p class="place-note" id="place-note" hidden>地级市由照片 GPS 与行政区边界自动识别 · 数据来源：<a href="https://datav.aliyun.com/portal/school/atlas/area_selector" target="_blank" rel="noopener">DataV.GeoAtlas</a></p>
+                <p class="place-note" id="place-note" hidden>行政区数据：<a href="https://datav.aliyun.com/portal/school/atlas/area_selector" target="_blank" rel="noopener">DataV.GeoAtlas</a></p>
             </div>
             <div id="chapters"></div>
             <div class="empty" id="grid-empty" hidden></div>
+<!-- BEGIN PHOTO LINKS -->
+<section class="photo-fallback" id="photo-fallback" aria-label="摄影集"><h1>沿途的风景</h1><div class="photo-fallback-grid"><a href="photos/web/IMG_4627.webp"><img src="photos/thumb/IMG_4627.webp" loading="lazy" alt="上海市 · 2026-10-27"><span>上海市 · 2026-10-27</span></a>
+<a href="photos/web/IMG_4622.webp"><img src="photos/thumb/IMG_4622.webp" loading="lazy" alt="上海市 · 2026-10-27"><span>上海市 · 2026-10-27</span></a>
+<a href="photos/web/IMG_4619.webp"><img src="photos/thumb/IMG_4619.webp" loading="lazy" alt="上海市 · 2026-10-27"><span>上海市 · 2026-10-27</span></a>
+<a href="photos/web/IMG_4417.webp"><img src="photos/thumb/IMG_4417.webp" loading="lazy" alt="上海市 · 2026-10-17"><span>上海市 · 2026-10-17</span></a>
+<a href="photos/web/IMG_4294.webp"><img src="photos/thumb/IMG_4294.webp" loading="lazy" alt="上海市 · 2026-10-11"><span>上海市 · 2026-10-11</span></a>
+<a href="photos/web/IMG_4292.webp"><img src="photos/thumb/IMG_4292.webp" loading="lazy" alt="上海市 · 2026-10-11"><span>上海市 · 2026-10-11</span></a>
+<a href="photos/web/IMG_4192.webp"><img src="photos/thumb/IMG_4192.webp" loading="lazy" alt="福州市 · 2026-10-06"><span>福州市 · 2026-10-06</span></a>
+<a href="photos/web/IMG_4188.webp"><img src="photos/thumb/IMG_4188.webp" loading="lazy" alt="福州市 · 2026-10-06"><span>福州市 · 2026-10-06</span></a>
+<a href="photos/web/IMG_4154.webp"><img src="photos/thumb/IMG_4154.webp" loading="lazy" alt="福州市 · 2026-10-06"><span>福州市 · 2026-10-06</span></a>
+<a href="photos/web/IMG_4110.webp"><img src="photos/thumb/IMG_4110.webp" loading="lazy" alt="福州市 · 2026-10-06"><span>福州市 · 2026-10-06</span></a>
+<a href="photos/web/IMG_4082.webp"><img src="photos/thumb/IMG_4082.webp" loading="lazy" alt="福州市 · 2026-10-05"><span>福州市 · 2026-10-05</span></a>
+<a href="photos/web/IMG_4028.webp"><img src="photos/thumb/IMG_4028.webp" loading="lazy" alt="泉州市 · 2026-10-04"><span>泉州市 · 2026-10-04</span></a>
+<a href="photos/web/IMG_3995.webp"><img src="photos/thumb/IMG_3995.webp" loading="lazy" alt="泉州市 · 2026-10-04"><span>泉州市 · 2026-10-04</span></a>
+<a href="photos/web/IMG_3981.webp"><img src="photos/thumb/IMG_3981.webp" loading="lazy" alt="泉州市 · 2026-10-04"><span>泉州市 · 2026-10-04</span></a>
+<a href="photos/web/IMG_3952.webp"><img src="photos/thumb/IMG_3952.webp" loading="lazy" alt="泉州市 · 2026-10-03"><span>泉州市 · 2026-10-03</span></a>
+<a href="photos/web/IMG_3821.webp"><img src="photos/thumb/IMG_3821.webp" loading="lazy" alt="厦门市 · 2026-10-02"><span>厦门市 · 2026-10-02</span></a>
+<a href="photos/web/IMG_3283.webp"><img src="photos/thumb/IMG_3283.webp" loading="lazy" alt="兰州市 · 2026-09-12"><span>兰州市 · 2026-09-12</span></a>
+<a href="photos/web/IMG_3204.webp"><img src="photos/thumb/IMG_3204.webp" loading="lazy" alt="西宁市 · 2026-09-11"><span>西宁市 · 2026-09-11</span></a>
+<a href="photos/web/IMG_3068.webp"><img src="photos/thumb/IMG_3068.webp" loading="lazy" alt="海西蒙古族藏族自治州 · 2026-09-09"><span>海西蒙古族藏族自治州 · 2026-09-09</span></a>
+<a href="photos/web/IMG_3066.webp"><img src="photos/thumb/IMG_3066.webp" loading="lazy" alt="海西蒙古族藏族自治州 · 2026-09-09"><span>海西蒙古族藏族自治州 · 2026-09-09</span></a>
+<a href="photos/web/IMG_3058.webp"><img src="photos/thumb/IMG_3058.webp" loading="lazy" alt="海西蒙古族藏族自治州 · 2026-09-09"><span>海西蒙古族藏族自治州 · 2026-09-09</span></a>
+<a href="photos/web/IMG_3007.webp"><img src="photos/thumb/IMG_3007.webp" loading="lazy" alt="海西蒙古族藏族自治州 · 2026-09-09"><span>海西蒙古族藏族自治州 · 2026-09-09</span></a>
+<a href="photos/web/dji_export_20260908_photo_0027.webp"><img src="photos/thumb/dji_export_20260908_photo_0027.webp" loading="lazy" alt="海西蒙古族藏族自治州 · 2026-09-08"><span>海西蒙古族藏族自治州 · 2026-09-08</span></a>
+<a href="photos/web/IMG_2813.webp"><img src="photos/thumb/IMG_2813.webp" loading="lazy" alt="海西蒙古族藏族自治州 · 2026-09-07"><span>海西蒙古族藏族自治州 · 2026-09-07</span></a>
+<a href="photos/web/IMG_2797.webp"><img src="photos/thumb/IMG_2797.webp" loading="lazy" alt="海西蒙古族藏族自治州 · 2026-09-07"><span>海西蒙古族藏族自治州 · 2026-09-07</span></a>
+<a href="photos/web/IMG_2776.webp"><img src="photos/thumb/IMG_2776.webp" loading="lazy" alt="酒泉市 · 2026-09-07"><span>酒泉市 · 2026-09-07</span></a>
+<a href="photos/web/IMG_2653.webp"><img src="photos/thumb/IMG_2653.webp" loading="lazy" alt="酒泉市 · 2026-09-05"><span>酒泉市 · 2026-09-05</span></a>
+<a href="photos/web/IMG_2599.webp"><img src="photos/thumb/IMG_2599.webp" loading="lazy" alt="张掖市 · 2026-09-04"><span>张掖市 · 2026-09-04</span></a>
+<a href="photos/web/IMG_2475.webp"><img src="photos/thumb/IMG_2475.webp" loading="lazy" alt="张掖市 · 2026-09-04"><span>张掖市 · 2026-09-04</span></a>
+<a href="photos/web/dji_export_20260904_photo_0037.webp"><img src="photos/thumb/dji_export_20260904_photo_0037.webp" loading="lazy" alt="张掖市 · 2026-09-04"><span>张掖市 · 2026-09-04</span></a>
+<a href="photos/web/IMG_2278.webp"><img src="photos/thumb/IMG_2278.webp" loading="lazy" alt="鹤岗市 · 2026-08-31"><span>鹤岗市 · 2026-08-31</span></a>
+<a href="photos/web/IMG_2259.webp"><img src="photos/thumb/IMG_2259.webp" loading="lazy" alt="鹤岗市 · 2026-08-30"><span>鹤岗市 · 2026-08-30</span></a>
+<a href="photos/web/IMG_2182.webp"><img src="photos/thumb/IMG_2182.webp" loading="lazy" alt="鹤岗市 · 2026-08-25"><span>鹤岗市 · 2026-08-25</span></a>
+<a href="photos/web/IMG_2180.webp"><img src="photos/thumb/IMG_2180.webp" loading="lazy" alt="鹤岗市 · 2026-08-25"><span>鹤岗市 · 2026-08-25</span></a>
+<a href="photos/web/2026_08_08_13_28_24_IMG_1940.webp"><img src="photos/thumb/2026_08_08_13_28_24_IMG_1940.webp" loading="lazy" alt="鹤岗市 · 2026-08-08"><span>鹤岗市 · 2026-08-08</span></a>
+<a href="photos/web/IMG_1495.webp"><img src="photos/thumb/IMG_1495.webp" loading="lazy" alt="杭州市 · 2026-07-22"><span>杭州市 · 2026-07-22</span></a>
+<a href="photos/web/2026_07_21_16_02_33_IMG_1431.webp"><img src="photos/thumb/2026_07_21_16_02_33_IMG_1431.webp" loading="lazy" alt="杭州市 · 2026-07-21"><span>杭州市 · 2026-07-21</span></a>
+<a href="photos/web/2026_07_21_10_14_13_IMG_1402.webp"><img src="photos/thumb/2026_07_21_10_14_13_IMG_1402.webp" loading="lazy" alt="杭州市 · 2026-07-21"><span>杭州市 · 2026-07-21</span></a>
+<a href="photos/web/DSC_0396.webp"><img src="photos/thumb/DSC_0396.webp" loading="lazy" alt="大理白族自治州 · 2026-07-09"><span>大理白族自治州 · 2026-07-09</span></a>
+<a href="photos/web/2026_07_08_19_45_37_IMG_0916.webp"><img src="photos/thumb/2026_07_08_19_45_37_IMG_0916.webp" loading="lazy" alt="大理白族自治州 · 2026-07-08"><span>大理白族自治州 · 2026-07-08</span></a>
+<a href="photos/web/2026_07_08_18_29_50_IMG_0902.webp"><img src="photos/thumb/2026_07_08_18_29_50_IMG_0902.webp" loading="lazy" alt="大理白族自治州 · 2026-07-08"><span>大理白族自治州 · 2026-07-08</span></a>
+<a href="photos/web/IMG_0812.webp"><img src="photos/thumb/IMG_0812.webp" loading="lazy" alt="昆明市 · 2026-07-07"><span>昆明市 · 2026-07-07</span></a>
+<a href="photos/web/DSC_0046.webp"><img src="photos/thumb/DSC_0046.webp" loading="lazy" alt="昆明市 · 2026-07-07"><span>昆明市 · 2026-07-07</span></a>
+<a href="photos/web/DSC_0027.webp"><img src="photos/thumb/DSC_0027.webp" loading="lazy" alt="昆明市 · 2026-07-07"><span>昆明市 · 2026-07-07</span></a>
+<a href="photos/web/DSC_9992.webp"><img src="photos/thumb/DSC_9992.webp" loading="lazy" alt="昆明市 · 2026-07-07"><span>昆明市 · 2026-07-07</span></a>
+<a href="photos/web/2026_06_26_18_15_13_IMG_0553.webp"><img src="photos/thumb/2026_06_26_18_15_13_IMG_0553.webp" loading="lazy" alt="上海市 · 2026-06-26"><span>上海市 · 2026-06-26</span></a>
+<a href="photos/web/2026_06_05_13_16_56_IMG_0044.webp"><img src="photos/thumb/2026_06_05_13_16_56_IMG_0044.webp" loading="lazy" alt="上海市 · 2026-06-05"><span>上海市 · 2026-06-05</span></a>
+<a href="photos/web/2026_05_30_18_57_56_IMG_9861.webp"><img src="photos/thumb/2026_05_30_18_57_56_IMG_9861.webp" loading="lazy" alt="上海市 · 2026-05-30"><span>上海市 · 2026-05-30</span></a>
+<a href="photos/web/DSC_9744.webp"><img src="photos/thumb/DSC_9744.webp" loading="lazy" alt="杭州市 · 2026-05-10"><span>杭州市 · 2026-05-10</span></a>
+<a href="photos/web/DSC_9726.webp"><img src="photos/thumb/DSC_9726.webp" loading="lazy" alt="杭州市 · 2026-05-10"><span>杭州市 · 2026-05-10</span></a>
+<a href="photos/web/2026_05_10_10_45_51_IMG_9203.webp"><img src="photos/thumb/2026_05_10_10_45_51_IMG_9203.webp" loading="lazy" alt="杭州市 · 2026-05-10"><span>杭州市 · 2026-05-10</span></a>
+<a href="photos/web/DSC_9649.webp"><img src="photos/thumb/DSC_9649.webp" loading="lazy" alt="杭州市 · 2026-05-10"><span>杭州市 · 2026-05-10</span></a>
+<a href="photos/web/DSC_9633.webp"><img src="photos/thumb/DSC_9633.webp" loading="lazy" alt="杭州市 · 2026-05-10"><span>杭州市 · 2026-05-10</span></a>
+<a href="photos/web/IMG_8549.webp"><img src="photos/thumb/IMG_8549.webp" loading="lazy" alt="上海市 · 2026-04-17"><span>上海市 · 2026-04-17</span></a>
+<a href="photos/web/2026_04_07_19_58_02_IMG_8259.webp"><img src="photos/thumb/2026_04_07_19_58_02_IMG_8259.webp" loading="lazy" alt="重庆市 · 2026-04-07"><span>重庆市 · 2026-04-07</span></a>
+<a href="photos/web/IMG_8239.webp"><img src="photos/thumb/IMG_8239.webp" loading="lazy" alt="重庆市 · 2026-04-07"><span>重庆市 · 2026-04-07</span></a>
+<a href="photos/web/IMG_8164.webp"><img src="photos/thumb/IMG_8164.webp" loading="lazy" alt="重庆市 · 2026-04-06"><span>重庆市 · 2026-04-06</span></a>
+<a href="photos/web/2026_04_06_19_44_24_IMG_8133.webp"><img src="photos/thumb/2026_04_06_19_44_24_IMG_8133.webp" loading="lazy" alt="重庆市 · 2026-04-06"><span>重庆市 · 2026-04-06</span></a>
+<a href="photos/web/2026_04_06_09_58_43_IMG_8042.webp"><img src="photos/thumb/2026_04_06_09_58_43_IMG_8042.webp" loading="lazy" alt="重庆市 · 2026-04-06"><span>重庆市 · 2026-04-06</span></a>
+<a href="photos/web/2026_04_04_17_27_04_IMG_7916.webp"><img src="photos/thumb/2026_04_04_17_27_04_IMG_7916.webp" loading="lazy" alt="重庆市 · 2026-04-04"><span>重庆市 · 2026-04-04</span></a>
+<a href="photos/web/2026_04_04_12_47_08_IMG_7892.webp"><img src="photos/thumb/2026_04_04_12_47_08_IMG_7892.webp" loading="lazy" alt="重庆市 · 2026-04-04"><span>重庆市 · 2026-04-04</span></a>
+<a href="photos/web/2026_04_04_10_53_14_IMG_7865.webp"><img src="photos/thumb/2026_04_04_10_53_14_IMG_7865.webp" loading="lazy" alt="重庆市 · 2026-04-04"><span>重庆市 · 2026-04-04</span></a>
+<a href="photos/web/2026_03_14_15_05_28_IMG_7053.webp"><img src="photos/thumb/2026_03_14_15_05_28_IMG_7053.webp" loading="lazy" alt="上海市 · 2026-03-14"><span>上海市 · 2026-03-14</span></a>
+<a href="photos/web/IMG_7029.webp"><img src="photos/thumb/IMG_7029.webp" loading="lazy" alt="上海市 · 2026-03-14"><span>上海市 · 2026-03-14</span></a>
+<a href="photos/web/IMG_6927.webp"><img src="photos/thumb/IMG_6927.webp" loading="lazy" alt="上海市 · 2026-03-08"><span>上海市 · 2026-03-08</span></a>
+<a href="photos/web/2026_02_27_16_39_29_IMG_6699.webp"><img src="photos/thumb/2026_02_27_16_39_29_IMG_6699.webp" loading="lazy" alt="北京市 · 2026-02-27"><span>北京市 · 2026-02-27</span></a>
+<a href="photos/web/IMG_6683.webp"><img src="photos/thumb/IMG_6683.webp" loading="lazy" alt="北京市 · 2026-02-27"><span>北京市 · 2026-02-27</span></a>
+<a href="photos/web/2026_02_27_12_41_12_IMG_6594.webp"><img src="photos/thumb/2026_02_27_12_41_12_IMG_6594.webp" loading="lazy" alt="北京市 · 2026-02-27"><span>北京市 · 2026-02-27</span></a>
+<a href="photos/web/IMG_6248.webp"><img src="photos/thumb/IMG_6248.webp" loading="lazy" alt="佳木斯市 · 2026-02-21"><span>佳木斯市 · 2026-02-21</span></a>
+<a href="photos/web/IMG_4958.webp"><img src="photos/thumb/IMG_4958.webp" loading="lazy" alt="上海市 · 2025-12-08"><span>上海市 · 2025-12-08</span></a>
+<a href="photos/web/IMG_4657.webp"><img src="photos/thumb/IMG_4657.webp" loading="lazy" alt="上海市 · 2025-11-29"><span>上海市 · 2025-11-29</span></a>
+<a href="photos/web/IMG_4501.webp"><img src="photos/thumb/IMG_4501.webp" loading="lazy" alt="武汉市 · 2025-11-08"><span>武汉市 · 2025-11-08</span></a>
+<a href="photos/web/IMG_4407.webp"><img src="photos/thumb/IMG_4407.webp" loading="lazy" alt="武汉市 · 2025-11-08"><span>武汉市 · 2025-11-08</span></a>
+<a href="photos/web/IMG_4290.webp"><img src="photos/thumb/IMG_4290.webp" loading="lazy" alt="武汉市 · 2025-11-08"><span>武汉市 · 2025-11-08</span></a>
+<a href="photos/web/IMG_4244.webp"><img src="photos/thumb/IMG_4244.webp" loading="lazy" alt="武汉市 · 2025-11-07"><span>武汉市 · 2025-11-07</span></a>
+<a href="photos/web/IMG_3898.webp"><img src="photos/thumb/IMG_3898.webp" loading="lazy" alt="长沙市 · 2025-11-06"><span>长沙市 · 2025-11-06</span></a>
+<a href="photos/web/2025_10_07_14_54_37_IMG_3078.webp"><img src="photos/thumb/2025_10_07_14_54_37_IMG_3078.webp" loading="lazy" alt="威海市 · 2025-10-07"><span>威海市 · 2025-10-07</span></a>
+<a href="photos/web/IMG_2683.webp"><img src="photos/thumb/IMG_2683.webp" loading="lazy" alt="济南市 · 2025-10-01"><span>济南市 · 2025-10-01</span></a>
+<a href="photos/web/IMG_1988.webp"><img src="photos/thumb/IMG_1988.webp" loading="lazy" alt="鹤岗市 · 2025-09-08"><span>鹤岗市 · 2025-09-08</span></a>
+<a href="photos/web/IMG_1959.webp"><img src="photos/thumb/IMG_1959.webp" loading="lazy" alt="佳木斯市 · 2025-09-06"><span>佳木斯市 · 2025-09-06</span></a>
+<a href="photos/web/IMG_1927.webp"><img src="photos/thumb/IMG_1927.webp" loading="lazy" alt="鹤岗市 · 2025-09-05"><span>鹤岗市 · 2025-09-05</span></a>
+<a href="photos/web/IMG_1283.webp"><img src="photos/thumb/IMG_1283.webp" loading="lazy" alt="哈尔滨市 · 2025-08-09"><span>哈尔滨市 · 2025-08-09</span></a>
+<a href="photos/web/IMG_1254.webp"><img src="photos/thumb/IMG_1254.webp" loading="lazy" alt="鹤岗市 · 2025-08-08"><span>鹤岗市 · 2025-08-08</span></a>
+<a href="photos/web/IMG_1200.webp"><img src="photos/thumb/IMG_1200.webp" loading="lazy" alt="鹤岗市 · 2025-08-05"><span>鹤岗市 · 2025-08-05</span></a>
+<a href="photos/web/IMG_1197.webp"><img src="photos/thumb/IMG_1197.webp" loading="lazy" alt="鹤岗市 · 2025-08-05"><span>鹤岗市 · 2025-08-05</span></a>
+<a href="photos/web/IMG_0125.webp"><img src="photos/thumb/IMG_0125.webp" loading="lazy" alt="漳州市 · 2025-06-20"><span>漳州市 · 2025-06-20</span></a>
+<a href="photos/web/IMG_0096.webp"><img src="photos/thumb/IMG_0096.webp" loading="lazy" alt="龙岩市 · 2025-06-20"><span>龙岩市 · 2025-06-20</span></a>
+<a href="photos/web/IMG_0032.webp"><img src="photos/thumb/IMG_0032.webp" loading="lazy" alt="厦门市 · 2025-06-19"><span>厦门市 · 2025-06-19</span></a>
+<a href="photos/web/IMG_9951.webp"><img src="photos/thumb/IMG_9951.webp" loading="lazy" alt="厦门市 · 2025-06-18"><span>厦门市 · 2025-06-18</span></a>
+<a href="photos/web/IMG_9916.webp"><img src="photos/thumb/IMG_9916.webp" loading="lazy" alt="厦门市 · 2025-06-18"><span>厦门市 · 2025-06-18</span></a>
+<a href="photos/web/IMG_9879.webp"><img src="photos/thumb/IMG_9879.webp" loading="lazy" alt="厦门市 · 2025-06-18"><span>厦门市 · 2025-06-18</span></a>
+<a href="photos/web/IMG_8454.webp"><img src="photos/thumb/IMG_8454.webp" loading="lazy" alt="上海市 · 2025-04-25"><span>上海市 · 2025-04-25</span></a>
+<a href="photos/web/IMG_7962.webp"><img src="photos/thumb/IMG_7962.webp" loading="lazy" alt="上海市 · 2025-04-03"><span>上海市 · 2025-04-03</span></a>
+<a href="photos/web/IMG_7940.webp"><img src="photos/thumb/IMG_7940.webp" loading="lazy" alt="上海市 · 2025-04-03"><span>上海市 · 2025-04-03</span></a>
+<a href="photos/web/IMG_7801.webp"><img src="photos/thumb/IMG_7801.webp" loading="lazy" alt="上海市 · 2025-03-30"><span>上海市 · 2025-03-30</span></a>
+<a href="photos/web/IMG_7428.webp"><img src="photos/thumb/IMG_7428.webp" loading="lazy" alt="上海市 · 2025-03-16"><span>上海市 · 2025-03-16</span></a>
+<a href="photos/web/IMG_7238.webp"><img src="photos/thumb/IMG_7238.webp" loading="lazy" alt="上海市 · 2025-03-08"><span>上海市 · 2025-03-08</span></a>
+<a href="photos/web/IMG_7047.webp"><img src="photos/thumb/IMG_7047.webp" loading="lazy" alt="湖州市 · 2025-03-01"><span>湖州市 · 2025-03-01</span></a>
+<a href="photos/web/2025_03_01_14_07_12_IMG_7009.webp"><img src="photos/thumb/2025_03_01_14_07_12_IMG_7009.webp" loading="lazy" alt="湖州市 · 2025-03-01"><span>湖州市 · 2025-03-01</span></a>
+<a href="photos/web/IMG_6578.webp"><img src="photos/thumb/IMG_6578.webp" loading="lazy" alt="鹤岗市 · 2025-02-12"><span>鹤岗市 · 2025-02-12</span></a>
+<a href="photos/web/IMG_1869.webp"><img src="photos/thumb/IMG_1869.webp" loading="lazy" alt="九江市 · 2024-08-21"><span>九江市 · 2024-08-21</span></a>
+<a href="photos/web/IMG_1710.webp"><img src="photos/thumb/IMG_1710.webp" loading="lazy" alt="南昌市 · 2024-08-19"><span>南昌市 · 2024-08-19</span></a>
+<a href="photos/web/IMG_1504.webp"><img src="photos/thumb/IMG_1504.webp" loading="lazy" alt="香港特别行政区 · 2024-08-14"><span>香港特别行政区 · 2024-08-14</span></a>
+<a href="photos/web/IMG_1356.webp"><img src="photos/thumb/IMG_1356.webp" loading="lazy" alt="香港特别行政区 · 2024-08-14"><span>香港特别行政区 · 2024-08-14</span></a>
+<a href="photos/web/IMG_1082.webp"><img src="photos/thumb/IMG_1082.webp" loading="lazy" alt="深圳市 · 2024-08-10"><span>深圳市 · 2024-08-10</span></a>
+<a href="photos/web/IMG_0928.webp"><img src="photos/thumb/IMG_0928.webp" loading="lazy" alt="鹤岗市 · 2024-08-07"><span>鹤岗市 · 2024-08-07</span></a>
+<a href="photos/web/IMG_0055.webp"><img src="photos/thumb/IMG_0055.webp" loading="lazy" alt="鹤岗市 · 2024-06-21"><span>鹤岗市 · 2024-06-21</span></a></div></section>
+<!-- END PHOTO LINKS -->
         </div>
 
         <div id="map-view" aria-label="照片地图">
             <div id="map"></div>
+            <div class="map-notice" id="map-notice" role="status" hidden>底图暂时没能加载，照片位置仍可查看。<button type="button" id="retry-map">重试底图</button></div>
             <button class="replay-btn" id="replay-btn" hidden>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8V4z"/></svg>
                 足迹回放
@@ -842,7 +984,13 @@
         <button class="lb-next" id="lb-next" aria-label="下一张">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 5l7 7-7 7"/></svg>
         </button>
-        <div class="lb-stage"><img id="lb-img" alt=""></div>
+        <div class="lb-stage">
+            <img id="lb-img" alt="">
+            <div class="lb-image-status" id="lb-image-status" hidden aria-live="polite">
+                <span id="lb-image-message">正在加载照片…</span>
+                <button type="button" id="lb-retry">重新加载</button>
+            </div>
+        </div>
         <div class="lb-cap">
             <div>
                 <div class="lb-title" id="lb-title"></div>
@@ -866,6 +1014,7 @@
         let map = null, cluster = null, markers = [];
         let current = -1;
         let replaying = false, replayToken = 0, pulse = null;
+        let replayWaitCancel = null;
         let revealObs = null;
         let relayoutTimer = null;
         let collectionMode = 'time';
@@ -880,8 +1029,14 @@
 
         function displayWhen(p) { return (p.date || '').slice(0, 16); }
 
+        function hasCoords(p) {
+            return p && typeof p.lat === 'number' && typeof p.lng === 'number'
+                && Number.isFinite(p.lat) && Number.isFinite(p.lng)
+                && Math.abs(p.lat) <= 90 && Math.abs(p.lng) <= 180;
+        }
+
         function placeFor(p) {
-            return String(p.city || '').trim() || (p.lat == null ? '未标注地点' : '未识别地级市');
+            return String(p.city || '').trim() || (hasCoords(p) ? '未识别地级市' : '未标注地点');
         }
 
         /* ---------- 入口 ---------- */
@@ -891,13 +1046,16 @@
                 const r = await fetch('photos.json');
                 if (!r.ok) throw new Error(r.status);
                 list = await r.json();
+                if (!Array.isArray(list)) throw new Error('Invalid photo index');
             } catch (e) {
-                showEmpty();
+                showEmpty(true);
                 return;
             }
             photos = list;
             if (!photos.length) { showEmpty(); return; }
 
+            $('photo-fallback').hidden = true;
+            $('collection-toolbar').hidden = false;
             $('segmented').hidden = false;
             let manual = {};
             try {
@@ -910,16 +1068,18 @@
             bindUI();
         }
 
-        function showEmpty() {
+        function showEmpty(failed = false) {
+            if (!failed) $('photo-fallback').hidden = true;
             $('cover').hidden = true;
             $('collection-toolbar').hidden = true;
             $('grid-empty').hidden = false;
             $('grid-empty').innerHTML = `
                 <div class="empty-icon">📷</div>
-                <strong>相册还是空的</strong>
-                把照片放入 <code>photos/src/</code> 目录（iPhone 原片 HEIC / JPG 均可，数据线或 iCloud 导入可保留定位），<br>
-                然后运行 <code>python build.py</code> 即可自动生成相册与地图。<br>
-                相机拍摄、没有定位的照片，可以之后用 <code>locate.html</code> 在地图上点选补注。`;
+                <strong>${failed ? '照片暂时没能抵达' : '沿途的风景，正在收集中'}</strong>
+                <p>${failed ? '请稍后重试。' : '暂无照片。'}</p>
+                ${failed ? '<button type="button" id="retry-photos">重新加载</button>' : ''}
+                <a href="index.html">返回小站 →</a>`;
+            if (failed) $('retry-photos').addEventListener('click', () => location.reload());
         }
 
         /* ---------- 封面 ---------- */
@@ -954,7 +1114,7 @@
             tryNext();
 
             // 统计：照片数 / 拍摄地数 / 最远跨越
-            const located = photos.filter(p => p.lat != null);
+            const located = photos.filter(hasCoords);
             const places = new Set(located.map(p => p.lat.toFixed(1) + ',' + p.lng.toFixed(1))).size;
             let km = 0;
             for (let i = 0; i < located.length; i++) {
@@ -1037,6 +1197,8 @@
             $('btn-place').classList.toggle('active', mode === 'place');
             $('btn-time').setAttribute('aria-selected', String(mode === 'time'));
             $('btn-place').setAttribute('aria-selected', String(mode === 'place'));
+            $('btn-time').tabIndex = mode === 'time' ? 0 : -1;
+            $('btn-place').tabIndex = mode === 'place' ? 0 : -1;
 
             $('chapters').innerHTML = entries.map(([key, idx], n) => {
                 if (mode === 'place') {
@@ -1098,13 +1260,14 @@
                 if (row.length) rows.push(row);
 
                 rowsEl.innerHTML = rows.map((r, ri) => {
-                    const isLast = ri === rows.length - 1 && r.length < 4; // 最后一行不满时不拉伸
+                    const naturalWidth = r.reduce((total, i) => total + (photos[i].ratio || 1.5) * H, 0) + gap * Math.max(0, r.length - 1);
+                    const isLast = ri === rows.length - 1 && r.length < 4 && naturalWidth <= W; // 仅在确实不足一行时保留留白
                     return `<div class="row" style="height:${H}px">` + r.map(i => {
                         const p = photos[i];
                         const ratio = p.ratio || 1.5;
                         const style = isLast ? `flex:0 0 ${Math.round(ratio * H)}px` : `flex-grow:${ratio}`;
                         const stamp = `#${String(i + 1).padStart(2, '0')} — ${(p.date || '').slice(0, 10).replace(/-/g, '.')}`;
-                        return `<figure class="cell" data-i="${i}" data-stamp="${esc(stamp)}" style="${style}">
+                        return `<figure class="cell" role="button" tabindex="0" aria-label="查看照片：${esc(p.title || p.city || p.location || '沿途风景')}" data-i="${i}" data-stamp="${esc(stamp)}" style="${style}">
                             <img src="${esc(p.thumb)}" loading="lazy" alt="">
                         </figure>`;
                     }).join('') + '</div>';
@@ -1130,6 +1293,21 @@
 
         /* ---------- 界面 ---------- */
         function bindUI() {
+            // Each segmented control is one tab stop; arrows move between its tabs.
+            document.querySelectorAll('[role="tablist"]').forEach(list => {
+                const tabs = [...list.querySelectorAll('[role="tab"]')];
+                function sync() { tabs.forEach(tab => tab.tabIndex = tab.getAttribute('aria-selected') === 'true' ? 0 : -1); }
+                list.addEventListener('click', sync);
+                list.addEventListener('keydown', e => {
+                    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+                    e.preventDefault();
+                    const index = tabs.indexOf(document.activeElement);
+                    const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (index + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+                    tabs[next].click();
+                    tabs[next].focus();
+                });
+                sync();
+            });
             $('btn-grid').addEventListener('click', () => setMode('grid'));
             $('btn-map').addEventListener('click', () => setMode('map'));
             $('btn-time').addEventListener('click', () => buildChapters('time'));
@@ -1137,6 +1315,13 @@
             $('chapters').addEventListener('click', e => {
                 const cell = e.target.closest('.cell');
                 if (cell) openLightbox(+cell.dataset.i);
+            });
+            $('chapters').addEventListener('keydown', e => {
+                const cell = e.target.closest('.cell');
+                if (cell && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    openLightbox(+cell.dataset.i);
+                }
             });
 
             addEventListener('scroll', () => {
@@ -1151,12 +1336,23 @@
             $('lb-prev').addEventListener('click', () => stepLightbox(-1));
             $('lb-next').addEventListener('click', () => stepLightbox(1));
             $('lb-map').addEventListener('click', () => { closeLightbox(); locateOnMap(current); });
+            $('lb-retry').addEventListener('click', () => {
+                $('lb-close').focus({ preventScroll: true });
+                loadLightboxImage(photos[current], true);
+            });
             $('lightbox').addEventListener('click', e => {
                 if (e.target === e.currentTarget || e.target.classList.contains('lb-stage')) closeLightbox();
             });
 
             document.addEventListener('keydown', e => {
                 if ($('lightbox').hidden) return;
+                if (e.key === 'Tab') {
+                    const controls = [...$('lightbox').querySelectorAll('button, a[href]')].filter(el => !el.hidden && el.getClientRects().length);
+                    const first = controls[0], last = controls[controls.length - 1];
+                    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                }
+                if (['Escape', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
                 if (e.key === 'Escape') closeLightbox();
                 else if (e.key === 'ArrowLeft') stepLightbox(-1);
                 else if (e.key === 'ArrowRight') stepLightbox(1);
@@ -1176,25 +1372,39 @@
             $('btn-map').classList.toggle('active', isMap);
             $('btn-grid').setAttribute('aria-selected', String(!isMap));
             $('btn-map').setAttribute('aria-selected', String(isMap));
+            $('btn-grid').tabIndex = isMap ? -1 : 0;
+            $('btn-map').tabIndex = isMap ? 0 : -1;
             $('topbar').classList.toggle('solid', isMap);
             scrollTo({ top: 0, behavior: 'auto' });
             if (isMap) {
                 if (!map) initMap();
                 else setTimeout(() => map.invalidateSize(), 0);
             }
+            if (!isMap && replaying) stopReplay();
         }
 
         /* ---------- 地图 ---------- */
         function initMap() {
+            if (!window.L || !L.markerClusterGroup) {
+                $('map').innerHTML = '<div class="map-message"><strong>地图暂时不可用</strong><span>照片仍可在网格中浏览。</span></div>';
+                return;
+            }
             map = L.map('map', { zoomControl: true });
             // Esri Gray Canvas 底图（免 API key），底图 + 参考层（路网与地名）
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+            const baseTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
                 maxNativeZoom: 16, maxZoom: 19,
                 attribution: 'Tiles &copy; Esri, Garmin, FAO, NOAA'
             }).addTo(map);
-            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+            const referenceTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
                 maxNativeZoom: 13, maxZoom: 19
             }).addTo(map);
+            baseTiles.on('tileerror', () => { $('map-notice').hidden = false; });
+            baseTiles.on('tileload', () => { $('map-notice').hidden = true; });
+            $('retry-map').addEventListener('click', () => {
+                $('map-notice').hidden = true;
+                baseTiles.redraw();
+                referenceTiles.redraw();
+            });
 
             cluster = L.markerClusterGroup({
                 showCoverageOnHover: false,
@@ -1216,8 +1426,10 @@
 
             const pts = [];
             photos.forEach((p, i) => {
-                if (p.lat == null) return;
+                if (!hasCoords(p)) return;
                 const marker = L.marker([p.lat, p.lng], {
+                    title: p.title || p.city || p.location || '照片拍摄地',
+                    alt: p.title || p.city || p.location || '照片拍摄地',
                     icon: L.divIcon({
                         className: 'ph-marker',
                         html: `<span class="ph-thumb" style="background-image:url('${esc(p.thumb)}')"></span>`,
@@ -1228,7 +1440,7 @@
                 marker.photoData = p;
                 marker.bindPopup(`
                     <div class="ph-pop">
-                        <span class="ph-pop-thumb" data-i="${i}" style="background-image:url('${esc(p.thumb)}')"></span>
+                        <span class="ph-pop-thumb" role="button" tabindex="0" aria-label="查看照片" data-i="${i}" style="background-image:url('${esc(p.thumb)}')"></span>
                         ${p.title ? `<div class="ph-pop-title">${esc(p.title)}</div>` : ''}
                         ${[displayWhen(p), p.location].some(Boolean) ? `<div class="ph-pop-meta">${esc([displayWhen(p), p.location].filter(Boolean).join(' · '))}</div>` : ''}
                     </div>`, { maxWidth: 220 });
@@ -1240,7 +1452,16 @@
             map.addLayer(cluster);
             map.on('popupopen', e => {
                 const thumb = e.popup.getElement().querySelector('.ph-pop-thumb');
-                if (thumb) thumb.addEventListener('click', () => openLightbox(+thumb.dataset.i));
+                if (thumb) {
+                    thumb.addEventListener('click', () => openLightbox(+thumb.dataset.i));
+                    thumb.addEventListener('keydown', event => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            openLightbox(+thumb.dataset.i);
+                        }
+                    });
+                }
             });
 
             if (pts.length === 1) map.setView(pts[0], 13);
@@ -1253,8 +1474,10 @@
 
         function locateOnMap(i) {
             const p = photos[i];
-            if (p.lat == null) return;
+            if (!hasCoords(p)) return;
             setMode('map');
+            if (!map) return;
+            map.getContainer().focus({ preventScroll: true });
             setTimeout(() => {
                 map.setView([p.lat, p.lng], Math.max(map.getZoom(), 14));
                 markers[i] && markers[i].openPopup();
@@ -1271,12 +1494,11 @@
             cap.hidden = false;
 
             const stops = photos.map((p, i) => ({ p, i }))
-                .filter(x => x.p.lat != null)
+                .filter(x => hasCoords(x.p))
                 .sort((a, b) => (a.p.date < b.p.date ? -1 : 1));
 
-            const onUser = () => stopReplay();
-            map.on('dragstart', onUser);
-            map.on('wheel', onUser);
+            map.on('dragstart', stopFromUser);
+            map.getContainer().addEventListener('wheel', stopFromUser, { passive: true });
 
             for (const { p, i } of stops) {
                 if (token !== replayToken) break;
@@ -1286,11 +1508,18 @@
                     icon: L.divIcon({ className: '', html: '<div class="pulse-marker"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }),
                     interactive: false, zIndexOffset: 1000
                 }).addTo(map);
-                map.flyTo([p.lat, p.lng], 12, { duration: reduced ? 0 : 1.6 });
-                await Promise.race([
-                    new Promise(res => map.once('moveend', res)),
-                    new Promise(res => setTimeout(res, 4500))
-                ]);
+                await new Promise(resolve => {
+                    const done = () => {
+                        clearTimeout(timeout);
+                        map.off('moveend', done);
+                        replayWaitCancel = null;
+                        resolve();
+                    };
+                    const timeout = setTimeout(done, 4500);
+                    replayWaitCancel = done;
+                    map.once('moveend', done);
+                    map.flyTo([p.lat, p.lng], 12, { duration: reduced ? 0 : 1.6 });
+                });
                 if (token !== replayToken) break;
                 await new Promise(res => setTimeout(res, reduced ? 200 : 950));
             }
@@ -1298,26 +1527,66 @@
             if (token === replayToken) stopReplay(true);
         }
 
+        function stopFromUser() { stopReplay(); }
+
         function stopReplay(fitAll) {
             replayToken++;
             replaying = false;
-            map.off('dragstart');
-            map.off('wheel');
+            if (replayWaitCancel) replayWaitCancel();
+            map.off('dragstart', stopFromUser);
+            map.getContainer().removeEventListener('wheel', stopFromUser);
+            map.stop();
             if (pulse) { map.removeLayer(pulse); pulse = null; }
             $('replay-cap').hidden = true;
             $('replay-btn').innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8V4z"/></svg> 足迹回放';
             if (fitAll) {
-                const pts = photos.filter(p => p.lat != null).map(p => [p.lat, p.lng]);
+                const pts = photos.filter(hasCoords).map(p => [p.lat, p.lng]);
                 if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(0.25));
             }
         }
 
         /* ---------- Lightbox ---------- */
+        let lightboxOrigin = null;
+        let previousOverflow = '';
+        let imageRequest = 0;
+
+        function loadLightboxImage(p, retry = false) {
+            const request = ++imageRequest;
+            const image = $('lb-img');
+            const status = $('lb-image-status');
+            image.hidden = true;
+            image.removeAttribute('src');
+            status.hidden = false;
+            $('lb-image-message').textContent = '正在加载照片…';
+            $('lb-retry').hidden = true;
+            const source = new Image();
+            source.onload = () => {
+                if (request !== imageRequest) return;
+                image.src = source.src;
+                image.hidden = false;
+                status.hidden = true;
+            };
+            source.onerror = () => {
+                if (request !== imageRequest) return;
+                status.hidden = false;
+                $('lb-image-message').textContent = '照片暂时无法加载';
+                $('lb-retry').hidden = false;
+            };
+            source.src = retry ? p.web + (p.web.includes('?') ? '&' : '?') + 'retry=' + Date.now() : p.web;
+        }
+
         function openLightbox(i) {
+            if (!photos[i]) return;
+            if (replaying) stopReplay();
+            const opening = $('lightbox').hidden;
+            if (opening) {
+                lightboxOrigin = document.activeElement;
+                previousOverflow = document.body.style.overflow;
+            }
             current = i;
             const p = photos[i];
-            $('lb-img').src = p.web;
-            $('lb-img').alt = p.title || '';
+            loadLightboxImage(p);
+            $('lb-img').alt = p.title || [p.city || p.location, (p.date || '').slice(0, 10)].filter(Boolean).join(' · ') || '沿途风景';
             $('lb-title').textContent = p.title || '';
             $('lb-title').style.display = p.title ? '' : 'none';
             $('lb-meta').textContent = [displayWhen(p), p.location, p.desc].filter(Boolean).join(' · ');
@@ -1325,11 +1594,12 @@
             $('lb-exif').textContent = exif;
             $('lb-exif').hidden = !exif;
             $('lb-count').textContent = `${String(i + 1).padStart(2, '0')} / ${String(photos.length).padStart(2, '0')}`;
-            $('lb-map').hidden = p.lat == null;
+            $('lb-map').hidden = !hasCoords(p);
             $('lb-dl').href = p.web || '';
             $('lb-dl').setAttribute('download', (p.file || 'photo').replace(/\.[^.]+$/, '') + '.webp');
             $('lb-dl').hidden = !p.web;
             $('lightbox').hidden = false;
+            if (opening) $('lb-close').focus({ preventScroll: true });
             document.body.style.overflow = 'hidden';
             [i - 1, i + 1].forEach(j => {
                 const n = (j + photos.length) % photos.length;
@@ -1346,8 +1616,10 @@
         }
 
         function closeLightbox() {
+            imageRequest++;
             $('lightbox').hidden = true;
-            document.body.style.overflow = '';
+            document.body.style.overflow = previousOverflow;
+            if (lightboxOrigin && lightboxOrigin.isConnected) lightboxOrigin.focus({ preventScroll: true });
         }
 
         function stepLightbox(d) {

@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>关于 · Inwt</title>
-    <meta name="description" content="关于 Inwt 的小站：四条线路——随笔、摄影、古典乐与 AI 学习，所有线路终点都是热爱。">
+    <meta name="description" content="关于 Inwt 的小站：随笔、摄影、古典乐与日常训练，以及沿线相遇的朋友。所有线路终点都是热爱。">
     <link rel="canonical" href="https://inwt233.cn/about.html">
     <meta name="theme-color" content="#0a0a0c">
     <meta property="og:site_name" content="Inwt · 小站">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://inwt233.cn/about.html">
     <meta property="og:title" content="关于 · Inwt">
-    <meta property="og:description" content="四条线路——随笔、摄影、古典乐与 AI 学习，所有线路终点都是热爱。">
+    <meta property="og:description" content="随笔、摄影、古典乐与日常训练，以及沿线相遇的朋友。所有线路终点都是热爱。">
     <meta property="og:image" content="https://inwt233.cn/assets/og.png">
     <meta property="og:locale" content="zh_CN">
     <meta name="twitter:card" content="summary_large_image">
@@ -19,6 +19,8 @@
     <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
     <link rel="stylesheet" href="assets/fonts/fonts.css">
+    <link rel="stylesheet" href="assets/site.css">
+    <script>try { const saved = localStorage.getItem('theme'); if (saved === 'dark' || saved === 'light') document.documentElement.dataset.theme = saved; } catch (_) {}</script>
     <style>
         :root {
             --bg: #0a0a0c;
@@ -27,11 +29,42 @@
             --grid: rgba(255, 255, 255, 0.045);
             --panel: rgba(12, 12, 16, 0.5);
             --panel-line: rgba(255, 255, 255, 0.1);
+            --nav-bg: rgba(10, 10, 12, 0.82);
             --red: #ff5a4f;
             --cyan: #42f5e9;
             --yellow: #ffd60a;
             --green: #30d158;
             --mono: 'Space Mono', ui-monospace, monospace;
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root:not([data-theme="dark"]) {
+                --bg: #f2f2f5;
+                --ink: #1c1c22;
+                --soft: #6b6b74;
+                --grid: rgba(0, 0, 0, 0.06);
+                --panel: rgba(255, 255, 255, 0.68);
+                --panel-line: rgba(0, 0, 0, 0.1);
+                --nav-bg: rgba(242, 242, 245, 0.88);
+                --red: #e03e33;
+                --cyan: #00a89b;
+                --yellow: #c79700;
+                --green: #1f9d52;
+            }
+        }
+
+        :root[data-theme="light"] {
+            --bg: #f2f2f5;
+            --ink: #1c1c22;
+            --soft: #6b6b74;
+            --grid: rgba(0, 0, 0, 0.06);
+            --panel: rgba(255, 255, 255, 0.68);
+            --panel-line: rgba(0, 0, 0, 0.1);
+            --nav-bg: rgba(242, 242, 245, 0.88);
+            --red: #e03e33;
+            --cyan: #00a89b;
+            --yellow: #c79700;
+            --green: #1f9d52;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -52,7 +85,7 @@
             position: sticky;
             top: 0;
             z-index: 20;
-            background: rgba(10, 10, 12, 0.82);
+            background: var(--nav-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--panel-line);
@@ -86,7 +119,7 @@
             flex: none;
         }
 
-        .nav { display: flex; gap: 22px; }
+        .nav { display: flex; align-items: center; gap: 22px; }
 
         .nav a {
             color: var(--soft);
@@ -96,6 +129,16 @@
         }
 
         .nav a:hover, .nav a[aria-current="page"] { color: var(--ink); }
+
+        .theme-toggle {
+            width: 34px; height: 34px; margin-left: 4px; border: 1px solid var(--panel-line);
+            border-radius: 50%; background: var(--panel); color: var(--soft); cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .theme-toggle:hover { color: var(--ink); border-color: currentColor; }
+        .theme-toggle .icon-moon { display: none; }
+        .theme-toggle[data-dark="true"] .icon-sun { display: none; }
+        .theme-toggle[data-dark="true"] .icon-moon { display: block; }
 
         .shell {
             position: relative;
@@ -243,9 +286,18 @@
             .rise { animation: none; opacity: 1; transform: none; }
             .line-card { transition: none; }
         }
+
+        @media (max-width: 480px) {
+            .topbar-inner { height: auto; min-height: 56px; padding: 14px 20px; flex-wrap: wrap; gap: 14px; }
+            .brand { white-space: nowrap; }
+            .nav { gap: 18px; flex-wrap: wrap; }
+            .shell { padding: 0 20px 64px; }
+            .hero { padding: 52px 0 34px; }
+        }
     </style>
 </head>
 <body>
+    <noscript><style>.theme-toggle{display:none}</style></noscript>
 
     <header class="topbar">
         <div class="topbar-inner">
@@ -255,6 +307,10 @@
                 <a href="essays.html">随笔</a>
                 <a href="gallery.html">摄影集</a>
                 <a href="about.html" aria-current="page">关于</a>
+                <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换昼夜配色">
+                    <svg class="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>
+                    <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4 6.7 6.7 0 0 0 20 14.5Z"/></svg>
+                </button>
             </nav>
         </div>
     </header>
@@ -263,8 +319,6 @@
         <section class="hero rise" style="animation-delay: 0.1s">
             <div class="eyebrow">ABOUT · 站点通告</div>
             <h1>关于这趟列车</h1>
-            <p>这里是 Inwt 的站台。我喜欢铁路图那种感觉——每条线路都有自己的颜色和终点，
-            又总能在某座车站交汇。所以干脆把小站画成了一张铁路图：你刚才在门厅看到的一切，就是这里的一切。</p>
         </section>
 
         <section class="block rise" style="animation-delay: 0.22s">
@@ -299,22 +353,12 @@
                     <div class="lc-name">乐律线</div>
                     <div class="lc-sub">古典乐演出日历 · CLASSIC</div>
                 </a>
-                <a class="line-card" style="--c: var(--green)" href="https://inwt233.gitbook.io/ai-learning" target="_blank" rel="noopener">
+                <a class="line-card" style="--c: var(--green)" href="gym/">
                     <div class="lc-bar" aria-hidden="true"></div>
                     <div class="lc-name">学园线</div>
-                    <div class="lc-sub">AI 学习笔记 · AI·LEARN</div>
+                    <div class="lc-sub">日常训练与身体手账 · TRAINING</div>
                 </a>
             </div>
-            <p>随笔线写城市、行走、人与事，<a href="https://shanghai-wish-map.onrender.com/" target="_blank" rel="noopener" style="color:inherit; text-decoration:none; border-bottom:1px solid var(--panel-line); padding-bottom:2px;">魔都·Explore</a> 也从这条线发车；
-            光影线收着按快门那一刻的坐标；乐律线整理全国的古典乐演出；学园线通往 AI 学习笔记。所有线路的终点，都是热爱。</p>
-        </section>
-
-        <section class="block rise" style="animation-delay: 0.46s">
-            <div class="block-head" style="--c: var(--cyan)"><i aria-hidden="true"></i><h2>这站怎么修的</h2></div>
-            <p>小站是<b>纯静态页面</b>：没有框架、没有后端、没有访问统计，你的足迹不出站。
-            照片由手机直传到电脑，本地脚本读取拍摄坐标后生成 WebP 与缩略图，随 git 一起发布。</p>
-            <p>门厅的轨道有日间与夜间两套配色，默认跟随系统，也可以用门厅右上角的按钮手动换乘。
-            字体和地图脚本也都收进仓库里，尽量不依赖外部服务——毕竟一趟能准点的车，靠的是自己的轨道。</p>
         </section>
 
         <section class="block rise" style="animation-delay: 0.58s">
@@ -326,10 +370,28 @@
         </section>
 
         <footer class="foot">
-            <span>© INWT · EST. 2024</span>
+            <span>© INWT · EST. 2026</span>
             <span><a href="index.html">← 返回门厅</a></span>
         </footer>
     </main>
 
+<script>
+    (() => {
+        const root = document.documentElement;
+        const toggle = document.getElementById('theme-toggle');
+        const system = matchMedia('(prefers-color-scheme: dark)');
+        const dark = () => root.dataset.theme === 'dark' || (!root.dataset.theme && system.matches);
+        const update = () => {
+            const isDark = dark();
+            toggle.dataset.dark = String(isDark);
+            toggle.setAttribute('aria-label', isDark ? '切换到日间模式' : '切换到夜间模式');
+            toggle.title = toggle.getAttribute('aria-label');
+            document.querySelector('meta[name="theme-color"]').content = isDark ? '#0a0a0c' : '#f2f2f5';
+        };
+        toggle.addEventListener('click', () => { root.dataset.theme = dark() ? 'light' : 'dark'; try { localStorage.setItem('theme', root.dataset.theme); } catch (_) {} update(); });
+        system.addEventListener('change', update);
+        update();
+    })();
+</script>
 </body>
 </html>

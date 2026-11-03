@@ -35,7 +35,21 @@ def test_mobile_station_labels_do_not_expand_and_footer_year_is_current():
 def test_xsy_page_is_private_and_loads_its_collection_module():
     html = (ROOT / "xsy" / "index.html").read_text(encoding="utf-8")
     assert '<meta name="robots" content="noindex, nofollow">' in html
-    assert '<script type="module" src="app.mjs"></script>' in html
+    from html.parser import HTMLParser
+
+    class Modules(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.sources = []
+
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            if tag == 'script' and attrs.get('type') == 'module':
+                self.sources.append(attrs.get('src', '').split('?')[0])
+
+    modules = Modules()
+    modules.feed(html)
+    assert 'app.mjs' in modules.sources
     assert 'data-favorite-count' in html
     assert 'data-favorites' in html
 

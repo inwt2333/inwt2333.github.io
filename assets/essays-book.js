@@ -132,7 +132,7 @@
         Object.keys(groups).sort(function (a, b) { return b.localeCompare(a); }).forEach(function (year) {
             var heading = document.createElement('div');
             heading.className = 'shelf-year';
-            heading.innerHTML = '<strong>' + esc(year) + '</strong><span>' + groups[year].length + ' 册 · 从这一年开始保存</span>';
+            heading.innerHTML = '<strong>' + esc(year) + '</strong><span>' + groups[year].length + ' 册</span>';
             var section = document.createElement('section');
             section.className = 'year-section';
             section.setAttribute('aria-label', year + ' 年随笔');
@@ -143,7 +143,6 @@
             section.appendChild(shelves);
             var preview = document.createElement('p');
             preview.className = 'shelf-preview';
-            preview.textContent = '抽出一本，读一段当时的自己。';
             section.appendChild(preview);
             entries.appendChild(section);
         });
@@ -282,13 +281,13 @@
         var note = post.note || post.summary || (contentRoot.querySelector('p') || contentRoot).textContent.trim().slice(0, 180);
         var result = [
             {kind:'cover', html:'<section class="cover-page" style="--cover-accent:' + esc(palette[0]) + '"><span class="cover-kicker">INWT PRIVATE LIBRARY / VOL. ' + number + '</span><div class="cover-art-large">' + art + '</div><h1>' + esc(post.title) + '</h1><span class="cover-date">' + esc(post.date || '') + ' · INWT</span></section>'},
-            {kind:'note', html:'<section class="note-page"><span class="note-mark">“</span><p class="note-text">' + esc(note) + '</p><p class="note-meta">这是第 ' + number + ' 册。<br>翻开它，回到写下这段话的那一天。</p></section>'}
+            {kind:'note', html:'<section class="note-page"><span class="note-mark">“</span><p class="note-text">' + esc(note) + '</p></section>'}
         ];
         result = result.concat(splitContent(contentRoot));
         var links = '';
         if (bookIndex > 0) links += '<button type="button" data-book="' + (bookIndex - 1) + '">← 上一册 · ' + esc(essays[bookIndex - 1].title) + '</button>';
         if (bookIndex + 1 < essays.length) links += '<button type="button" data-book="' + (bookIndex + 1) + '">下一册 · ' + esc(essays[bookIndex + 1].title) + ' →</button>';
-        result.push({kind:'end', html:'<section class="end-page"><span class="cover-kicker">FIN / INWT</span><h2>这本书读到这里。</h2><p>写于 ' + esc(post.date || '某一天') + '。<br>这是书架上的第 ' + number + ' / ' + essays.length + ' 册。</p><div class="end-links">' + links + '</div></section>'});
+        result.push({kind:'end', html:'<section class="end-page"><span class="cover-kicker">FIN / INWT</span><h2>完</h2><p>' + esc(post.date || '') + '</p><div class="end-links">' + links + '</div></section>'});
         return result;
     }
 
@@ -350,7 +349,7 @@
             renderSpread();
         }).catch(function () {
             if (version !== loadVersion || reader.hidden) return;
-            pages = [{kind:'note', html:'<section class="note-page"><span class="note-mark">!</span><p class="note-text">这本书暂时打不开。</p><p class="note-meta">请使用下方“在独立文章页打开”继续阅读。</p></section>'}];
+            pages = [{kind:'note', html:'<section class="note-page"><span class="note-mark">!</span><p class="note-text">这本书暂时打不开。</p><p class="note-meta">可从下方查看原文。</p></section>'}];
             renderSpread();
         });
     }
@@ -481,7 +480,19 @@
 
     fetch('posts.json').then(function (r) { if (!r.ok) throw new Error('index'); return r.json(); }).then(function (list) {
         essays = list.filter(function (p) { return p.category === 'essay'; });
-        if (!essays.length) { entries.innerHTML = '<div class="state">还没有随笔。请在 <code>posts/</code> 中添加 <code>category: essay</code> 的文章。</div>'; return; }
+        if (!essays.length) {
+            entries.innerHTML = '<div class="state">暂无随笔。</div>';
+            document.getElementById('essay-count').textContent = '故事待续';
+            return;
+        }
         renderShelf();
-    }).catch(function () { entries.innerHTML = '<div class="state">书架暂时无法打开，请刷新重试。</div>'; });
+    }).catch(function () {
+        var message = document.createElement('div');
+        message.className = 'state';
+        message.setAttribute('role', 'status');
+        message.innerHTML = '书架加载失败。<button type="button">重新加载</button>';
+        message.querySelector('button').addEventListener('click', function () { location.reload(); });
+        entries.prepend(message);
+        document.getElementById('essay-count').textContent = '随笔目录';
+    });
 })();

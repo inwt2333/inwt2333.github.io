@@ -14,6 +14,7 @@
 | `gallery.html` | 摄影集（沉浸式封面 + 可按时间 / 地点分类的章节流 + 足迹地图；灯箱含 EXIF 器材信息与原图下载） |
 | `about.html` | 关于页 |
 | `friends.html` | 沿线友邻（主页黄线直达；三座矢量小站、支线点亮与窗灯、昼夜配色；手机沿纵向线路浏览） |
+| `food.html` | 深夜食堂（照片记忆板、每日小票、食味簿与随机食味签；加载失败可重试） |
 | `gym/` | 沉浸式训练馆（全屏室内场景、器材悬停高亮、第一人称漫游；点击查看训练、日历和体重，支持本地保存与备份） |
 | `404.html` | 404 页（铁路主题） |
 | `locate.html` | 照片定位标注工具（仅本地使用） |
@@ -67,6 +68,7 @@ cover_image: "assets/essay-covers/example.svg"
    - `post/<slug>/`（每篇随笔的静态 HTML，正文预渲染，公式由页面检测到后按需加载 MathJax）；
    - `feed.xml`（RSS 订阅，最新 20 篇）与 `sitemap.xml`；
    - 照片相关产物（见下）。
+   - 随笔页的静态文章目录与摄影集的静态缩略图入口：脚本禁用或索引请求失败时仍可访问内容，正常加载后自动切换成交互视图。
 3. 提示：新文章标题里的生僻字如果要出现在主页发车信息牌上，重跑一次
    `tools/make_fonts.py` 更新主页字体子集（子集未覆盖的字会回退系统字体，不影响功能）。
 
@@ -129,7 +131,13 @@ python -m venv .venv
 | `assets/favicon.svg` 等 | 站点图标与 `og.png` 分享卡（`tools/make_assets.py` 生成） |
 | `tools/fonts-src/` | 字体源文件（gitignore），重跑 `tools/make_fonts.py` 前确保存在 |
 
-其余页面（随笔/文章/摄影集）的 Google 字体均为非阻塞加载：大陆访问者会立即看到系统字体版式，字体加载成功后无感替换。
+摄影集也使用仓库内的字体。随笔和文章的 Google 字体均为非阻塞加载：大陆访问者会立即看到系统字体版式，字体加载成功后替换。
+
+浏览器检查可在运行静态服务后执行 `node tests/site-browser.cjs` 与 `node tests/public-pages.cjs`（需要 Playwright）。默认预览地址为 `http://127.0.0.1:8765`，可用 `SITE_TEST_URL` 覆盖；第二组可设 `SITE_TEST_ENGINE=webkit` 检查 Safari 内核。检查包含手机与横屏布局、所有文章页面、相册键盘操作、失败重试、坐标缺失与阅读进度更新。
+
+`node tests/progressive-pages.cjs` 另检查 Chromium / WebKit 的无脚本导航、静态文章和照片入口、索引失败恢复与矮屏 404。`python -m unittest discover -s tests -p 'test_progressive_build.py'` 在临时目录完成整站内容构建，检查文章、照片、RSS、站点地图及生成区域转义，不改写工作区产物。
+
+`node tests/food-resilience.cjs` 检查 Chromium / WebKit 下食堂的索引和照片重试、后台刷新焦点保留、弹窗返回与无脚本记录。`node tests/food-editor-browser.cjs` 在独立临时目录中启动编辑服务，检查配对码、保存、冲突保护及失败时保留输入，支持 Windows 与 macOS/Linux。全部 Python 构建与服务测试可用 `python -m unittest discover -s tests -p 'test_*.py'` 执行。
 
 ## 隐私边界
 

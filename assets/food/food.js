@@ -37,7 +37,7 @@ function showMeal(meal) {
     $('receipt-photos').replaceChildren(...meal.photos.map((photo, index) => {
         const button = element('button', 'dish');
         button.setAttribute('aria-label', `放大第 ${index + 1} 张美食照片`);
-        button.append(image(photo, true), element('span', '', `${String(index + 1).padStart(2, '0')} / ${String(meal.photos.length).padStart(2, '0')} · 点击放大`));
+        button.append(image(photo, true), element('span', '', `${String(index + 1).padStart(2, '0')} / ${String(meal.photos.length).padStart(2, '0')}`));
         button.addEventListener('click', () => { photoIndex = index; renderPhoto(); viewer.showModal(); });
         const entry = element('article', 'dish-entry');
         entry.append(button);
@@ -60,9 +60,11 @@ function showMeal(meal) {
     receipt.showModal();
     receipt.scrollTop = 0;
 }
-function renderPhoto() {
+function renderPhoto(retry = false) {
     const photo = activeMeal.photos[photoIndex];
-    $('full-photo').src = photo.web;
+    $('photo-error').hidden = true;
+    $('full-photo').hidden = false;
+    $('full-photo').src = photo.web + (retry ? (photo.web.includes('?') ? '&' : '?') + 'retry=' + Date.now() : '');
     $('full-photo').alt = photo.dish || `${activeMeal.date} 的第 ${photoIndex + 1} 张美食照片`;
     $('photo-caption').textContent = [activeMeal.date, photo.dish, photo.location, `${photoIndex + 1} / ${activeMeal.photos.length}`].filter(Boolean).join(' · ');
     $('previous').hidden = $('next').hidden = activeMeal.photos.length < 2;
@@ -73,7 +75,14 @@ $('next').addEventListener('click', () => step(1));
 viewer.addEventListener('keydown', event => {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); step(event.key === 'ArrowLeft' ? -1 : 1); }
 });
-$('full-photo').addEventListener('error', () => { $('full-photo').alt = '照片暂时无法加载，可以切换到下一张'; });
+$('full-photo').addEventListener('error', () => {
+    $('full-photo').hidden = true;
+    $('photo-error').hidden = false;
+});
+$('retry-photo').addEventListener('click', () => {
+    viewer.querySelector('[data-close]').focus();
+    renderPhoto(true);
+});
 for (const dialog of [menu, receipt, viewer, fortune]) {
     dialog.querySelector('[data-close]').addEventListener('click', () => dialog.close());
     dialog.addEventListener('click', event => {
@@ -118,7 +127,7 @@ async function drawFood() {
     const token = ++drawToken;
     $('draw-again').disabled = $('draw-receipt').disabled = true;
     $('fortune-result').hidden = true;
-    $('draw-status').textContent = '摇一摇签筒，让美味替你做个决定…';
+    $('draw-status').textContent = '抽签中…';
     fortune.classList.add('drawing');
     if (!reducedMotion.matches) await new Promise(resolve => setTimeout(resolve, 650));
     if (token !== drawToken || !fortune.open) return;
@@ -134,7 +143,7 @@ async function drawFood() {
     if (dish?.price !== '' && dish?.price != null) details.push(`¥${Number(dish.price).toFixed(2)}`);
     result.append(element('p', 'muted', details.filter(Boolean).join(' · ')));
     if (dish?.note) result.append(element('p', 'fortune-note', dish.note));
-    $('draw-status').textContent = '这一签，留给你的胃。';
+    $('draw-status').textContent = '';
     result.hidden = false;
     fortune.classList.remove('drawing');
     drawing = false;
@@ -170,19 +179,35 @@ function render() {
         $('archive').append(element('p', 'muted', '食味簿还是空白，下一顿就是第一页。'));
     }
 }
+let refreshing = false;
+let lastIndex = null;
 async function refresh() {
+    if (refreshing) return;
+    refreshing = true;
     try {
         const response = await fetch('food.json', {cache: 'no-store'});
         if (!response.ok) throw new Error(response.status);
         const data = await response.json();
-        boardIndex = Math.min(boardIndex, Math.max(0, Math.ceil(data.length / 3) - 1));
-        meals = data.filter(m => m.photos?.length).sort((a,b) => b.date.localeCompare(a.date));
+        if (!Array.isArray(data)) throw new Error('Invalid meal index');
+        const signature = JSON.stringify(data);
+        if (signature === lastIndex) return;
+        meals = data.filter(m => m && typeof m.date === 'string' && Array.isArray(m.photos) && m.photos.length).sort((a,b) => b.date.localeCompare(a.date));
+        boardIndex = Math.min(boardIndex, Math.max(0, Math.ceil(meals.length / 3) - 1));
         render();
+        lastIndex = signature;
     } catch {
-        $('board').replaceChildren(element('p', 'board-message', '记忆暂未送达，\n稍后再来看看。'));
-        const retry = element('button', 'archive-row', '暂时无法读取食味簿，点击重试');
+        if (lastIndex !== null) return; // Keep the last usable board on a failed local refresh.
+        const message = element('div', 'board-message');
+        message.append(element('p', '', '记忆暂未送达，\n稍后再来看看。'));
+        const reload = element('button', 'board-retry', '重新加载');
+        reload.addEventListener('click', refresh);
+        message.append(reload);
+        $('board').replaceChildren(message);
+        const retry = element('button', 'archive-row', '重新加载食味簿');
         retry.addEventListener('click', refresh);
         $('archive').replaceChildren(retry);
+    } finally {
+        refreshing = false;
     }
 }
 refresh();

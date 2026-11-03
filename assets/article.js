@@ -84,15 +84,21 @@
     }
 
     /* ---------- 阅读进度条 ---------- */
+    var updateProgress = function () {};
     (function progress() {
         var bar = document.getElementById('progress');
         if (!bar) return;
         function update() {
             var h = document.documentElement;
             var max = h.scrollHeight - h.clientHeight;
-            bar.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+            bar.style.width = (max > 0 ? Math.min(100, Math.max(0, (h.scrollTop / max) * 100)) : 0) + '%';
         }
+        updateProgress = update;
         addEventListener('scroll', update, { passive: true });
+        addEventListener('resize', update, { passive: true });
+        addEventListener('load', update);
+        if (window.ResizeObserver && content) new ResizeObserver(update).observe(content);
+        if (document.fonts) document.fonts.ready.then(update);
         update();
     })();
 
@@ -147,10 +153,42 @@
     }
 
     function afterRender(rawText) {
+        if (content) {
+            content.querySelectorAll('table').forEach(function (table) {
+                var wrapper = document.createElement('div');
+                wrapper.className = 'table-scroll';
+                wrapper.tabIndex = 0;
+                wrapper.setAttribute('role', 'region');
+                wrapper.setAttribute('aria-label', '文章表格，可横向滚动');
+                table.before(wrapper);
+                wrapper.appendChild(table);
+            });
+            content.querySelectorAll('img').forEach(function (img) {
+                img.loading = 'lazy';
+                img.decoding = 'async';
+                img.addEventListener('load', updateProgress, { once: true });
+            });
+        }
         readingTime();
         buildToc();
         prevNext();
         if (rawText && needsMath(rawText)) loadMathJax();
+        updateProgress();
+    }
+
+    function showArticleError(invalid) {
+        var title = invalid ? '未找到这篇文章' : '文章暂时没能抵达';
+        document.title = title + ' · Inwt';
+        var heading = document.getElementById('title-placeholder');
+        if (heading) heading.textContent = title;
+        if (!content) return;
+        content.innerHTML = '<div class="article-error" role="status"><p>'
+            + (invalid ? '这个链接可能不完整，可以回书架找找。' : '请稍后重试，也可以先回书架看看其他文章。')
+            + '</p>' + (invalid ? '' : '<button type="button" id="retry-article">重新加载</button> ')
+            + '<a href="' + ROOT + 'essays.html">返回书架 →</a></div>';
+        var retry = document.getElementById('retry-article');
+        if (retry) retry.addEventListener('click', function () { location.reload(); });
+        updateProgress();
     }
 
     /* ---------- 正文渲染 ---------- */
@@ -167,10 +205,10 @@
                 content.innerHTML = window.marked ? marked.parse(body) : '<p style="color:var(--seal)">渲染器加载失败，请刷新重试。</p>';
                 afterRender(body);
             })
-            .catch(function (err) {
-                content.innerHTML = '<p style="color:var(--seal); text-align:center;">文章加载失败：' + esc(err.message) + '</p>';
+            .catch(function () {
+                showArticleError(false);
             });
     } else {
-        content.innerHTML = '<p style="text-align:center;">无效的文章链接。</p>';
+        showArticleError(true);
     }
 })();

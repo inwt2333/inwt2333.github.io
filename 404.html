@@ -8,10 +8,10 @@
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#0a0a0c">
     <link rel="canonical" href="https://inwt233.cn/404.html">
-    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-    <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
-    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-    <link rel="stylesheet" href="assets/fonts/fonts.css">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="/assets/fonts/fonts.css">
     <style>
         :root {
             --bg: #0a0a0c;
@@ -30,18 +30,22 @@
         html, body { height: 100%; }
 
         body {
+            min-height: 100svh;
+            height: auto;
             background: var(--bg);
             background-image: radial-gradient(var(--grid) 1px, transparent 1px);
             background-size: 26px 26px;
             color: var(--ink);
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             -webkit-font-smoothing: antialiased;
         }
 
         .panel {
+            margin: auto 0;
             text-align: center;
             padding: 0 28px;
             max-width: 640px;
@@ -110,9 +114,7 @@
         .links a.primary:hover { background: rgba(48, 209, 88, 0.1); border-color: var(--green); }
 
         footer {
-            position: fixed;
-            bottom: 26px;
-            left: 0; right: 0;
+            padding: 26px 0;
             text-align: center;
             font-family: var(--mono);
             font-size: 0.66rem;
@@ -128,6 +130,7 @@
         @media (prefers-reduced-motion: reduce) {
             * { animation: none !important; }
         }
+        @media (max-height: 650px) { .panel { padding-top: 28px; } .eyebrow { margin-bottom: 20px; } }
     </style>
 </head>
 <body>
@@ -145,16 +148,16 @@
 
         <div class="code">4<span>0</span>4</div>
         <h1>本次列车不停靠此站</h1>
-        <p class="desc">你要找的站台不存在，或者已经改线。<br>车门已关闭，请随列车返回门厅换乘。</p>
+        <p class="desc">这个站台不存在。</p>
 
         <nav class="links" aria-label="换乘线路">
-            <a class="primary" href="index.html">返回门厅</a>
-            <a href="essays.html">随笔线</a>
-            <a href="gallery.html">光影线</a>
+            <a class="primary" href="/">返回门厅</a>
+            <a href="/essays.html">随笔线</a>
+            <a href="/gallery.html">光影线</a>
         </nav>
     </main>
 
-    <footer>© INWT · EST. 2024</footer>
+    <footer>© INWT · EST. 2026</footer>
 
 </body>
 </html>

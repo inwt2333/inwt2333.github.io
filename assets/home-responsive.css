@@ -1,0 +1,24 @@
+/* Keep every destination visible instead of cropping the desktop map on phones. */
+.plain-navigation { position: relative; z-index: 10; display: flex; flex-wrap: wrap; gap: 10px; padding: 16px; background: var(--bg); }
+.plain-navigation p { width: 100%; }
+.plain-navigation a { padding: 10px 14px; border: 1px solid var(--panel-line); border-radius: 8px; color: var(--ink); text-decoration: none; }
+.station:focus-visible .st-name { text-decoration: underline; text-underline-offset: 6px; }
+.platform-kicker { gap: 12px; flex-wrap: wrap; }
+.platform-kicker span { flex-shrink: 0; }
+@media (max-width: 700px), (max-height: 500px), (min-aspect-ratio: 2/1) {
+    body { overflow: auto; min-height: 100svh; }
+    .masthead { position: absolute; top: 22px; left: 22px; }
+    .masthead h1 { font-size: 1.6rem; }
+    .theme-toggle { position: absolute; top: 22px; right: 22px; }
+    .map { position: relative; inset: auto; margin-top: 142px; width: 100%; height: max(470px, calc(100svh - 260px)); }
+    .platform-panel { display: block; position: relative; inset: auto; width: auto; margin: 4px 22px 24px; }
+    .platform-main { gap: 16px; }
+    .platform-title { white-space: normal; overflow-wrap: anywhere; }
+    .footer-hint { position: relative; inset: auto; padding: 0 22px 24px; }
+    .decor { display: none; }
+    #sub-gallery { transform: translateY(26px); }
+}
+@media (max-height: 500px) and (min-width: 701px) {
+    .map { height: 650px; }
+    .platform-panel { max-width: 600px; margin-left: auto; margin-right: auto; }
+}

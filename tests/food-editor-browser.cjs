@@ -12,9 +12,10 @@ const {spawn} = require('node:child_process');
  fs.writeFileSync(path.join(tmp,'food/manual.json'),'{"photos":{},"meals":{}}');
  fs.copyFileSync('food.html',path.join(tmp,'food.html'));
  fs.copyFileSync('tools/food-editor.html',path.join(tmp,'tools/food-editor.html'));
- fs.symlinkSync(path.join(root,'assets'),path.join(tmp,'assets'));
- for(const folder of ['web','thumb'])fs.symlinkSync(path.join(root,'food',folder),path.join(tmp,'food',folder));
- const server=spawn('.venv/bin/python',['-u','-c',`import serve; serve.ROOT=${JSON.stringify(tmp)}; serve.SRC_DIR=${JSON.stringify(path.join(tmp,'photos/src'))}; serve.PORT=8201; serve.PIN='1234'; serve.main()`],{stdio:['ignore','pipe','pipe']});
+ fs.symlinkSync(path.join(root,'assets'),path.join(tmp,'assets'),process.platform==='win32'?'junction':'dir');
+ for(const folder of ['web','thumb'])fs.symlinkSync(path.join(root,'food',folder),path.join(tmp,'food',folder),process.platform==='win32'?'junction':'dir');
+ const python=process.env.PYTHON || path.join(root,'.venv',process.platform==='win32'?'Scripts/python.exe':'bin/python');
+ const server=spawn(python,['-u','-c',`import serve; serve.ROOT=${JSON.stringify(tmp)}; serve.SRC_DIR=${JSON.stringify(path.join(tmp,'photos/src'))}; serve.PORT=8201; serve.PIN='1234'; serve.main()`],{stdio:['ignore','pipe','pipe']});
  let logs='';server.stdout.on('data',c=>logs+=c);server.stderr.on('data',c=>logs+=c);
  let browser;
  try{
@@ -70,5 +71,5 @@ const {spawn} = require('node:child_process');
   assert.equal(await input.inputValue(),'保存失败也要保留');
   assert.deepEqual(errors,[]);
   console.log('PASS editor PIN, save/rebuild, public captions, clear/reset, search, responsive layout, failed-save retention and conflict protection.');
- }catch(e){console.error(logs);throw e;}finally{if(browser)await browser.close();server.kill('SIGTERM');await new Promise(r=>server.once('exit',r));fs.rmSync(tmp,{recursive:true,force:true});}
+ }catch(e){console.error(logs);throw e;}finally{if(browser)await browser.close();if(server.exitCode===null){server.kill('SIGTERM');await new Promise(r=>server.once('exit',r));}const resolved=fs.realpathSync(tmp);assert.equal(path.dirname(resolved),fs.realpathSync(os.tmpdir()));assert.ok(path.basename(resolved).startsWith('food-editor-test-'));fs.rmSync(resolved,{recursive:true,force:true});}
 })().catch(e=>{console.error(e);process.exit(1)});

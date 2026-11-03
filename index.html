@@ -459,10 +459,27 @@
             .status .dot { animation: none; }
         }
     </style>
+    <link rel="stylesheet" href="assets/home-responsive.css">
     <script>/* 昼夜记忆：渲染前恢复上次的手动选择，避免闪屏 */
     try { var _t = localStorage.getItem('theme'); if (_t) document.documentElement.dataset.theme = _t; } catch (e) {}</script>
 </head>
 <body>
+    <noscript>
+        <style>
+            body { overflow: auto; }
+            .map, .masthead, .theme-toggle, .legend, .platform-panel, .footer-hint, .cursor-glow { display: none; }
+            .plain-navigation { max-width: 640px; margin: 10vh auto; padding: 24px; }
+            .plain-navigation p { font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; }
+        </style>
+        <nav class="plain-navigation" aria-label="小站导航">
+            <p>选择下一站</p>
+            <a href="essays.html">随笔</a><a href="gallery.html">摄影集</a>
+            <a href="gym/">训练馆</a><a href="friends.html">友链</a><a href="about.html">关于</a>
+            <a href="food.html">深夜食堂</a>
+            <a href="https://inwt233.cn/Classic-Music/" target="_blank" rel="noopener">古典乐日历 ↗</a>
+            <a href="https://shanghai-wish-map.onrender.com/" target="_blank" rel="noopener">城市探索 ↗</a>
+        </nav>
+    </noscript>
 
     <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
 
@@ -611,8 +628,11 @@
 
     <script>
         const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const revisit = !!sessionStorage.getItem('visited');
-        sessionStorage.setItem('visited', '1');
+        let revisit = false;
+        try {
+            revisit = !!sessionStorage.getItem('visited');
+            sessionStorage.setItem('visited', '1');
+        } catch (_) { /* Navigation must work when browser storage is unavailable. */ }
         if (revisit) document.body.classList.add('revisit');
 
         /* ---------- 由航点生成「直线 + 圆角转弯」路径 ---------- */
@@ -734,9 +754,9 @@
         fetch('posts.json')
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(list => {
-                const latest = list.find(p => p.category === 'essay');
+                const latest = list.filter(p => p.category === 'essay').sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0];
                 if (latest) {
-                    document.getElementById('sub-essays').textContent = '最新 · ' + latest.title;
+                    document.getElementById('sub-essays').textContent = '最新 · ' + (latest.date || '文字与随想');
                     const item = document.getElementById('platform-latest');
                     item.href = latest.url || 'essays.html';
                     item.querySelector('.platform-title').textContent = latest.title;
@@ -751,12 +771,13 @@
         fetch('photos.json')
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(ps => {
-                const m = new Set(ps.filter(p => p.lat != null).map(p => p.lat.toFixed(1) + ',' + p.lng.toFixed(1))).size;
+                const m = new Set(ps.filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lng)).map(p => p.lat.toFixed(1) + ',' + p.lng.toFixed(1))).size;
                 document.getElementById('sub-gallery').textContent = `${ps.length} 张照片 · ${m} 处足迹`;
             })
             .catch(() => {
                 document.getElementById('sub-gallery').textContent = '按下快门的地方';
             });
     </script>
+    <script src="assets/home-responsive.js" defer></script>
 </body>
 </html>

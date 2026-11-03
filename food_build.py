@@ -1,9 +1,8 @@
 """Build the independent food journal using the gallery's image processing helpers."""
 import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 from build import _make_sizes, _read_exif
 
@@ -44,7 +43,7 @@ def build_food(root=None):
     old = _load(root/'food.json', [])
     photos = {p['file']: dict(p) for meal in old for p in meal['photos']}
     manual = _load(folder/'manual.json', {})
-    today = datetime.now(ZoneInfo('Asia/Shanghai')).strftime('%Y-%m-%d')
+    today = datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d')
     for src in sorted((folder/'src').iterdir()):
         if src.suffix.lower() not in {'.jpg', '.jpeg', '.png', '.heic', '.heif'}:
             continue

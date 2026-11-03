@@ -20,7 +20,7 @@ class FoodEditorTest(unittest.TestCase):
             self.assertEqual(saved['date'],'2026-11-02')
             self.assertEqual(saved['dish'],'牛肉面')
             self.assertEqual(saved['note'],'<script>文字</script>')
-            manual=json.loads((root/'food/manual.json').read_text())
+            manual=json.loads((root/'food/manual.json').read_text(encoding='utf-8'))
             self.assertEqual(manual['meals']['2026-11-01']['note'],'保留整日备注')
             with self.assertRaises(food_editor.EditConflict):
                 food_editor.save_edits(root, {'revision':state['revision'],'photos':[]})

@@ -34,3 +34,15 @@
     transform-origin: left;
 }
 @media (prefers-reduced-motion: reduce) { .site-nav-link::after { transition: none; } }
+
+/* Make keyboard navigation visible on map links, photo cells and page controls. */
+a:focus-visible, button:focus-visible, [role="button"]:focus-visible {
+    outline: 2px solid var(--cyan, var(--seal, var(--site-accent)));
+    outline-offset: 4px;
+}
+.cell:focus-visible { outline-offset: -4px; }
+#grid-empty button, #grid-empty a {
+    display: inline-block; margin: 16px 8px 0; padding: 10px 18px;
+    border: 1px solid var(--line); border-radius: 24px;
+    color: var(--ink); background: transparent; font: inherit; cursor: pointer;
+}
