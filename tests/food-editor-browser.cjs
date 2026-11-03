@@ -9,7 +9,7 @@ const {spawn} = require('node:child_process');
  const root=process.cwd(), tmp=fs.mkdtempSync(path.join(os.tmpdir(),'food-editor-test-'));
  fs.mkdirSync(path.join(tmp,'food')); fs.mkdirSync(path.join(tmp,'tools'));
  fs.copyFileSync('food.json',path.join(tmp,'food.json'));
- fs.writeFileSync(path.join(tmp,'food/manual.json'),'{"photos":{},"meals":{}}');
+ fs.copyFileSync('food/manual.json',path.join(tmp,'food/manual.json'));
  fs.copyFileSync('food.html',path.join(tmp,'food.html'));
  fs.copyFileSync('tools/food-editor.html',path.join(tmp,'tools/food-editor.html'));
  fs.symlinkSync(path.join(root,'assets'),path.join(tmp,'assets'),process.platform==='win32'?'junction':'dir');

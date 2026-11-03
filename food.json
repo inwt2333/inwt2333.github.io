@@ -92,5 +92,192 @@
         ]
       }
     ]
+  },
+  {
+    "id": "2026-10-25",
+    "date": "2026-10-25",
+    "title": "",
+    "note": "女仆咖啡厅，得劲魔法～",
+    "cover": "IMG_4599.HEIC",
+    "photos": [
+      {
+        "file": "IMG_4599.HEIC",
+        "sha256": "2728d0dcc772b4df272d2115b9f2cd74b0d73748bb512cc78bd6804cbdebad81",
+        "web": "food/web/99c59773c21e01dc31c1.webp",
+        "thumb": "food/thumb/99c59773c21e01dc31c1.webp",
+        "ratio": 0.75,
+        "source_date": "2026-10-25",
+        "date": "2026-10-25",
+        "location": "静安大悦城女仆咖啡厅",
+        "dish": "蛋包饭",
+        "note": "",
+        "dishes": [
+          {
+            "name": "蛋包饭",
+            "price": "68",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2026-10-22",
+    "date": "2026-10-22",
+    "title": "",
+    "note": "",
+    "cover": "IMG_4518.JPG",
+    "photos": [
+      {
+        "file": "IMG_4518.JPG",
+        "sha256": "b5ef852b4895c7ce85745693715f40410afb6190cc2a3718d1468121dc2807e0",
+        "web": "food/web/0fd89ec44b4b0bb5422f.webp",
+        "thumb": "food/thumb/0fd89ec44b4b0bb5422f.webp",
+        "ratio": 0.75,
+        "source_date": "2026-11-03",
+        "date": "2026-10-22",
+        "location": "哈乐餐厅",
+        "dish": "小馄饨",
+        "note": "",
+        "dishes": [
+          {
+            "name": "小馄饨",
+            "price": "15",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2026-10-19",
+    "date": "2026-10-19",
+    "title": "",
+    "note": "",
+    "cover": "IMG_4439.HEIC",
+    "photos": [
+      {
+        "file": "IMG_4439.HEIC",
+        "sha256": "b740b29c03950dd43964a42eca9f5eb4dbeccca279f95a6634b7e48a93b205f5",
+        "web": "food/web/571945f9f1e7ead2b6ec.webp",
+        "thumb": "food/thumb/571945f9f1e7ead2b6ec.webp",
+        "ratio": 1.3333,
+        "source_date": "2026-10-19",
+        "date": "2026-10-19",
+        "location": "老胖烧烤",
+        "dish": "烧烤",
+        "note": "",
+        "dishes": [
+          {
+            "name": "烧烤",
+            "price": "",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "file": "IMG_4441.HEIC",
+        "sha256": "9a38fb154f9a9976a18c104c2b51dc5da680f0f74bc648ac7b6768bb122cc970",
+        "web": "food/web/8cecc8478004ef813f1c.webp",
+        "thumb": "food/thumb/8cecc8478004ef813f1c.webp",
+        "ratio": 1.3333,
+        "source_date": "2026-10-19",
+        "date": "2026-10-19",
+        "location": "老胖烧烤",
+        "dish": "烧烤",
+        "note": "",
+        "dishes": [
+          {
+            "name": "烧烤",
+            "price": "",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2026-10-18",
+    "date": "2026-10-18",
+    "title": "",
+    "note": "鱼鳍请客～",
+    "cover": "IMG_4430.HEIC",
+    "photos": [
+      {
+        "file": "IMG_4430.HEIC",
+        "sha256": "805bae2ebdc50123d6c34de3a193a9a634a9c25438189acf553e8363afc71503",
+        "web": "food/web/5d55f2ede2923d13aa39.webp",
+        "thumb": "food/thumb/5d55f2ede2923d13aa39.webp",
+        "ratio": 0.75,
+        "source_date": "2026-10-18",
+        "date": "2026-10-18",
+        "location": "",
+        "dish": "麦当劳",
+        "note": "",
+        "dishes": [
+          {
+            "name": "麦当劳",
+            "price": "",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2026-10-16",
+    "date": "2026-10-16",
+    "title": "",
+    "note": "",
+    "cover": "IMG_4391.HEIC",
+    "photos": [
+      {
+        "file": "IMG_4391.HEIC",
+        "sha256": "28b9bd9dce59f297f06912daea80e5ee7f9d02727af4c876d69924080542d806",
+        "web": "food/web/72e705688b201ef3cc01.webp",
+        "thumb": "food/thumb/72e705688b201ef3cc01.webp",
+        "ratio": 0.9099,
+        "source_date": "2026-10-16",
+        "date": "2026-10-16",
+        "location": "屠手猪脚饭",
+        "dish": "三拼猪脚饭",
+        "note": "",
+        "dishes": [
+          {
+            "name": "三拼猪脚饭",
+            "price": "19",
+            "note": "蹄膀，叉烧，肉卷"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2026-10-12",
+    "date": "2026-10-12",
+    "title": "",
+    "note": "",
+    "cover": "IMG_4313.heic",
+    "photos": [
+      {
+        "file": "IMG_4313.heic",
+        "sha256": "00ab637fd723ec8408d47006a8c9d01ff74e40bef8e89ed41e24bf52e440ab68",
+        "web": "food/web/bcd16632f147fd5cc8ef.webp",
+        "thumb": "food/thumb/bcd16632f147fd5cc8ef.webp",
+        "ratio": 0.75,
+        "source_date": "2026-10-12",
+        "date": "2026-10-12",
+        "location": "霸王茶姬",
+        "dish": "霸王茶姬",
+        "note": "",
+        "dishes": [
+          {
+            "name": "霸王茶姬",
+            "price": "18",
+            "note": "买一送一"
+          }
+        ]
+      }
+    ]
   }
 ]
