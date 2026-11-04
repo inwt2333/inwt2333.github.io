@@ -28,8 +28,9 @@ class MusicEditorTest(unittest.TestCase):
                 editor.extract_song_id(text)
 
     def test_save_edit_delete_and_build(self):
-        state = self.save()
+        state = self.save(playbackSourceId='https://music.163.com/song?id=573579809')
         identifier = state['tracks'][0]['id']
+        self.assertEqual(state['tracks'][0]['playbackSourceId'], '573579809')
         self.assertEqual(json.loads((self.root/'music/collection.json').read_text(encoding='utf8'))['tracks'][0]['note'], self.track['note'])
         self.assertEqual(json.loads((self.root/'music/collection.json').read_text(encoding='utf8'))['tracks'][0]['excerpt'], self.track['excerpt'])
         for path in ['music/index.html', 'music/classical/index.html', 'music/japanese/index.html']:
@@ -58,7 +59,7 @@ class MusicEditorTest(unittest.TestCase):
         self.assertEqual([f.read_bytes() for f in files], before)
 
     def test_invalid_metadata_is_rejected_before_writing(self):
-        for change in [{'title':''}, {'room':'other'}, {'cover':'javascript:alert(1)'}, {'url':'https://example.com'}, {'url':'https://music.163.com/song?id=1'}, {'tags':'not a list'}, {'duration':-1}, {'date':'2026-02-30'}, {'excerpt':'a' * 601}]:
+        for change in [{'title':''}, {'room':'other'}, {'cover':'javascript:alert(1)'}, {'url':'https://example.com'}, {'url':'https://music.163.com/song?id=1'}, {'playbackSourceId':'https://example.com/song?id=2'}, {'tags':'not a list'}, {'duration':-1}, {'date':'2026-02-30'}, {'excerpt':'a' * 601}]:
             with self.assertRaises(ValueError):
                 self.save(**change)
         self.assertFalse((self.root/'music/library.json').exists())

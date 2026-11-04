@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const fields = ['title','artist','album','room','tags','date','note','excerpt','composer','work','performers','duration','cover'];
+  const fields = ['title','artist','album','room','tags','date','note','excerpt','composer','work','performers','duration','cover','playbackSourceId'];
   let pin = '', revision = '', tracks = [], currentId = null, sourceId = '', dirty = false, recognizing = false, saving = false;
   const touched = new Set();
   function status(id, text, error = false) { $(id).textContent = text; $(id).dataset.error = String(error); }

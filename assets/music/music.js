@@ -56,19 +56,23 @@
     document.querySelector('.sleeve-name').hidden = !!cover;
     const link = $('listen-link'), player = $('netease-player'), shell = $('embedded-player');
     link.hidden = true; link.removeAttribute('href'); shell.hidden = true;
-    let songId = /^[1-9][0-9]{0,15}$/.test(String(track.sourceId || '')) ? String(track.sourceId) : '';
+    link.textContent = '无法播放或需要会员？在网易云打开 ↗';
+    let originalId = /^[1-9][0-9]{0,15}$/.test(String(track.sourceId || '')) ? String(track.sourceId) : '';
     try {
       const url = new URL(track.url);
       if (url.protocol === 'https:' && ['music.163.com', 'y.music.163.com'].includes(url.hostname)) {
-        if (!songId && /^[1-9][0-9]{0,15}$/.test(url.searchParams.get('id') || '')) songId = url.searchParams.get('id');
+        if (!originalId && /^[1-9][0-9]{0,15}$/.test(url.searchParams.get('id') || '')) originalId = url.searchParams.get('id');
         link.href = url.href; link.hidden = false; shell.hidden = false;
       }
     } catch { /* Manually entered records may have no music link. */ }
+    const alternateId = /^[1-9][0-9]{0,15}$/.test(String(track.playbackSourceId || '')) ? String(track.playbackSourceId) : '';
+    const songId = alternateId || originalId;
     if (songId) {
       const source = 'https://music.163.com/outchain/player?type=2&id=' + songId + '&auto=0&height=66';
       player.hidden = false; shell.hidden = false;
       if (player.src !== source) player.src = source;
-      link.href = 'https://music.163.com/song?id=' + songId;
+      link.href = 'https://music.163.com/song?id=' + (originalId || songId);
+      if (alternateId && originalId && alternateId !== originalId) link.textContent = '内嵌播放为同曲另一发行版 · 查看原收藏 ↗';
       link.hidden = false;
     } else {
       player.hidden = true;

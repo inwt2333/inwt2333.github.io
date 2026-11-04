@@ -87,7 +87,8 @@ def read_state(root):
 
 
 TEXT_FIELDS = {'title': 300, 'artist': 500, 'album': 500, 'note': 12000, 'excerpt': 600, 'composer': 300,
-               'performers': 500, 'work': 300, 'date': 10, 'sourceId': 16, 'url': 2000, 'cover': 2000}
+               'performers': 500, 'work': 300, 'date': 10, 'sourceId': 16, 'url': 2000, 'cover': 2000,
+               'playbackSourceId': 2000}
 
 
 def validate_track(track):
@@ -114,6 +115,8 @@ def validate_track(track):
         raise ValueError('歌曲链接应为网易云音乐地址。')
     if item['sourceId'] and not re.fullmatch(r'[1-9][0-9]{0,15}', item['sourceId']):
         raise ValueError('歌曲 ID 格式不正确。')
+    if item['playbackSourceId']:
+        item['playbackSourceId'] = extract_song_id(item['playbackSourceId'])
     if item['url']:
         if urlparse(item['url']).hostname not in {'music.163.com', 'y.music.163.com'}:
             raise ValueError('请先识别短链接，或填写歌曲的完整链接。')
