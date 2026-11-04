@@ -83,12 +83,12 @@ h1 .title-dot { display: none; }
 .railway[data-active="andy"] .neighbor[data-neighbor="andy"] .station-scene,
 .railway[data-active="chrmysle"] .neighbor[data-neighbor="chrmysle"] .station-scene,
 .railway[data-active="koitown"] .neighbor[data-neighbor="koitown"] .station-scene,
-.railway[data-active="yuhua"] .neighbor[data-neighbor="yuhua"] .station-scene { opacity: 1; }
+.railway[data-active="silhovette"] .neighbor[data-neighbor="silhovette"] .station-scene { opacity: 1; }
 .stations { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr); grid-template-rows: repeat(5, 1fr); column-gap: 0; row-gap: 24px; padding-top: 42px; }
 .neighbor { --accent: var(--red); --roof: color-mix(in srgb, var(--accent) 9%, var(--bg)); --roof-dark: var(--accent); --foliage: color-mix(in srgb, var(--ink) 4%, var(--bg)); --window: color-mix(in srgb, var(--accent) 14%, var(--bg)); position: relative; min-width: 0; display: block; border-radius: 14px; }
 .neighbor[data-neighbor="chrmysle"] { --accent: var(--sage); }
 .neighbor[data-neighbor="koitown"] { --accent: #f28c38; }
-.neighbor[data-neighbor="yuhua"] { --accent: #8d63bc; }
+.neighbor[data-neighbor="silhovette"] { --accent: #8d63bc; }
 .station-scene { display: block; width: min(100%, 480px); height: auto; overflow: visible; transition: opacity .3s; }
 .station-scene .stroke { stroke: var(--outline); stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
 .station-scene .solid { fill: var(--building); }

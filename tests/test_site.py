@@ -72,7 +72,7 @@ def test_friends_page_lists_every_neighbour_as_a_safe_external_link():
     assert html.count('class="neighbor"') == 4
     for href in ("http://andysgz.top", "https://chrmysle.cn/", "https://koitown.cn/", "https://silhovette.github.io/photos.html"):
         assert f'href="{href}" target="_blank" rel="noopener"' in html
-    assert 'data-neighbor="yuhua"' in html
+    assert 'data-neighbor="silhovette"' in html
     assert 'aria-label="四座友邻小站"' in html
     for branch in ("andy", "koitown", "chrmysle"):
         assert f'data-branch="{branch}"' in html
@@ -103,8 +103,10 @@ def test_koitown_station_uses_orange_koi_and_centered_signage():
     assert "grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr)" in css
 
 
-def test_yuhua_photos_station_has_its_own_theme_and_centered_sign():
+def test_silhovette_photos_station_has_its_own_theme_and_centered_sign():
     html = (ROOT / "friends.html").read_text(encoding="utf-8")
     css = (ROOT / "assets" / "friends.css").read_text(encoding="utf-8")
-    assert '<text x="260" y="143" text-anchor="middle" class="scene-label">YUHUA LUO</text>' in html
-    assert '.neighbor[data-neighbor="yuhua"] { --accent: #8d63bc; }' in css
+    assert '<text x="260" y="143" text-anchor="middle" class="scene-label">silhovette</text>' in html
+    assert '<h2>silhovette</h2>' in html
+    assert 'aria-label="访问 silhovette 的摄影作品集（新窗口）"' in html
+    assert '.neighbor[data-neighbor="silhovette"] { --accent: #8d63bc; }' in css
