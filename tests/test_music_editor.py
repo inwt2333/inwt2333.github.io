@@ -28,12 +28,13 @@ class MusicEditorTest(unittest.TestCase):
                 editor.extract_song_id(text)
 
     def test_save_edit_delete_and_build(self):
-        state = self.save(playbackSourceId='https://music.163.com/song?id=573579809')
+        state = self.save(room='roaming', playbackSourceId='https://music.163.com/song?id=573579809')
         identifier = state['tracks'][0]['id']
+        self.assertEqual(state['tracks'][0]['room'], 'roaming')
         self.assertEqual(state['tracks'][0]['playbackSourceId'], '573579809')
         self.assertEqual(json.loads((self.root/'music/collection.json').read_text(encoding='utf8'))['tracks'][0]['note'], self.track['note'])
         self.assertEqual(json.loads((self.root/'music/collection.json').read_text(encoding='utf8'))['tracks'][0]['excerpt'], self.track['excerpt'])
-        for path in ['music/index.html', 'music/classical/index.html', 'music/japanese/index.html']:
+        for path in ['music/index.html', 'music/classical/index.html', 'music/japanese/index.html', 'music/roaming/index.html']:
             self.assertTrue((self.root/path).is_file())
         edited = editor.save_edit(self.root, {'revision':state['revision'], 'id':identifier, 'track':{**self.track, 'note':''}})
         self.assertEqual(edited['tracks'][0]['note'], '')

@@ -5,21 +5,20 @@
     .venv/bin/python serve.py            # macOS / Linux
 
 手机与电脑连接同一 Wi-Fi，用手机浏览器打开启动后打印的局域网地址，
-进入「上传」页面，输入终端里显示的 4 位配对码后选择照片。照片会以
+进入「上传」页面，选择照片即可。照片会以
 原始文件形式（EXIF 定位完整保留）保存到 photos/src/，全部传完后
 自动运行 build.py 重新构建索引。
 
-安全设计（服务只监听局域网，但仍以防所在的 Wi-Fi 并不可信）：
-- 每次启动生成 4 位配对码，上传必须携带；
+服务会监听本机所有网络接口，只应在可信的局域网中运行：
+- 仅在可信的局域网内启动，使用后关闭服务；
 - 静态文件只暴露站点白名单目录（.git / photos/src / 脚本等一律不可读）；
 - 单文件上限 80MB。
 
-仅限局域网内使用；Ctrl+C 停止。首次运行若弹出防火墙提示，请选择「允许」。
+仅在可信的局域网中使用；Ctrl+C 停止。首次运行若弹出防火墙提示，请选择「允许」。
 """
 import json
 import hashlib
 import os
-import random
 import socket
 import subprocess
 import sys
@@ -33,8 +32,6 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.join(ROOT, 'photos', 'src')
 ALLOWED_EXT = {'.jpg', '.jpeg', '.png', '.heic', '.heif'}
 MAX_UPLOAD = 80 * 1024 * 1024  # 单文件 80MB 上限
-
-PIN = f'{random.randint(0, 9999):04d}'  # 每次启动随机生成，打印在终端
 
 # 手机预览可访问的范围：站点页面与其依赖，其余（.git、photos/src、脚本）一律 404
 ALLOWED_GET = {
@@ -74,17 +71,6 @@ UPLOAD_PAGE = """<!doctype html>
     .eyebrow { font-size: 0.68rem; letter-spacing: 0.4em; color: #9a9aa0; margin-bottom: 14px; }
     h1 { font-size: 1.6rem; letter-spacing: 0.2em; margin-bottom: 8px; }
     .sub { color: #9a9aa0; font-size: 0.82rem; line-height: 1.8; text-align: center; margin-bottom: 26px; }
-    .pin-row {
-        display: flex; align-items: center; gap: 12px; margin-bottom: 30px;
-        color: #9a9aa0; font-size: 0.82rem;
-    }
-    .pin-row input {
-        width: 110px; background: rgba(255,255,255,.06); color: #f5f5f7;
-        border: 1px solid rgba(255,255,255,.25); border-radius: 10px;
-        padding: 10px 0; text-align: center; font-size: 1.25rem; letter-spacing: .45em;
-        font-family: ui-monospace, Menlo, monospace; outline: none;
-    }
-    .pin-row input:focus { border-color: #30d158; }
     label.btn {
         display: block; width: min(420px, 86vw); text-align: center;
         border: 1px dashed rgba(255,255,255,.3); border-radius: 16px;
@@ -112,12 +98,7 @@ UPLOAD_PAGE = """<!doctype html>
     <div class="eyebrow mono">DIRECT UPLOAD</div>
     <h1>照片直传</h1>
     <a href="/food-edit" style="color:#cdb88e;font-size:14px;margin:10px 0 20px">编辑已有美食照片 →</a>
-    <p class="sub">输入电脑终端显示的 4 位配对码连接，<br>照片原样上传（保留拍摄定位），传完自动构建，git push 即可发布。</p>
-
-    <div class="pin-row">
-        <span class="mono">PIN</span>
-        <input id="pin" inputmode="numeric" maxlength="4" placeholder="····" autocomplete="off">
-    </div>
+    <p class="sub">照片原样上传（保留拍摄定位），传完自动构建，git push 即可发布。</p>
 
     <label for="collection" style="margin-bottom:20px">上传到
         <select id="collection" style="font:inherit;padding:10px;background:#242426;color:white;border-radius:8px">
@@ -136,20 +117,17 @@ UPLOAD_PAGE = """<!doctype html>
 
 <script>
 const input = document.getElementById('file');
-const pin = document.getElementById('pin');
 const go = document.getElementById('go');
 const list = document.getElementById('list');
 const summary = document.getElementById('summary');
 const collection = document.getElementById('collection');
 if (new URLSearchParams(location.search).get('collection') === 'food') collection.value = 'food';
-const pinOk = () => /^\\d{4}$/.test(pin.value);
 
 function refresh() {
-    const ready = pinOk() && input.files.length;
+    const ready = input.files.length;
     go.style.display = input.files.length ? 'block' : 'none';
     go.disabled = !ready;
 }
-pin.addEventListener('input', refresh);
 input.addEventListener('change', () => {
     document.getElementById('n').textContent = input.files.length;
     list.innerHTML = ''; summary.textContent = '';
@@ -157,11 +135,10 @@ input.addEventListener('change', () => {
 });
 
 go.addEventListener('click', async () => {
-    if (!pinOk()) { summary.textContent = '请先输入配对码。'; return; }
     go.disabled = true; go.textContent = '上传中…';
     const destination = collection.value;
     collection.disabled = true;
-    let ok = 0, fail = 0, badPin = false;
+    let ok = 0, fail = 0;
     for (const f of input.files) {
         const row = document.createElement('div');
         const filename = document.createElement('span'); filename.textContent = f.name;
@@ -169,31 +146,25 @@ go.addEventListener('click', async () => {
         row.append(filename, status);
         list.appendChild(row);
         try {
-            const r = await fetch('/upload?name=' + encodeURIComponent(f.name) + '&collection=' + destination + '&pin=' + pin.value,
+            const r = await fetch('/upload?name=' + encodeURIComponent(f.name) + '&collection=' + destination,
                                   { method: 'POST', body: f });
-            if (r.status === 403) { badPin = true; throw new Error(403); }
             if (!r.ok) throw new Error(r.status);
             row.lastChild.className = 'ok'; row.lastChild.textContent = 'OK'; ok++;
         } catch (e) {
             row.lastChild.className = 'fail';
-            row.lastChild.textContent = badPin ? '配对码错误' : '失败';
+            row.lastChild.textContent = '失败';
             fail++;
         }
-        if (badPin) break;
     }
     let total = '';
-    if (!badPin) {
         try {
-            const r = await fetch('/upload?done=1&collection=' + destination + '&pin=' + pin.value, { method: 'POST' });
+            const r = await fetch('/upload?done=1&collection=' + destination, { method: 'POST' });
             if (!r.ok) throw new Error(r.status);
             const j = await r.json();
             if (!j.ok) throw new Error('build');
             total = destination === 'food' ? `深夜食堂现共 <b>${j.total}</b> 张照片 · <b>${j.meals}</b> 张小票` : `相册现共 <b>${j.total}</b> 张（${j.located} 张有定位）`;
         } catch (e) { total = '构建未完成，请在电脑上手动运行 build.py'; }
         summary.innerHTML = `上传完成：<b>${ok}</b> 张成功${fail ? `，<b style="color:#ff453a">${fail}</b> 张失败` : ''}。<br>${total}<br>在电脑上 <span class="mono">git add -A && git commit && git push</span> 即可发布。`;
-    } else {
-        summary.innerHTML = '<b style="color:#ff453a">配对码不正确</b>，请核对电脑终端显示的 4 位数字。';
-    }
     collection.disabled = false;
     go.textContent = '已完成，可再选一批'; go.disabled = false;
     input.value = ''; go.style.display = 'none';
@@ -218,6 +189,7 @@ def lan_ip():
 _build_timers = {}
 _build_lock = threading.Lock()
 _execution_lock = threading.Lock()
+_food_edit_lock = threading.Lock()
 
 
 def run_build(collection='photos'):
@@ -262,22 +234,21 @@ class Handler(SimpleHTTPRequestHandler):
             self._send(200, page, 'text/html; charset=utf-8')
             return
         if parsed.path == '/api/music-edit':
-            if self.headers.get('X-Edit-Pin') != PIN:
-                self._send(403, json.dumps({'error': '配对码不正确'}), 'application/json')
-                return
             from music_editor import read_state
             with _execution_lock:
                 self._send(200, json.dumps(read_state(ROOT)), 'application/json')
             return
         if parsed.path == '/food-edit':
-            self._send(200, (Path(ROOT)/'tools/food-editor.html').read_text(encoding='utf-8'), 'text/html; charset=utf-8')
+            assets = Path(ROOT) / 'assets/food'
+            version = hashlib.sha256((assets/'editor.css').read_bytes() + (assets/'editor.js').read_bytes()).hexdigest()[:12]
+            page = (Path(ROOT)/'tools/food-editor.html').read_text(encoding='utf-8').replace('__EDITOR_ASSET_VERSION__', version)
+            self._send(200, page, 'text/html; charset=utf-8')
             return
         if parsed.path == '/api/food-edit':
-            if self.headers.get('X-Edit-Pin') != PIN:
-                self._send(403, json.dumps({'error': '配对码不正确'}), 'application/json')
-                return
             from food_editor import read_state
-            with _execution_lock:
+            # food_build.py replaces its index atomically; viewing it need not wait
+            # for a long image rebuild. Only serialize reads with manual edits.
+            with _food_edit_lock:
                 self._send(200, json.dumps(read_state(ROOT)), 'application/json')
             return
         if parsed.path == '/upload':
@@ -292,16 +263,13 @@ class Handler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def _edit_food(self):
-        if self.headers.get('X-Edit-Pin') != PIN:
-            self._send(403, json.dumps({'error': '配对码不正确'}), 'application/json')
-            return
         from food_editor import save_edits, EditConflict
         try:
             length = int(self.headers.get('Content-Length', '0'))
             if not 0 < length <= 2 * 1024 * 1024:
                 raise ValueError('保存内容为空或过大')
             payload = json.loads(self.rfile.read(length))
-            with _execution_lock:
+            with _execution_lock, _food_edit_lock:
                 state = save_edits(ROOT, payload)
             self._send(200, json.dumps(state), 'application/json')
         except EditConflict as error:
@@ -312,9 +280,6 @@ class Handler(SimpleHTTPRequestHandler):
             self._send(500, json.dumps({'error': '保存或构建失败，原有说明已保留，请检查终端后重试。'}), 'application/json')
 
     def _music_request(self, recognize_only=False):
-        if self.headers.get('X-Edit-Pin') != PIN:
-            self._send(403, json.dumps({'error': '配对码不正确'}), 'application/json')
-            return
         from music_editor import save_edit, recognize, EditConflict
         try:
             length = int(self.headers.get('Content-Length', '0'))
@@ -338,6 +303,10 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         parsed = urlparse(self.path)
+        origin = self.headers.get('Origin')
+        if origin and origin != f"http://{self.headers.get('Host', '')}":
+            self._send(403, json.dumps({'error': '请从本地服务页面提交'}), 'application/json')
+            return
         if parsed.path in ('/api/music-edit', '/api/music-recognize'):
             self._music_request(parsed.path == '/api/music-recognize')
             return
@@ -348,10 +317,6 @@ class Handler(SimpleHTTPRequestHandler):
             self._send(404, '{"ok":false}', 'application/json')
             return
         query = parse_qs(parsed.query)
-
-        if query.get('pin', [''])[0] != PIN:
-            self._send(403, json.dumps({'ok': False, 'error': '配对码不正确'}), 'application/json')
-            return
 
         collection = query.get('collection', ['photos'])[0]
         if collection not in ('photos', 'food'):
@@ -422,7 +387,7 @@ def main():
     ip = lan_ip()
     server = ThreadingHTTPServer(('0.0.0.0', PORT), Handler)
     print(f"""
-照片直传服务已启动（仅限局域网使用，Ctrl+C 停止）：
+照片直传服务已启动（请仅在可信局域网使用，Ctrl+C 停止）：
 
   本机预览   http://127.0.0.1:{PORT}/gallery.html
   手机直传   http://{ip}:{PORT}/upload      <- 手机与电脑连同一 Wi-Fi，浏览器打开
@@ -431,8 +396,8 @@ def main():
   音乐编辑   http://127.0.0.1:{PORT}/music-edit
   留声室     http://127.0.0.1:{PORT}/music/
 
-  本次配对码（手机页面上输入）：{PIN}
   手机也可以打开 http://{ip}:{PORT}/gallery.html 先预览当前相册。
+  仅在可信的局域网中使用；用完后关闭服务。
   首次运行如弹出防火墙提示，请选择「允许」。
 """)
     try:

@@ -372,6 +372,7 @@ def build_sitemap(posts):
         ('/music/chinese/', today),
         ('/music/western/', today),
         ('/music/japanese/', today),
+        ('/music/roaming/', today),
         ('/gym/', today),
         ('/about.html', today),
         ('/friends.html', today),

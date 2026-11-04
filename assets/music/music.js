@@ -26,6 +26,48 @@
     $('track-note').hidden = value !== 'b';
   }
   document.querySelectorAll('[data-side]').forEach(b => b.addEventListener('click', () => side(b.dataset.side)));
+  const excerptSection = document.querySelector('.excerpt-section');
+  let excerptLines = [], excerptIndex = 0, excerptTimer = null, excerptVisible = true;
+  function stopExcerptTimer() {
+    if (excerptTimer) clearInterval(excerptTimer);
+    excerptTimer = null;
+  }
+  function showExcerpt(index) {
+    excerptIndex = (index + excerptLines.length) % excerptLines.length;
+    const line = $('track-excerpt');
+    line.classList.remove('lyric-enter');
+    line.textContent = excerptLines[excerptIndex];
+    void line.offsetWidth;
+    line.classList.add('lyric-enter');
+    const count = excerptLines.length;
+    $('excerpt-progress').textContent = String(excerptIndex + 1).padStart(2, '0') + ' / ' + String(count).padStart(2, '0');
+    $('excerpt-progress').setAttribute('aria-label', '摘录第 ' + (excerptIndex + 1) + ' 句，共 ' + count + ' 句');
+    $('excerpt-prev').disabled = $('excerpt-next').disabled = count < 2;
+  }
+  function startExcerptTimer() {
+    stopExcerptTimer();
+    if (excerptLines.length < 2 || !excerptVisible || document.hidden ||
+        matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        excerptSection.matches(':hover') || excerptSection.contains(document.activeElement)) return;
+    excerptTimer = setInterval(() => showExcerpt(excerptIndex + 1), 8000);
+  }
+  function setExcerpt(value) {
+    excerptLines = String(value || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    if (!excerptLines.length) excerptLines = ['这首歌尚未留下摘录。'];
+    showExcerpt(0);
+    startExcerptTimer();
+  }
+  $('excerpt-prev').addEventListener('click', () => showExcerpt(excerptIndex - 1));
+  $('excerpt-next').addEventListener('click', () => showExcerpt(excerptIndex + 1));
+  excerptSection.addEventListener('mouseenter', stopExcerptTimer);
+  excerptSection.addEventListener('mouseleave', startExcerptTimer);
+  excerptSection.addEventListener('focusin', stopExcerptTimer);
+  excerptSection.addEventListener('focusout', () => setTimeout(startExcerptTimer, 0));
+  document.addEventListener('visibilitychange', startExcerptTimer);
+  new IntersectionObserver(entries => {
+    excerptVisible = entries[0].isIntersecting;
+    startExcerptTimer();
+  }).observe(excerptSection);
   function select(track, scroll = false) {
     selected = track;
     $('selection-label').textContent = track.featured ? 'SELECTED BY INWT' : 'FROM THE COLLECTION';
@@ -40,10 +82,9 @@
     }
     $('track-information').replaceChildren(info);
     $('track-note').textContent = track.note || '这张唱片的听后记，留待下一次落笔。';
-    $('track-excerpt').textContent = track.excerpt || '这首歌尚未留下摘录。';
+    setExcerpt(track.excerpt);
     $('track-information').scrollTop = 0;
     $('track-note').scrollTop = 0;
-    $('track-excerpt').scrollTop = 0;
     document.querySelector('.side-controls').hidden = false;
     const cover = safeCover(track.cover);
     const label = document.querySelector('.record-cover');

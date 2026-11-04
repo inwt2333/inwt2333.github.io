@@ -2,11 +2,11 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const fields = ['title','artist','album','room','tags','date','note','excerpt','composer','work','performers','duration','cover','playbackSourceId'];
-  let pin = '', revision = '', tracks = [], currentId = null, sourceId = '', dirty = false, recognizing = false, saving = false;
+  let revision = '', tracks = [], currentId = null, sourceId = '', dirty = false, recognizing = false, saving = false;
   const touched = new Set();
   function status(id, text, error = false) { $(id).textContent = text; $(id).dataset.error = String(error); }
   async function api(path, body) {
-    const response = await fetch(path, {method: body ? 'POST' : 'GET', headers: {'X-Edit-Pin':pin, ...(body ? {'Content-Type':'application/json'} : {})}, ...(body ? {body:JSON.stringify(body)} : {})});
+    const response = await fetch(path, {method: body ? 'POST' : 'GET', headers: body ? {'Content-Type':'application/json'} : {}, ...(body ? {body:JSON.stringify(body)} : {})});
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || '操作失败，请重试。');
     return result;
@@ -54,11 +54,14 @@
     dirty = false; status('lookup-status','粘贴网易云歌曲链接，自动识别基本信息。');
     status('save-status','保存到本地文件，发布网站后访客可见。'); preview(); list();
   }
-  $('unlock-form').addEventListener('submit',async event => {
-    event.preventDefault(); pin = $('pin').value;
+  async function openEditor() {
+    $('retry-open').hidden = true;
+    status('unlock-status','正在读取唱片…');
     try {const state = await api('/api/music-edit'); revision = state.revision; tracks = state.tracks; $('unlock').hidden = true; $('editor').hidden = false; open();}
-    catch(error) {status('unlock-status',error.message,true);}
-  });
+    catch(error) {status('unlock-status',error.message,true);$('retry-open').hidden = false;}
+  }
+  $('retry-open').addEventListener('click',openEditor);
+  openEditor();
   $('search').addEventListener('input',list);
   $('new-track').addEventListener('click',() => {if (canLeave()) open();});
   $('track-form').addEventListener('input',event => {dirty = true; touched.add(event.target.id); preview();});

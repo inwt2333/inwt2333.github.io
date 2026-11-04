@@ -82,9 +82,9 @@ cover_image: "assets/essay-covers/example.svg"
 .venv/Scripts/python serve.py
 ```
 
-按打印的提示用手机浏览器打开 `http://<电脑局域网IP>:8199/upload`，**输入终端显示的 4 位配对码**后选择照片上传——照片以**原始文件**直传（EXIF 定位完整保留），传完自动构建索引，之后在电脑上 `git add -A && git commit && git push` 即可发布。手机也可以打开 `http://<IP>:8199/gallery.html` 预览当前相册。
+按打印的提示用手机浏览器打开 `http://<电脑局域网IP>:8199/upload`，选择照片上传——照片以**原始文件**直传（EXIF 定位完整保留），传完自动构建索引，之后在电脑上 `git add -A && git commit && git push` 即可发布。手机也可以打开 `http://<IP>:8199/gallery.html` 预览当前相册。
 
-服务每次启动生成新配对码；静态预览只暴露站点白名单目录（`.git/`、`photos/src/`、脚本等一律不可读），单文件上限 80MB。
+服务无需配对码，使用时请确保处于可信的局域网并在用完后停止；静态预览只暴露站点白名单目录（`.git/`、`photos/src/`、脚本等一律不可读），单文件上限 80MB。
 
 ### 方式二：电脑导入
 
@@ -137,21 +137,21 @@ python -m venv .venv
 
 `node tests/progressive-pages.cjs` 另检查 Chromium / WebKit 的无脚本导航、静态文章和照片入口、索引失败恢复与矮屏 404。`python -m unittest discover -s tests -p 'test_progressive_build.py'` 在临时目录完成整站内容构建，检查文章、照片、RSS、站点地图及生成区域转义，不改写工作区产物。
 
-`node tests/food-resilience.cjs` 检查 Chromium / WebKit 下食堂的索引和照片重试、后台刷新焦点保留、弹窗返回与无脚本记录。`node tests/food-editor-browser.cjs` 在独立临时目录中启动编辑服务，检查配对码、保存、冲突保护及失败时保留输入，支持 Windows 与 macOS/Linux。全部 Python 构建与服务测试可用 `python -m unittest discover -s tests -p 'test_*.py'` 执行。
+`node tests/food-resilience.cjs` 检查 Chromium / WebKit 下食堂的索引和照片重试、后台刷新焦点保留、弹窗返回与无脚本记录。`node tests/food-editor-browser.cjs` 在独立临时目录中启动编辑服务，检查免配对码打开、保存、冲突保护及失败时保留输入，支持 Windows 与 macOS/Linux。全部 Python 构建与服务测试可用 `python -m unittest discover -s tests -p 'test_*.py'` 执行。
 
 ## 留声室：收藏音乐与听后记
 
-首页乐律线新增「留声室」入口，`/music/` 为门厅，`/music/classical/`、`/music/chinese/`、`/music/western/`、`/music/japanese/` 为四个独立听音室。古典馆使用提供的木质房间背景，其他馆暂以 CSS 光影呈现；之后可在 `assets/music/music.css` 替换各馆背景。背景来源见 `assets/music/ASSETS.md`。
+首页乐律线新增「留声室」入口，`/music/` 为门厅，`/music/classical/`、`/music/chinese/`、`/music/western/`、`/music/japanese/`、`/music/roaming/` 为五个独立听音室。「漫游室」收纳不适合前四类的曲目。古典和华语馆使用提供的桌面与手机背景，欧美、日本与漫游馆暂以 CSS 光影呈现；之后可在 `assets/music/music.css` 替换各馆背景。背景来源见 `assets/music/ASSETS.md`。
 
-运行 `.venv/Scripts/python serve.py`（macOS/Linux 为 `.venv/bin/python serve.py`），打开终端打印的 `/music-edit`，输入同一服务的 4 位配对码：
+运行 `.venv/Scripts/python serve.py`（macOS/Linux 为 `.venv/bin/python serve.py`），打开终端打印的 `/music-edit`，页面会自动打开整理台：
 
 1. 点「＋ 新增」，粘贴网易云单首歌曲链接或分享文字，自动识别曲名、歌手、专辑、封面与时长；也可点击「识别歌曲」。支持完整链接、hash 路由、歌曲 ID 与网易云短链接。识别失败时保留输入，可使用完整歌曲链接并手工填写信息。
 2. 选择听音室，添加逗号分隔的标签、聆听日期和听后记。另有独立的「歌曲摘录」字段（最多 600 字），用于展示你挑选的短句；已有听后记不会自动改写。作品信息中可填写作曲家、P 主、作品编号、关联作品、指挥与演奏版本。自动识别不会覆盖正在手工编辑的字段。
 3. 可设为该馆精选；每馆最多一张精选，未指定时显示最近添加的收藏。右侧实时预览唱片内页。
-4. 点「保存并更新预览」，内容写入 `music/library.json`，并生成公开的 `music/collection.json` 与五个页面。保存后刷新对应听音室查看。已有记录支持搜索、修改、删除，并通过文件版本检查避免覆盖另一个编辑页的修改。
+4. 点「保存并更新预览」，内容写入 `music/library.json`，并生成公开的 `music/collection.json` 与六个页面。保存后刷新对应听音室查看。已有记录支持搜索、修改、删除，并通过文件版本检查避免覆盖另一个编辑页的修改。
 5. 检查预览后，按原 Git 流程提交与发布。这里保存的所有字段都用于公开展示；不存放私密备注。编辑入口不加入公开导航与站点地图，线上静态页面不提供写入接口。
 
-线上点选唱片可查看 A 面曲目信息和 B 面听后记，另有歌曲摘录区和标签筛选。宽屏且高度足够时，摘录显示在唱片下方的同一画面；窄屏则作为下方板块。A/B 面及不同长度的听后记共用固定的主画面高度；长内容在各自阅读区滚动，唱片位置不变。四间听音室使用各自的阅读字体组合，并回退到系统字体。有网易云歌曲 ID 的收藏会显示网易云官方内嵌播放器，默认不自动播放，并保留较小的原曲目入口以应对版权、地区或嵌入限制。封面按需加载，失败时显示素色封套。曲目信息识别依赖网易云当前返回结果，不需要账号或 Cookie，不获取音频文件。
+线上点选唱片可查看 A 面曲目信息和 B 面听后记，另有歌曲摘录区和标签筛选。宽屏且高度足够时，摘录以通栏歌词带呈现在唱片画面底部；窄屏则紧接主画面。摘录按换行逐句轮播，可手动切换；鼠标悬停、键盘聚焦或系统偏好减少动态效果时暂停自动轮播。A/B 面及不同长度的听后记共用固定的主画面高度；长内容在各自阅读区滚动，唱片位置不变。五间听音室使用各自的阅读字体组合，并回退到系统字体。有网易云歌曲 ID 的收藏会显示网易云官方内嵌播放器，默认不自动播放，并保留较小的原曲目入口以应对版权、地区或嵌入限制。封面按需加载，失败时显示素色封套。曲目信息识别依赖网易云当前返回结果，不需要账号或 Cookie，不获取音频文件。
 
 若收藏的原版本无法内嵌播放，可在整理台「作品、版本与封面」中填写网易云里**同曲可播放发行版**的歌曲链接或 ID。此设置只更换内嵌播放器的音源，保留原收藏的曲名、专辑、封面和链接；公开页面会标明正在播放另一发行版。示例《Les Champs-Elysées》的原收藏需要会员，内嵌播放器使用网易云另一条可公开播放的 Joe Dassin 发行版。播放权仍由网易云控制，日后若音源失效需重新选择。
 
@@ -164,7 +164,7 @@ python -m venv .venv
 
 ## 深夜食堂：上传与补充记录
 
-运行 `.venv/bin/python serve.py`（Windows 为 `.venv/Scripts/python serve.py`），手机与电脑连接同一 Wi-Fi，打开启动地址的 `/upload?collection=food`，输入配对码后上传。上传页也可以切换“摄影集 / 深夜食堂”。美食原片存入 `food/src/`，不入库，也不能通过本地静态服务读取。`python food_build.py` 可单独重建；`python build.py` 同时构建美食索引。
+运行 `.venv/bin/python serve.py`（Windows 为 `.venv/Scripts/python serve.py`），手机与电脑连接同一 Wi-Fi，打开启动地址的 `/upload?collection=food`，直接上传。上传页也可以切换“摄影集 / 深夜食堂”。美食原片存入 `food/src/`，不入库，也不能通过本地静态服务读取。`python food_build.py` 可单独重建；`python build.py` 同时构建美食索引。
 
 照片按 EXIF 拍摄日期归到每日一张小票，同一天的不同餐次合并。没有拍摄日期时，使用首次导入当天的中国标准时间日期；后续构建保持这个日期。生成的 `food.json`、`food/web/`、`food/thumb/` 随网站提交；其他设备缺少原片时仍保留已有记录。重复导入同名相同照片不新增记录。
 
@@ -189,7 +189,7 @@ python -m venv .venv
 
 ### 本地编辑照片说明
 
-启动 `serve.py` 后打开 `/food-edit`（上传页也有“编辑已有美食照片”入口），使用同一个配对码解锁。可逐张编辑拍摄日期、地点／店名、菜品和备注，并搜索照片。点击“保存修改并更新预览”后，说明写入 `food/manual.json`，同时重建 `food.json`；公开小票会显示每张照片的说明。清空文字会删除其展示，清空日期则恢复原始拍摄日期。
+启动 `serve.py` 后打开 `/food-edit`（上传页也有“编辑已有美食照片”入口），页面会自动加载照片。可逐张编辑拍摄日期、地点／店名、菜品和备注，并搜索照片。点击“保存修改并更新预览”后，说明写入 `food/manual.json`，同时重建 `food.json`；公开小票会显示每张照片的说明。清空文字会删除其展示，清空日期则恢复原始拍摄日期。
 
 保存是写入本地文件，关闭页面后仍保留；保存失败会保留页面中的输入。若另一个页面已修改说明，编辑器会提示冲突，避免静默覆盖。编辑页不加入公开导航或站点地图，写入接口仅由本地服务提供；线上静态网站不支持编辑。确认食堂预览后，将说明文件、索引和构建后的图片按现有 Git 流程提交、推送发布。
 

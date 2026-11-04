@@ -62,7 +62,7 @@ class FoodEditorTest(unittest.TestCase):
             cleared=food_editor.save_edits(root,{'revision':saved['revision'],'photos':[],'meals':[{'date':'2026-11-01','note':''}]})
             self.assertEqual(cleared['meals'][0]['note'],'')
 
-    def test_http_requires_pin_and_persists_valid_edits(self):
+    def test_http_without_pin_persists_valid_edits(self):
         import serve
         import threading
         import urllib.request
@@ -77,19 +77,23 @@ class FoodEditorTest(unittest.TestCase):
                 server=serve.ThreadingHTTPServer(('127.0.0.1',0),serve.Handler)
                 thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
                 url=f'http://127.0.0.1:{server.server_port}/api/food-edit'
-                def request(method='GET',payload=None,pin=None):
-                    req=urllib.request.Request(url, data=json.dumps(payload).encode() if payload is not None else None, method=method,headers={'X-Edit-Pin':pin or ''})
+                def request(method='GET',payload=None):
+                    req=urllib.request.Request(url, data=json.dumps(payload).encode() if payload is not None else None, method=method)
                     try:
-                        with urllib.request.urlopen(req) as r: return r.status,json.load(r)
+                        with urllib.request.urlopen(req, timeout=3) as r: return r.status,json.load(r)
                     except urllib.error.HTTPError as error: return error.code,json.load(error)
                 try:
-                    self.assertEqual(request()[0],403)
-                    code,state=request(pin=serve.PIN);self.assertEqual(code,200)
+                    code,state=request();self.assertEqual(code,200)
+                    # A photo rebuild may take minutes; reading the last complete
+                    # index must stay responsive while its execution lock is held.
+                    with serve._execution_lock:
+                        code,during_build=request()
+                    self.assertEqual(code,200)
+                    self.assertEqual(during_build['photos'][0]['file'],'a.jpg')
                     payload={'revision':state['revision'],'photos':[{'file':'a.jpg','dish':'热面','location':'上海','note':'雨天'}]}
-                    self.assertEqual(request('POST',payload)[0],403)
-                    code,result=request('POST',payload,serve.PIN)
+                    code,result=request('POST',payload)
                     self.assertEqual(code,200);self.assertEqual(result['photos'][0]['dish'],'热面')
-                    self.assertEqual(request('POST',payload,serve.PIN)[0],409)
-                    self.assertEqual(request('POST',{'revision':result['revision'],'photos':[{'file':'a.jpg','date':'not-a-date'}]},serve.PIN)[0],400)
+                    self.assertEqual(request('POST',payload)[0],409)
+                    self.assertEqual(request('POST',{'revision':result['revision'],'photos':[{'file':'a.jpg','date':'not-a-date'}]})[0],400)
                 finally:
                     server.shutdown();server.server_close();thread.join()

@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>食味编辑室 · Inwt</title>
-<link rel="stylesheet" href="/assets/food/editor.css"><script src="/assets/food/editor.js" defer></script>
+<link rel="stylesheet" href="/assets/food/editor.css?v=__EDITOR_ASSET_VERSION__"><script src="/assets/food/editor.js?v=__EDITOR_ASSET_VERSION__" defer></script>
 </head>
 <body>
 <header><a class="back" href="/food.html">← 回到食堂</a><span class="edition">LOCAL EDITION · 本地编辑</span><a href="/upload?collection=food">上传照片 ↗</a></header>
 <main>
 <div class="intro"><p class="eyebrow">BEHIND THE COUNTER</p><h1>食味编辑室<span>给每道美味，留一点记忆。</span></h1><p>地点、菜品、那天的心情，都可以慢慢补上。保存后即可在食堂预览。</p></div>
-<form id="unlock" class="unlock"><label for="pin">输入本次服务的 4 位配对码</label><div><input id="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required placeholder="配对码"><button type="submit">打开编辑室 →</button></div><p>配对码显示在启动上传服务的终端中。</p></form>
+<div id="unlock" class="unlock"><p>正在读取照片…</p><button id="open" type="button" hidden>重新读取</button></div>
 <p id="status" role="status" aria-live="polite"></p>
 <section id="workspace" hidden aria-label="照片编辑">
 <div class="toolbar"><label class="search-label" for="search">查找照片<input id="search" type="search" placeholder="日期、文件名、地点或菜品"></label><span id="count"></span><button id="reload" class="secondary" type="button">重新加载</button></div>

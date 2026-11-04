@@ -49,6 +49,7 @@ summary { cursor:pointer; color:var(--muted); font-size:12px; }
 .live-preview[data-room=chinese] { --preview-font:'Microsoft YaHei','PingFang SC',sans-serif; }
 .live-preview[data-room=western] { --preview-font:'Palatino Linotype',Georgia,'Noto Sans SC','Microsoft YaHei',sans-serif; }
 .live-preview[data-room=japanese] { --preview-font:'Yu Gothic',Meiryo,'Noto Sans SC','Microsoft YaHei',sans-serif; }
+.live-preview[data-room=roaming] { --preview-font:'Iowan Old Style',Georgia,'Noto Serif CJK SC','Songti SC',serif; }
 #preview-note { font:15px/1.95 var(--preview-font); white-space:pre-wrap; overflow-wrap:anywhere; margin:28px 0; }
 .preview-label { color:var(--gold); font-size:11px; letter-spacing:2px; margin:24px 0 8px; }
 #preview-excerpt { margin:0 0 28px; padding-left:14px; border-left:1px solid var(--gold); font:15px/1.8 var(--preview-font); white-space:pre-wrap; overflow-wrap:anywhere; }

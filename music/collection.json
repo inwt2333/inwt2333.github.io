@@ -2,6 +2,51 @@
   "version": 1,
   "tracks": [
     {
+      "title": "空动的无限星 Infinite Cosmodynamics",
+      "artist": "HOYO-MiX",
+      "album": "原神-闪耀的群星5 The Stellar Moments Vol. 5",
+      "note": "黑曜石奶奶的PV曲！\n也是我原神中最喜欢的PV曲之一，具有很强的叙事性，开头轻松愉快，钢琴和钟琴像小鸟一样叽叽喳喳，提琴在下面铺织着优美的旋律。到后来却突然转调，越来越沉重，节奏也愈发紧张，仿佛在回忆往事。人声突然把调式拉回大调，思绪从远方飘回。最后钢琴几个和弦作为结尾，为这段故事画下句号。",
+      "excerpt": "",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "2026-11-04",
+      "sourceId": "2666551256",
+      "url": "https://music.163.com/song?id=2666551256",
+      "cover": "https://p2.music.126.net/WOKfJIIq9oANAgnMKIur_g==/109951170381779648.jpg",
+      "playbackSourceId": "",
+      "room": "roaming",
+      "tags": [
+        "原神",
+        "纯音乐"
+      ],
+      "featured": true,
+      "duration": 188,
+      "id": "b1ceebd12c014c2f"
+    },
+    {
+      "title": "道别是一件难事",
+      "artist": "上海彩虹室内合唱团",
+      "album": "道别是一件难事",
+      "note": "彩虹合唱的封神之作，初听会感到淡淡的却深入骨髓的悲伤，歌词更是每一句都戳进内心最深处。\n\n故乡和爱人，是我近两年来深夜中的永恒议题。\n故乡不能忘，也不会忘。爱人想忘，但是忘不掉。\n既然都忘不掉，不如就装着吧。",
+      "excerpt": "故乡哟故乡\n爱人哟爱人\n既然都忘不掉\n不如就装着吧",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "2026-11-04",
+      "sourceId": "1888933954",
+      "url": "https://music.163.com/song?id=1888933954",
+      "cover": "https://p2.music.126.net/PNSDtZUDYbPRRuk7kJlywA==/109951166544751174.jpg",
+      "playbackSourceId": "",
+      "room": "chinese",
+      "tags": [
+        "彩虹合唱"
+      ],
+      "featured": true,
+      "duration": 249,
+      "id": "53f9dbac5516419b"
+    },
+    {
       "title": "Les Champs-Elysées",
       "artist": "Joe Dassin",
       "album": "Les Champs-Èlysées",

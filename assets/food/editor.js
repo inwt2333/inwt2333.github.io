@@ -1,11 +1,11 @@
 'use strict';
 const $ = id => document.getElementById(id);
-let pin = '', revision = '', photos = [], meals = [], pending = false;
+let revision = '', photos = [], meals = [], pending = false;
 const dirty = new Map(), dirtyMeals = new Map();
 function node(tag, cls, text) { const n = document.createElement(tag); if(cls) n.className=cls; if(text!==undefined)n.textContent=text; return n; }
 function status(message, error=false) { $('status').textContent=message; $('status').classList.toggle('error',error); }
 async function request(method, body) {
-    const response = await fetch('/api/food-edit', {method, headers:{'X-Edit-Pin':pin, ...(body?{'Content-Type':'application/json'}:{})}, ...(body?{body:JSON.stringify(body)}:{})});
+    const response = await fetch('/api/food-edit', {method, headers:body?{'Content-Type':'application/json'}:{}, ...(body?{body:JSON.stringify(body)}:{})});
     const data = await response.json();
     if(!response.ok) throw new Error(data.error || '请求失败，请稍后重试');
     return data;
@@ -44,7 +44,7 @@ function render(data) {
             $('cards').append(block);
         }
         const card=node('article','edit-card'); card.dataset.file=photo.file;
-        const figure=node('figure','photo-side'), img=node('img'); img.src=photo.web; img.alt=photo.dish || '待编辑的美食照片'; img.loading='lazy';
+        const figure=node('figure','photo-side'), img=node('img'); img.src=photo.thumb || photo.web; img.alt=photo.dish || '待编辑的美食照片'; img.loading='lazy'; img.decoding='async';
         figure.append(img,node('figcaption','',photo.file));
         const fields=node('fieldset','fields');
         for(const [key,title,max] of [['date','拍摄日期',10],['location','地点 / 店名',200]]) {
@@ -90,12 +90,13 @@ function render(data) {
     }
     $('empty').hidden=!!photos.length; filter(); updateDirty();
 }
-$('unlock').addEventListener('submit',async event=>{
-    event.preventDefault(); pin=$('pin').value;
-    const button=event.submitter; button.disabled=true; status('正在读取照片…');
-    try { const data=await request('GET'); render(data); $('unlock').hidden=true; $('workspace').hidden=false; status('已打开。修改后点击底部按钮保存到本地。'); }
-    catch(error){status(error.message,true);}finally{button.disabled=false;}
-});
+async function openEditor() {
+    const button=$('open'); button.disabled=true; status('正在读取照片…');
+    try { const data=await request('GET'); render(data); $('unlock').hidden=true; $('workspace').hidden=false; status('已打开。刚上传的照片如仍在构建，完成后点击“重新加载”。'); }
+    catch(error){status(error.message,true);button.hidden=false;}finally{button.disabled=false;}
+}
+$('open').addEventListener('click',openEditor);
+openEditor();
 $('search').addEventListener('input',filter);
 $('reload').addEventListener('click',async()=>{
     if((dirty.size || dirtyMeals.size) && !confirm('重新加载会丢弃尚未保存的修改，确定继续吗？'))return;

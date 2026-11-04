@@ -68,7 +68,7 @@ class FoodBuildTest(unittest.TestCase):
             self.assertFalse(serve._get_allowed(path))
 
 class FoodUploadTest(unittest.TestCase):
-    def test_upload_routing_auth_and_same_size_collision(self):
+    def test_upload_routing_without_pin_and_same_size_collision(self):
         import serve
         import threading
         import urllib.request
@@ -81,30 +81,30 @@ class FoodUploadTest(unittest.TestCase):
                 thread = threading.Thread(target=server.serve_forever, daemon=True)
                 thread.start()
                 base = f'http://127.0.0.1:{server.server_port}'
-                def post(query, data=b'first'):
-                    request = urllib.request.Request(base+'/upload?'+query, data=data)
+                def post(query, data=b'first', origin=None):
+                    request = urllib.request.Request(base+'/upload?'+query, data=data, headers={'Origin': origin} if origin else {})
                     try:
                         with urllib.request.urlopen(request) as response:
                             return response.status, json.load(response)
                     except urllib.error.HTTPError as error:
                         return error.code, None
                 try:
-                    self.assertEqual(post('name=a.jpg&collection=food&pin=wrong')[0],403)
-                    self.assertEqual(post(f'name=a.jpg&collection=unknown&pin={serve.PIN}')[0],400)
-                    status, first = post(f'name=a.jpg&collection=food&pin={serve.PIN}')
+                    self.assertEqual(post('name=a.jpg&collection=unknown')[0],400)
+                    self.assertEqual(post('name=a.jpg&collection=food',origin='https://other.example')[0],403)
+                    status, first = post('name=a.jpg&collection=food')
                     self.assertEqual(status,200)
                     self.assertTrue((root/'food/src/a.jpg').exists())
                     self.assertFalse((root/'photos/src/a.jpg').exists())
-                    _, duplicate = post(f'name=a.jpg&collection=food&pin={serve.PIN}')
+                    _, duplicate = post('name=a.jpg&collection=food')
                     self.assertEqual(first['saved'],duplicate['saved'])
-                    _, different = post(f'name=a.jpg&collection=food&pin={serve.PIN}',b'other')
+                    _, different = post('name=a.jpg&collection=food',b'other')
                     self.assertNotEqual(first['saved'],different['saved'])
                     self.assertEqual((root/'food/src/a.jpg').read_bytes(),b'first')
-                    self.assertEqual(post(f'name=p.jpg&pin={serve.PIN}')[0],200)
+                    self.assertEqual(post('name=p.jpg')[0],200)
                     self.assertTrue((root/'photos/src/p.jpg').exists())
                     # A synced index exists, but the other device's source does not.
                     (root/'food.json').write_text(json.dumps([{'photos':[{'file':'remote.jpg', 'sha256':'unknown'}]}]))
-                    _, remote = post(f'name=remote.jpg&collection=food&pin={serve.PIN}')
+                    _, remote = post('name=remote.jpg&collection=food')
                     self.assertNotEqual(remote['saved'], 'remote.jpg')
 
                     try:
