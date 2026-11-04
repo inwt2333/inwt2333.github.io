@@ -5,8 +5,9 @@ let meals = [], activeMeal, photoIndex = 0, boardPhotos = [];
 let drawState = {}, selectedFood = null, drawing = false, drawToken = 0;
 const fortune = $('fortune-dialog');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const menu = $('menu-dialog'), receipt = $('receipt-dialog'), viewer = $('viewer'), mapDialog = $('food-map-dialog');
-let foodMap = null, returnFromMap = false;
+const compactBoard = matchMedia('(max-width: 600px)');
+const menu = $('menu-dialog'), receipt = $('receipt-dialog'), viewer = $('viewer'), ticketDialog = $('ticket-dialog');
+let stations = [], stationIndex = 0, stationPhotoIndex = 0, returnFromTicket = false;
 function element(tag, className, text) {
     const node = document.createElement(tag);
     if (className) node.className = className;
@@ -84,7 +85,7 @@ $('retry-photo').addEventListener('click', () => {
     viewer.querySelector('[data-close]').focus();
     renderPhoto(true);
 });
-for (const dialog of [menu, receipt, viewer, fortune, mapDialog]) {
+for (const dialog of [menu, receipt, viewer, fortune, ticketDialog]) {
     dialog.querySelector('[data-close]').addEventListener('click', () => dialog.close());
     dialog.addEventListener('click', event => {
         if (event.target !== dialog) return;
@@ -94,8 +95,10 @@ for (const dialog of [menu, receipt, viewer, fortune, mapDialog]) {
 }
 $('menu-open').addEventListener('click', () => menu.showModal());
 function renderBoard() {
+    const visibleCount = compactBoard.matches ? 2 : 3;
+    const previousFocus = document.activeElement?.classList.contains('memory');
     $('board').replaceChildren();
-    for (const {meal, photo} of boardPhotos) {
+    for (const {meal, photo} of boardPhotos.slice(0, visibleCount)) {
         const button = element('button', 'memory');
         button.setAttribute('aria-label', `查看 ${meal.date} 的美食照片和用餐小票`);
         button.append(image(photo), time(meal.date));
@@ -107,101 +110,140 @@ function renderBoard() {
     }
     const count = meals.reduce((total, meal) => total + meal.photos.length, 0);
     $('board-shuffle').hidden = !count;
-    $('board-shuffle').disabled = count <= 3;
+    $('board-shuffle').disabled = count <= visibleCount;
+    const amount = visibleCount === 2 ? '两' : '三';
+    $('board-shuffle').querySelector('.shuffle-label').textContent = `换${amount}张`;
+    $('board-shuffle').setAttribute('aria-label', `重新随机挑选${amount}张美食照片`);
+    if (previousFocus) $('board').querySelector('.memory')?.focus();
 }
 function reshuffleBoard() {
-    boardPhotos = randomBoardPhotos(meals, boardPhotos.map(item => item.id));
+    boardPhotos = randomBoardPhotos(meals, boardPhotos.slice(0, compactBoard.matches ? 2 : 3).map(item => item.id));
     renderBoard();
 }
 $('board-shuffle').addEventListener('click', reshuffleBoard);
-function mapPlaces() {
-    const byPlace = new Map(), unlocated = [];
+compactBoard.addEventListener('change', () => { if (meals.length) renderBoard(); });
+function ticketStations() {
+    const byPlace = new Map();
     for (const meal of meals) for (const photo of meal.photos) {
-        if (!photo.location) continue;
-        if (typeof photo.lat !== 'number' || typeof photo.lng !== 'number' || !Number.isFinite(photo.lat) || !Number.isFinite(photo.lng)) {
-            unlocated.push({meal, photo});
-            continue;
-        }
-        const key = `${photo.location}|${Math.round(photo.lat * 1000)}|${Math.round(photo.lng * 1000)}`;
-        if (!byPlace.has(key)) byPlace.set(key, {name: photo.location, lat: photo.lat, lng: photo.lng, items: []});
+        const name = typeof photo.location === 'string' ? photo.location.trim() : '';
+        const key = name || '__waiting__';
+        if (!byPlace.has(key)) byPlace.set(key, {name: name || '待补票', items: []});
         byPlace.get(key).items.push({meal, photo});
     }
-    return {places: [...byPlace.values()], unlocated};
+    const waiting = byPlace.get('__waiting__');
+    byPlace.delete('__waiting__');
+    const result = [...byPlace.values()];
+    if (waiting) result.push(waiting);
+    return result;
 }
-function openMapReceipt(meal, photo) {
-    mapDialog.close();
-    returnFromMap = true;
-    showMeal(meal);
-    $('receipt-photos').children[meal.photos.indexOf(photo)]?.scrollIntoView({block:'start',behavior:'instant'});
+function selectedTicketItem() { return stations[stationIndex]?.items[stationPhotoIndex]; }
+function renderTicketPhoto() {
+    const item = selectedTicketItem();
+    if (!item) return;
+    const photo = $('ticket-photo');
+    const dish = item.photo.dishes?.map(entry => entry.name).filter(Boolean).join('、') || item.photo.dish || '';
+    photo.hidden = false;
+    $('ticket-photo-failed').hidden = true;
+    photo.src = item.photo.web || item.photo.thumb;
+    photo.alt = dish || item.meal.date + ' 的美食照片';
+    $('ticket-photo-caption').textContent = item.meal.date.replaceAll('-', '.') + (dish ? ' · ' + dish : '');
+    for (const [index, button] of [...$('ticket-photo-strip').children].entries()) {
+        button.setAttribute('aria-pressed', String(index === stationPhotoIndex));
+    }
+}
+function renderTicketStation() {
+    const station = stations[stationIndex];
+    if (!station) return;
+    $('ticket-index').textContent = String(stationIndex + 1).padStart(2, '0') + ' / ' + String(stations.length).padStart(2, '0');
+    $('ticket-station-name').textContent = station.name;
+    const mealCount = new Set(station.items.map(item => item.meal.date)).size;
+    $('ticket-station-meta').textContent = station.name === '待补票'
+        ? station.items.length + ' 张照片 · 地点尚未标注'
+        : mealCount + ' 顿 · ' + station.items.length + ' 张照片';
+    for (const [index, button] of [...$('ticket-stamps').children].entries()) {
+        button.setAttribute('aria-pressed', String(index === stationIndex));
+    }
+    const strip = $('ticket-photo-strip');
+    strip.replaceChildren();
+    station.items.forEach((item, index) => {
+        const button = element('button', 'ticket-photo-thumb');
+        button.type = 'button';
+        button.setAttribute('aria-label', '查看第 ' + (index + 1) + ' 张照片，' + item.meal.date);
+        button.append(image(item.photo));
+        button.addEventListener('click', () => { stationPhotoIndex = index; renderTicketPhoto(); });
+        strip.append(button);
+    });
+    $('ticket-prev').disabled = $('ticket-next').disabled = stations.length < 2;
+    renderTicketPhoto();
+}
+function selectTicketStation(index) {
+    if (!stations.length) return;
+    stationIndex = (index + stations.length) % stations.length;
+    stationPhotoIndex = 0;
+    renderTicketStation();
+}
+function openTicketReceipt() {
+    const item = selectedTicketItem();
+    if (!item) return;
+    returnFromTicket = true;
+    ticketDialog.close();
+    showMeal(item.meal);
+    $('receipt-photos').children[item.meal.photos.indexOf(item.photo)]?.scrollIntoView({block:'start', behavior:'instant'});
 }
 receipt.addEventListener('close', () => {
-    if (returnFromMap) { returnFromMap = false; $('map-open').focus(); }
+    if (returnFromTicket) { returnFromTicket = false; $('ticket-open').focus(); }
 });
-mapDialog.addEventListener('close', () => { foodMap?.remove(); foodMap = null; });
-function renderFoodMap() {
-    const {places, unlocated} = mapPlaces();
-    const surface = $('food-map'), list = $('map-place-list'), missing = $('map-unlocated'), notice = $('map-notice');
-    foodMap?.remove(); foodMap = null;
-    surface.replaceChildren(); list.replaceChildren(); missing.replaceChildren(); notice.hidden = true;
-    if (!places.length) {
-        surface.append(element('p', 'map-empty', '还没有带地点和定位的照片，先从食味簿翻一翻吧。'));
-    } else if (window.L) {
-        const L = window.L;
-        foodMap = L.map(surface, {scrollWheelZoom:false});
-        const tiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-            maxNativeZoom:16, maxZoom:19, attribution:'Tiles &copy; Esri, TomTom, Garmin, FAO, NOAA, USGS, OpenStreetMap contributors'
-        }).addTo(foodMap);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {maxNativeZoom:13,maxZoom:19}).addTo(foodMap);
-        tiles.on('tileerror', () => { notice.hidden = false; });
-    } else {
-        surface.append(element('p', 'map-empty', '地图暂时不可用，请从下方地点列表查看小票。'));
-    }
-    const bounds = [];
-    for (const place of places) {
-        let marker;
-        if (foodMap) {
-            const L = window.L, pin = image(place.items[0].photo);
-            pin.alt = ''; pin.loading = 'eager';
-            marker = L.marker([place.lat, place.lng], {title: place.name, alt: place.name, icon:L.divIcon({className:'food-map-pin',html:pin,iconSize:[48,48],iconAnchor:[24,24]})}).addTo(foodMap);
-            const popup = element('div', 'food-map-popup');
-            popup.append(element('strong', '', place.name), image(place.items[0].photo));
-            for (const item of place.items.filter((entry, index, all) => all.findIndex(candidate => candidate.meal.date === entry.meal.date) === index)) {
-                const button = element('button', '', `${item.meal.date.replaceAll('-', '.')} · 查看小票 ↗`);
-                button.type = 'button';
-                button.addEventListener('click', () => openMapReceipt(item.meal, item.photo));
-                popup.append(button);
-            }
-            marker.bindPopup(popup, {maxWidth:230});
-            bounds.push([place.lat, place.lng]);
-        }
-        const row = element('button', 'map-place-row');
-        row.type = 'button';
-        const copy = element('span');
-        copy.append(element('strong', '', place.name), element('small', '', `${new Set(place.items.map(item => item.meal.date)).size} 餐 · ${place.items.length} 张照片`));
-        row.append(image(place.items[0].photo), copy);
-        row.addEventListener('click', () => {
-            if (!foodMap) { openMapReceipt(place.items[0].meal, place.items[0].photo); return; }
-            foodMap.setView([place.lat, place.lng], Math.max(foodMap.getZoom(), 15));
-            marker.openPopup();
-        });
-        list.append(row);
-    }
-    if (foodMap) {
-        if (bounds.length === 1) foodMap.setView(bounds[0], 15);
-        else foodMap.fitBounds(window.L.latLngBounds(bounds), {padding:[35,35],maxZoom:14});
-        requestAnimationFrame(() => foodMap?.invalidateSize());
-    }
-    if (unlocated.length) {
-        missing.append(element('h3', '', '有地名，尚无照片定位'));
-        for (const {meal, photo} of unlocated) {
-            const row = element('button', '', `${photo.location} · ${meal.date.replaceAll('-', '.')} · 查看小票 ↗`);
-            row.type = 'button';
-            row.addEventListener('click', () => openMapReceipt(meal, photo));
-            missing.append(row);
-        }
-    }
-}
-$('map-open').addEventListener('click', () => { mapDialog.showModal(); renderFoodMap(); });
+ticketDialog.addEventListener('close', () => { if (!returnFromTicket) $('ticket-open').focus(); });
+$('ticket-photo').addEventListener('error', () => {
+    $('ticket-photo').hidden = true;
+    $('ticket-photo-failed').hidden = false;
+});
+$('ticket-open').addEventListener('click', () => {
+    stations = ticketStations();
+    if (!stations.length) return;
+    stationIndex = stationPhotoIndex = 0;
+    const stamps = $('ticket-stamps');
+    stamps.replaceChildren();
+    stations.forEach((station, index) => {
+        const stamp = element('button', 'ticket-stamp');
+        stamp.type = 'button';
+        stamp.setAttribute('aria-label', station.name + '，' + station.items.length + ' 张照片');
+        stamp.append(element('span', '', station.name), element('small', '', station.items.length + ' 张留念'));
+        stamp.addEventListener('click', () => selectTicketStation(index));
+        stamps.append(stamp);
+    });
+    renderTicketStation();
+    ticketDialog.showModal();
+});
+$('ticket-prev').addEventListener('click', () => selectTicketStation(stationIndex - 1));
+$('ticket-next').addEventListener('click', () => selectTicketStation(stationIndex + 1));
+$('ticket-photo-open').addEventListener('click', openTicketReceipt);
+$('ticket-receipt').addEventListener('click', openTicketReceipt);
+ticketDialog.addEventListener('keydown', event => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    selectTicketStation(stationIndex + (event.key === 'ArrowRight' ? 1 : -1));
+});
+const ticketPanel = $('ticket-panel');
+let swipeStart = null, suppressSwipeClick = false;
+ticketPanel.addEventListener('dragstart', event => event.preventDefault());
+ticketPanel.addEventListener('pointerdown', event => { swipeStart = {x: event.clientX, y: event.clientY}; });
+ticketPanel.addEventListener('pointercancel', () => { swipeStart = null; });
+ticketPanel.addEventListener('pointerup', event => {
+    if (!swipeStart) return;
+    const dx = event.clientX - swipeStart.x, dy = event.clientY - swipeStart.y;
+    swipeStart = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    suppressSwipeClick = true;
+    selectTicketStation(stationIndex + (dx < 0 ? 1 : -1));
+    setTimeout(() => { suppressSwipeClick = false; }, 0);
+});
+ticketPanel.addEventListener('click', event => {
+    if (!suppressSwipeClick) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    suppressSwipeClick = false;
+}, true);
 async function drawFood() {
     if (drawing || !meals.length) return;
     drawing = true;
@@ -244,9 +286,13 @@ function render() {
     $('draw-open').disabled = !meals.length;
     $('draw-open').title = meals.length ? '随机抽取一道吃过的美味' : '等第一份美味入席后再来抽签';
     $('menu-count').textContent = meals.length ? `${meals.length} 日 · ${meals.reduce((n,m) => n + m.photos.length, 0)} 张留念` : '一餐一记 · 慢慢收藏';
-    const {places, unlocated} = mapPlaces();
-    $('map-open').disabled = !places.length && !unlocated.length;
-    $('map-count').textContent = places.length ? `${places.length} 处落脚 · ${unlocated.length} 处待定位` : '等第一站落下图钉';
+    const availableStations = ticketStations();
+    const located = availableStations.filter(station => station.name !== '待补票');
+    const pending = availableStations.find(station => station.name === '待补票');
+    $('ticket-open').disabled = !availableStations.length;
+    $('ticket-count').textContent = located.length
+        ? `${located.length} 站 · ${pending ? pending.items.length + ' 张待补票' : '继续出发'}`
+        : pending ? `${pending.items.length} 张待补票` : '等第一站开张';
     renderBoard();
     let month;
     for (const meal of meals) {

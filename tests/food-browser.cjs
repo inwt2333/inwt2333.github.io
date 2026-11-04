@@ -33,10 +33,17 @@ const path = require('node:path');
    assert.equal(layout.overflow,false);
    await page.screenshot({path:path.join(out,`wide-${size.width}.png`)});
   }
-  for(const size of [{width:1440,height:900},{width:390,height:844},{width:600,height:900},{width:768,height:1024}]) {
+  for(const size of [{width:1440,height:900},{width:390,height:844},{width:320,height:568},{width:600,height:900},{width:768,height:1024}]) {
    await page.setViewportSize(size);
+   await page.waitForFunction(expected=>document.querySelectorAll('.memory').length===expected,size.width<=600?2:3,{timeout:1500});
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no horizontal overflow');
    assert.equal(await page.evaluate(()=>{const b=document.querySelector('.board').getBoundingClientRect();return [...document.querySelectorAll('.memory')].every(p=>{const r=p.getBoundingClientRect();return r.left>=b.left-5&&r.right<=b.right+5&&r.top>=b.top-5&&r.bottom<=b.bottom+5})}),true,'photos remain inside board');
+   if(size.width<=600){
+    const mobile=await page.evaluate(()=>{const card=document.querySelector('.memory').getBoundingClientRect(),photo=document.querySelector('.memory img').getBoundingClientRect(),menu=document.querySelector('#menu-open').getBoundingClientRect(),menuAction=document.querySelector('.book-action').getBoundingClientRect(),ticket=document.querySelector('#ticket-open').getBoundingClientRect(),ticketAction=document.querySelector('#ticket-open em').getBoundingClientRect();return {photoShare:photo.width*photo.height/(card.width*card.height),menuInset:menu.bottom-menuAction.bottom,ticketInset:ticket.bottom-ticketAction.bottom,label:document.querySelector('#board-shuffle').getAttribute('aria-label')}});
+    assert(mobile.photoShare>.6,'mobile wall should be led by food photography');
+    assert(mobile.menuInset>=5 && mobile.ticketInset>=5,'bottom card actions need breathing room');
+    assert.match(mobile.label,/两张/);
+   }
    if(size.width===390) await page.screenshot({path:path.join(out,'mobile-fixture.png'),fullPage:true});
   }
   await page.setViewportSize({width:390,height:844});
