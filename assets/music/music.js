@@ -119,7 +119,7 @@
   async function load() {
     $('collection-state').hidden = false; $('collection-state').textContent = '正在打开唱片柜…';
     try {
-      const response = await fetch('/music/collection.json', {cache: 'no-cache'});
+      const response = await fetch('/music/collection.json', {cache: 'no-store'});
       if (!response.ok) throw new Error('load');
       const data = await response.json();
       if (!Array.isArray(data.tracks)) throw new Error('format');
