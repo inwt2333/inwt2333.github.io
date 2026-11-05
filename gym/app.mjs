@@ -1,5 +1,6 @@
 import { stations, exercises, publishedEntries, exerciseName, byDate, dateLabel, localDate, cardioMinutes, validateJournal } from './data.mjs?v=journal-nov05';
 import { musclePanel } from './anatomy.mjs?v=leg-machine-1';
+import { reportHTML } from './report.mjs?v=daily-1';
 
 const $ = selector => document.querySelector(selector);
 const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -117,7 +118,7 @@ function calendarDetail() {
     const trained = days.has(date);
     grid += `<${trained ? 'button type="button"' : 'span'} class="calendar-day ${trained ? 'has-training' : ''} ${selectedDate === date ? 'is-selected' : ''} ${date === localDate() ? 'is-today' : ''}" ${trained ? `data-day="${date}" aria-label="${dateLabel(date)}，查看训练记录" aria-pressed="${selectedDate === date}"` : ''}>${d}</${trained ? 'button' : 'span'}>`;
   }
-  return `<p class="eyebrow">SHOWING UP / THE CALENDAR</p><div class="detail-heading"><div><h2 id="detail-title">训练日历</h2></div><button class="primary-button" type="button" data-new="row">＋ 记一笔</button></div><div class="calendar-toolbar"><button type="button" data-month="-1" aria-label="上一个月">←</button><h3>${year} / ${String(m).padStart(2, '0')}</h3><button type="button" data-month="1" aria-label="下一个月">→</button></div><div class="calendar-grid">${grid}</div><p class="calendar-legend">绿色 · 训练日</p>${groupedHTML(list)}`;
+  return `<p class="eyebrow">SHOWING UP / THE CALENDAR</p><div class="detail-heading"><div><h2 id="detail-title">训练日历与日报</h2></div><button class="primary-button" type="button" data-new="row">＋ 记一笔</button></div><div class="calendar-toolbar"><button type="button" data-month="-1" aria-label="上一个月">←</button><h3>${year} / ${String(m).padStart(2, '0')}</h3><button type="button" data-month="1" aria-label="下一个月">→</button></div><div class="calendar-grid">${grid}</div><p class="calendar-legend">绿色 · 训练日，选择日期查看日报；再次点击查看整月记录。</p>${selectedDate ? reportHTML(all, selectedDate) : '<p class="report-prompt">选择一个训练日，查看当天总结、近期趋势与下次训练建议。</p>'}${groupedHTML(list)}`;
 }
 
 function weightChart(list) {
@@ -316,7 +317,7 @@ const descriptions = {
   shoulder: '肩部推举 · 查看训练记录', abs: '腹肌训练 · 查看核心训练记录',
   'leg-curl': '腿屈伸 / 腿弯曲 · 查看训练记录',
   legs: '腿部训练 · 查看腿部训练记录', cardio: '跑步机 · 记录有氧训练',
-  weight: '体重秤 · 记录身体的变化', calendar: '训练手账 · 查看训练日历',
+  weight: '体重秤 · 记录身体的变化', calendar: '训练手账 · 查看日历与训练日报',
 };
 let room = null;
 const menu = $('#menu-dialog');
