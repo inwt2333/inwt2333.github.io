@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const fields = ['title','artist','album','room','tags','date','note','excerpt','composer','work','performers','duration','cover','playbackSourceId'];
+  const fields = ['title','artist','album','room','tags','date','note','composer','work','performers','duration','cover','playbackSourceId'];
   let revision = '', tracks = [], currentId = null, sourceId = '', dirty = false, recognizing = false, saving = false;
   const touched = new Set();
   function status(id, text, error = false) { $(id).textContent = text; $(id).dataset.error = String(error); }
@@ -12,12 +12,67 @@
     return result;
   }
   function safeCover(value) { try {const u = new URL(value); return u.protocol === 'https:' && u.hostname.endsWith('.music.126.net') ? u.href : '';} catch {return '';} }
+  function excerptEntries() {
+    return [...$('excerpt-lines').children].map(row => ({
+      text: row.querySelector('.excerpt-text').value.trim(),
+      translation: row.querySelector('.excerpt-translation-input').value.trim()
+    })).filter(line => line.text || line.translation);
+  }
+  function renumberExcerptLines() {
+    [...$('excerpt-lines').children].forEach((row, index) => {
+      row.querySelector('.excerpt-line-number').textContent = '第 ' + String(index + 1).padStart(2, '0') + ' 句';
+    });
+    $('add-excerpt-line').disabled = saving || $('excerpt-lines').children.length >= 30;
+  }
+  function addExcerptLine(entry = {}) {
+    if ($('excerpt-lines').children.length >= 30) return null;
+    const row = document.createElement('div'); row.className = 'excerpt-line';
+    const top = document.createElement('div'); top.className = 'excerpt-line-top';
+    const number = document.createElement('span'); number.className = 'excerpt-line-number';
+    const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = '移除这句';
+    remove.addEventListener('click', () => {
+      row.remove();
+      if (!$('excerpt-lines').children.length) addExcerptLine();
+      renumberExcerptLines(); dirty = true; preview();
+    });
+    top.append(number, remove);
+    const pair = document.createElement('div'); pair.className = 'excerpt-pair';
+    const sourceLabel = document.createElement('label'); sourceLabel.textContent = '原句';
+    const source = document.createElement('input'); source.type = 'text'; source.className = 'excerpt-text';
+    source.maxLength = 240; source.placeholder = '每条填写一句歌词或摘录'; source.value = entry.text || '';
+    sourceLabel.append(source);
+    const translationLabel = document.createElement('label'); translationLabel.textContent = '中文译文（可选）';
+    const translation = document.createElement('input'); translation.type = 'text'; translation.className = 'excerpt-translation-input';
+    translation.maxLength = 240; translation.placeholder = '显示在原句下方的小字'; translation.value = entry.translation || '';
+    translationLabel.append(translation);
+    pair.append(sourceLabel, translationLabel); row.append(top, pair); $('excerpt-lines').append(row);
+    renumberExcerptLines();
+    return source;
+  }
+  function renderExcerptLines(track) {
+    const lines = Array.isArray(track.excerptLines) ? track.excerptLines :
+      String(track.excerpt || '').split(/\r?\n/).map(text => ({text, translation: ''})).filter(line => line.text.trim());
+    $('excerpt-lines').replaceChildren();
+    (lines.length ? lines : [{}]).forEach(addExcerptLine);
+  }
   function preview() {
     document.querySelector('.live-preview').dataset.room = $('room').value;
     $('preview-title').textContent = $('title').value || '一张新的唱片';
     $('preview-credits').textContent = [$('artist').value,$('album').value].filter(Boolean).join('\n');
     $('preview-note').textContent = $('note').value || '你的听后记，会留在唱片的 B 面。';
-    $('preview-excerpt').textContent = $('excerpt').value || '在这里留下一小段喜欢的词句。';
+    const excerpt = $('preview-excerpt'); excerpt.replaceChildren();
+    const lines = excerptEntries().filter(line => line.text);
+    if (!lines.length) excerpt.textContent = '在这里留下一小段喜欢的词句。';
+    for (const line of lines) {
+      const item = document.createElement('p'); item.className = 'preview-lyric';
+      const source = document.createElement('span'); source.className = 'preview-lyric-source'; source.textContent = line.text;
+      item.append(source);
+      if (line.translation) {
+        const translation = document.createElement('span'); translation.className = 'preview-lyric-translation';
+        translation.textContent = line.translation; item.append(translation);
+      }
+      excerpt.append(item);
+    }
     $('room-preview').href = '/music/' + $('room').value + '/';
     const cover = safeCover($('cover').value), img = $('preview-cover');
     img.hidden = !cover; $('preview-placeholder').hidden = !!cover;
@@ -44,11 +99,13 @@
   function setSaving(value) {
     saving = value;
     $('track-form').querySelectorAll('input,textarea,select,button').forEach(control => {control.disabled = value;});
+    renumberExcerptLines();
     $('new-track').disabled = value;
   }
   function open(track = {}) {
     currentId = track.id || null; sourceId = track.sourceId || ''; touched.clear();
     fields.forEach(field => {$(field).value = field === 'tags' ? (track.tags || []).join(', ') : track[field] ?? (field === 'room' ? 'classical' : field === 'duration' ? 0 : '');});
+    renderExcerptLines(track);
     $('share').value = track.url || ''; $('featured').checked = track.featured === true;
     $('delete').hidden = !currentId; $('form-title').textContent = currentId ? '整理这张唱片' : '一张新的唱片';
     dirty = false; status('lookup-status','粘贴网易云歌曲链接，自动识别基本信息。');
@@ -64,6 +121,10 @@
   openEditor();
   $('search').addEventListener('input',list);
   $('new-track').addEventListener('click',() => {if (canLeave()) open();});
+  $('add-excerpt-line').addEventListener('click', () => {
+    const input = addExcerptLine();
+    if (input) { dirty = true; preview(); input.focus(); }
+  });
   $('track-form').addEventListener('input',event => {dirty = true; touched.add(event.target.id); preview();});
   $('room').addEventListener('change',preview);
   async function recognize() {
@@ -87,6 +148,7 @@
   $('recognize').addEventListener('click',recognize);
   function payload() {
     const track = Object.fromEntries(fields.map(field => [field,$(field).value]));
+    track.excerptLines = excerptEntries();
     track.tags = track.tags.split(/[,，、]/).map(t=>t.trim()).filter(Boolean);
     track.duration = Number(track.duration || 0); track.featured = $('featured').checked;
     track.sourceId = sourceId; track.url = $('share').value.trim(); return track;

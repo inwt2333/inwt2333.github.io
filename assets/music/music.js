@@ -36,7 +36,10 @@
     excerptIndex = (index + excerptLines.length) % excerptLines.length;
     const line = $('track-excerpt');
     line.classList.remove('lyric-enter');
-    line.textContent = excerptLines[excerptIndex];
+    const selectedLine = excerptLines[excerptIndex];
+    $('excerpt-original').textContent = selectedLine.text;
+    $('excerpt-translation').textContent = selectedLine.translation;
+    $('excerpt-translation').hidden = !selectedLine.translation;
     void line.offsetWidth;
     line.classList.add('lyric-enter');
     const count = excerptLines.length;
@@ -49,11 +52,22 @@
     if (excerptLines.length < 2 || !excerptVisible || document.hidden ||
         matchMedia('(prefers-reduced-motion: reduce)').matches ||
         excerptSection.matches(':hover') || excerptSection.contains(document.activeElement)) return;
-    excerptTimer = setInterval(() => showExcerpt(excerptIndex + 1), 8000);
+    excerptTimer = setInterval(() => showExcerpt(excerptIndex + 1), 6500);
   }
-  function setExcerpt(value) {
-    excerptLines = String(value || '').split(/\r?\n/).map(line => line.trim()).filter(Boolean);
-    if (!excerptLines.length) excerptLines = ['这首歌尚未留下摘录。'];
+  function setExcerpt(track) {
+    stopExcerptTimer();
+    const lines = Array.isArray(track.excerptLines) ? track.excerptLines :
+      String(track.excerpt || '').split(/\r?\n/).map(text => ({text, translation: ''}));
+    excerptLines = lines.filter(line => line && typeof line.text === 'string' && line.text.trim())
+      .map(line => ({text: line.text.trim(), translation: typeof line.translation === 'string' ? line.translation.trim() : ''}));
+    excerptSection.hidden = !excerptLines.length;
+    if (!excerptLines.length) {
+      excerptIndex = 0;
+      $('excerpt-original').textContent = '';
+      $('excerpt-translation').textContent = '';
+      $('excerpt-translation').hidden = true;
+      return;
+    }
     showExcerpt(0);
     startExcerptTimer();
   }
@@ -82,7 +96,7 @@
     }
     $('track-information').replaceChildren(info);
     $('track-note').textContent = track.note || '这张唱片的听后记，留待下一次落笔。';
-    setExcerpt(track.excerpt);
+    setExcerpt(track);
     $('track-information').scrollTop = 0;
     $('track-note').scrollTop = 0;
     document.querySelector('.side-controls').hidden = false;

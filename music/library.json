@@ -2,11 +2,153 @@
   "version": 1,
   "tracks": [
     {
+      "title": "皎洁的笑颜 Moonlike Smile",
+      "artist": "陈致逸 / HOYO-MiX",
+      "album": "原神-漩涡、落星与冰山  Vortex of Legends",
+      "note": "伟大，无需多言。\n\n冰晶闪烁在梦里，心绪翻涌如雪。",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "2026-11-05",
+      "sourceId": "1833805540",
+      "url": "https://music.163.com/song?id=1833805540",
+      "cover": "https://p1.music.126.net/_U__1_DT6eLbvObNtK3apg==/109951165849462124.jpg",
+      "playbackSourceId": "",
+      "excerptLines": [],
+      "room": "roaming",
+      "tags": [
+        "反复听",
+        "原神"
+      ],
+      "featured": true,
+      "duration": 78,
+      "id": "a4fb053e20c843a1"
+    },
+    {
+      "title": "好きだから。",
+      "artist": "『ユイカ』",
+      "album": "好きだから。",
+      "note": "高二的时候暗恋某个女生，恰好听到这首歌，歌词每一句都唱到了青春期暗恋的小心思。\n真是一段清纯而美好的岁月啊。\n伴奏简单清新，钢琴与吉他构成了轻巧的底色，鼓点不繁杂恰到好处，如小鹿乱撞的心跳。\n\n其实现在也常常幻想歌词中的画面吧。",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "2026-11-05",
+      "sourceId": "1856722728",
+      "url": "https://music.163.com/song?id=1856722728",
+      "cover": "https://p2.music.126.net/ozNsc3XPpvMQlHYyU9LVAg==/109951166125448895.jpg",
+      "playbackSourceId": "",
+      "excerptLines": [
+        {
+          "text": "振り向いてほしくて、",
+          "translation": "希望你能回过头"
+        },
+        {
+          "text": "意識してほしくて、",
+          "translation": "希望你能注意到我"
+        },
+        {
+          "text": "香水をつけて",
+          "translation": "喷上了香水"
+        },
+        {
+          "text": "1人でむせて。",
+          "translation": "却只有自己闻到"
+        },
+        {
+          "text": "貴方が欲しくて、",
+          "translation": "好想得到你"
+        },
+        {
+          "text": "貴方のものになりたくて、",
+          "translation": "好想成为你的另一半"
+        },
+        {
+          "text": "「明日こそは。」って",
+          "translation": "“明天一定。”这样子说了"
+        },
+        {
+          "text": "ベッドの上でシミュレーション",
+          "translation": "在床上幻想着"
+        },
+        {
+          "text": "貴方を考えながら",
+          "translation": "一边想着你"
+        },
+        {
+          "text": "また明日。",
+          "translation": "期待着明天的见面"
+        }
+      ],
+      "room": "japanese",
+      "tags": [
+        "青春"
+      ],
+      "featured": false,
+      "duration": 299,
+      "id": "5fc4a68f3a284048"
+    },
+    {
+      "title": "88☆彡",
+      "artist": "まらしぃ / 堀江晶太 / 初音ミク / KAITO",
+      "album": "88☆彡",
+      "note": "88颗星星，88个琴键，88个小节，88=∞∞。\n原本以为触手猴只是改编大拿，没想到编曲也这么厉害。\n一辈子也学不来的和声编排。\n最喜欢的术曲之一。🧊🧊🧊",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "",
+      "sourceId": "1940912991",
+      "url": "https://music.163.com/song?id=1940912991",
+      "cover": "https://p1.music.126.net/FOTk3htn-d5xl9rVL8cchw==/109951167333646060.jpg",
+      "playbackSourceId": "",
+      "excerptLines": [
+        {
+          "text": "馬鹿になって 飛んでいって",
+          "translation": "像个笨蛋 一飞冲天"
+        },
+        {
+          "text": "時折ほんのちょっと 思い出せばいい",
+          "translation": "只要时不时记得回忆就好"
+        },
+        {
+          "text": "やむを得ずも 空回り？",
+          "translation": "一筹莫展 白忙一场？"
+        },
+        {
+          "text": "土壇場ドタバタ滑り込めばいい",
+          "translation": "只要最后时刻能赶上就算一切顺利"
+        },
+        {
+          "text": "きっとそうだ そんなもんだ",
+          "translation": "肯定没错 就是这样"
+        },
+        {
+          "text": "夢も希望も欲張っちゃえばいい",
+          "translation": "无论梦想还是希望都可以尽管贪心"
+        },
+        {
+          "text": "待ってました お出ましだ",
+          "translation": "各位久等啦 我们登场啦"
+        },
+        {
+          "text": "88個のスター 駆け上がれ！",
+          "translation": "88颗的星星呀 现在就出发！"
+        }
+      ],
+      "room": "japanese",
+      "tags": [
+        "触手猴",
+        "miku",
+        "术力口"
+      ],
+      "featured": true,
+      "duration": 129,
+      "id": "c5f738c913e94dd7"
+    },
+    {
       "title": "空动的无限星 Infinite Cosmodynamics",
       "artist": "HOYO-MiX",
       "album": "原神-闪耀的群星5 The Stellar Moments Vol. 5",
       "note": "黑曜石奶奶的PV曲！\n也是我原神中最喜欢的PV曲之一，具有很强的叙事性，开头轻松愉快，钢琴和钟琴像小鸟一样叽叽喳喳，提琴在下面铺织着优美的旋律。到后来却突然转调，越来越沉重，节奏也愈发紧张，仿佛在回忆往事。人声突然把调式拉回大调，思绪从远方飘回。最后钢琴几个和弦作为结尾，为这段故事画下句号。",
-      "excerpt": "",
       "composer": "",
       "performers": "",
       "work": "",
@@ -20,16 +162,16 @@
         "原神",
         "纯音乐"
       ],
-      "featured": true,
+      "featured": false,
       "duration": 188,
-      "id": "b1ceebd12c014c2f"
+      "id": "b1ceebd12c014c2f",
+      "excerptLines": []
     },
     {
       "title": "道别是一件难事",
       "artist": "上海彩虹室内合唱团",
       "album": "道别是一件难事",
       "note": "彩虹合唱的封神之作，初听会感到淡淡的却深入骨髓的悲伤，歌词更是每一句都戳进内心最深处。\n\n故乡和爱人，是我近两年来深夜中的永恒议题。\n故乡不能忘，也不会忘。爱人想忘，但是忘不掉。\n既然都忘不掉，不如就装着吧。",
-      "excerpt": "故乡哟故乡\n爱人哟爱人\n既然都忘不掉\n不如就装着吧",
       "composer": "",
       "performers": "",
       "work": "",
@@ -44,14 +186,31 @@
       ],
       "featured": true,
       "duration": 249,
-      "id": "53f9dbac5516419b"
+      "id": "53f9dbac5516419b",
+      "excerptLines": [
+        {
+          "text": "故乡哟故乡",
+          "translation": ""
+        },
+        {
+          "text": "爱人哟爱人",
+          "translation": ""
+        },
+        {
+          "text": "既然都忘不掉",
+          "translation": ""
+        },
+        {
+          "text": "不如就装着吧",
+          "translation": ""
+        }
+      ]
     },
     {
       "title": "Les Champs-Elysées",
       "artist": "Joe Dassin",
       "album": "Les Champs-Èlysées",
       "note": "第一次听到这首曲子是在视频号里「南极星Chloe」，“在法语里，我们不说‘哦，南京西路’，‘哦，王府井大街’，我们说，”\n\nJe m'baladais sur l'avenue le cœur ouvert à l'inconnu\n我走在大街上敞开心扉面对陌生人\n\nJ'avais envie de dire bonjour à n'importe qui\n只想对随便一个人说声你好\n\nN'importe qui et ce fut toi je t'ai dit n'importe quoi\n随便一个人结果就是你我对你胡言乱语\n\nIl suffisait de te parler pour t'apprivoiser\n只要和你说说话就能慢慢靠近你\n\nAux Champs Elysées aux Champs Elysées\n在香榭丽舍大街 在香榭丽舍大街\n\nAu soleil sous la pluie à midi ou à minuit\n无论晴雨无论正午或是深夜\n\nIl y a tout ce que vous voulez aux Champs Elysées\n在香榭丽舍大街你想要的一切都能拥有\n\n如此悠闲的法语小调唱出了如此浪漫的感觉，仿佛我真端着一杯咖啡漫步在香榭丽舍大街上，擦肩而过的是穿着裙子翩翩起舞的路人。这下懂为什么那么多人在学法语了！确实浪漫啊！这首歌应该也是除了《马赛曲》以外我第一首关注的法语歌曲。就冲这首歌，我以后一定要漫步Champs Elysées！",
-      "excerpt": "Aux Champs Elysées aux Champs Elysées\n在香榭丽舍大街 在香榭丽舍大街",
       "composer": "",
       "performers": "",
       "work": "",
@@ -66,7 +225,13 @@
       ],
       "featured": false,
       "duration": 158,
-      "id": "28485e6122f84abb"
+      "id": "28485e6122f84abb",
+      "excerptLines": [
+        {
+          "text": "Aux Champs Elysées aux Champs Elysées",
+          "translation": "在香榭丽舍大街 在香榭丽舍大街"
+        }
+      ]
     }
   ]
 }

@@ -86,7 +86,7 @@ def read_state(root):
             'tracks': json.loads(raw).get('tracks', []) if raw else []}
 
 
-TEXT_FIELDS = {'title': 300, 'artist': 500, 'album': 500, 'note': 12000, 'excerpt': 600, 'composer': 300,
+TEXT_FIELDS = {'title': 300, 'artist': 500, 'album': 500, 'note': 12000, 'composer': 300,
                'performers': 500, 'work': 300, 'date': 10, 'sourceId': 16, 'url': 2000, 'cover': 2000,
                'playbackSourceId': 2000}
 
@@ -102,6 +102,24 @@ def validate_track(track):
         item[field] = value.strip()
     if not item['title']:
         raise ValueError('请填写曲名。')
+    lines = track.get('excerptLines')
+    if lines is None:
+        legacy = track.get('excerpt', '')
+        if not isinstance(legacy, str) or len(legacy) > 600:
+            raise ValueError('歌曲摘录格式不正确或文字过长。')
+        lines = [{'text': text.strip(), 'translation': ''} for text in legacy.splitlines() if text.strip()]
+    if not isinstance(lines, list) or len(lines) > 30:
+        raise ValueError('歌曲摘录最多添加 30 句。')
+    item['excerptLines'] = []
+    for line in lines:
+        if not isinstance(line, dict):
+            raise ValueError('歌曲摘录格式不正确。')
+        text, translation = line.get('text', ''), line.get('translation', '')
+        if (not isinstance(text, str) or not isinstance(translation, str)
+                or not text.strip() or len(text) > 240 or len(translation) > 240
+                or '\n' in text or '\r' in text or '\n' in translation or '\r' in translation):
+            raise ValueError('每句摘录须填写原句，原句和译文各不超过 240 字。')
+        item['excerptLines'].append({'text': text.strip(), 'translation': translation.strip()})
     item['room'] = track.get('room')
     if item['room'] not in ROOMS:
         raise ValueError('请选择听音室。')

@@ -33,7 +33,7 @@ class MusicEditorTest(unittest.TestCase):
         self.assertEqual(state['tracks'][0]['room'], 'roaming')
         self.assertEqual(state['tracks'][0]['playbackSourceId'], '573579809')
         self.assertEqual(json.loads((self.root/'music/collection.json').read_text(encoding='utf8'))['tracks'][0]['note'], self.track['note'])
-        self.assertEqual(json.loads((self.root/'music/collection.json').read_text(encoding='utf8'))['tracks'][0]['excerpt'], self.track['excerpt'])
+        self.assertEqual(json.loads((self.root/'music/collection.json').read_text(encoding='utf8'))['tracks'][0]['excerptLines'], [{'text': self.track['excerpt'], 'translation': ''}])
         for path in ['music/index.html', 'music/classical/index.html', 'music/japanese/index.html', 'music/roaming/index.html']:
             self.assertTrue((self.root/path).is_file())
         edited = editor.save_edit(self.root, {'revision':state['revision'], 'id':identifier, 'track':{**self.track, 'note':''}})
@@ -50,6 +50,14 @@ class MusicEditorTest(unittest.TestCase):
         state = self.save(sourceId='186017', featured=True)
         self.assertEqual(sum(t['featured'] for t in state['tracks']), 1)
 
+    def test_original_and_optional_translation_stay_paired(self):
+        lines = [{'text': 'Aux Champs Elysées', 'translation': '在香榭丽舍大街'},
+                 {'text': 'One more side', 'translation': ''}]
+        state = self.save(excerptLines=lines)
+        self.assertEqual(state['tracks'][0]['excerptLines'], lines)
+        self.assertNotIn('excerpt', state['tracks'][0])
+        self.assertEqual(json.loads((self.root/'music/collection.json').read_text(encoding='utf8'))['tracks'][0]['excerptLines'], lines)
+
     def test_failed_build_keeps_original_library_and_index(self):
         self.save()
         files = [self.root/'music/library.json', self.root/'music/collection.json']
@@ -60,7 +68,7 @@ class MusicEditorTest(unittest.TestCase):
         self.assertEqual([f.read_bytes() for f in files], before)
 
     def test_invalid_metadata_is_rejected_before_writing(self):
-        for change in [{'title':''}, {'room':'other'}, {'cover':'javascript:alert(1)'}, {'url':'https://example.com'}, {'url':'https://music.163.com/song?id=1'}, {'playbackSourceId':'https://example.com/song?id=2'}, {'tags':'not a list'}, {'duration':-1}, {'date':'2026-02-30'}, {'excerpt':'a' * 601}]:
+        for change in [{'title':''}, {'room':'other'}, {'cover':'javascript:alert(1)'}, {'url':'https://example.com'}, {'url':'https://music.163.com/song?id=1'}, {'playbackSourceId':'https://example.com/song?id=2'}, {'tags':'not a list'}, {'duration':-1}, {'date':'2026-02-30'}, {'excerpt':'a' * 601}, {'excerptLines':'bad'}, {'excerptLines':[{'text':'', 'translation':'译文'}]}, {'excerptLines':[{'text':'a' * 241}]}, {'excerptLines':[{'text':'a\nb'}]}, {'excerptLines':[{'text':'a'}] * 31}]:
             with self.assertRaises(ValueError):
                 self.save(**change)
         self.assertFalse((self.root/'music/library.json').exists())
