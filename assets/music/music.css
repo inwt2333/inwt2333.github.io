@@ -126,8 +126,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .door b { position: absolute; right: 20px; bottom: 24px; font-weight: 400; }
 .door-classical { background: linear-gradient(#21160c77, #21160ce6), url('./classical-room.webp') 36% center / cover; }
 .door-chinese { background: linear-gradient(125deg, #37231c66, #211816d9), url('./chinese-room.webp') 30% center / cover no-repeat; }
-.door-western { background: repeating-linear-gradient(90deg, transparent 0 30px, #7295aa0c 31px 33px), linear-gradient(135deg, #294554, #111b24); }
-.door-japanese { background: radial-gradient(ellipse at 100% 0, #a589a64d, transparent 65%), linear-gradient(140deg, #3b304e, #191c30); }
+.door-western { background: linear-gradient(125deg, #101a2140, #101a21db), url('./western-room.webp') 28% center / cover no-repeat; }
+.door-japanese { background: linear-gradient(125deg, #1b192b44, #1b192bdb), url('./japanese-room.webp') 27% center / cover no-repeat; }
 .door-roaming { background: radial-gradient(ellipse at 80% 10%, #bdc59a44, transparent 62%), linear-gradient(135deg, #34443d, #17221f 70%); }
 body[data-room=classical] { --note-font: Georgia, 'Noto Sans SC', 'Microsoft YaHei', sans-serif; }
 body[data-room=chinese] { --ink: #211816; --gold: #e0b696; --note-font: 'Microsoft YaHei', 'PingFang SC', sans-serif; }
@@ -136,8 +136,10 @@ body[data-room=japanese] { --ink: #1b192b; --gold: #cab4da; --note-font: 'Yu Got
 body[data-room=roaming] { --ink: #16201d; --gold: #c4d0a2; --note-font: 'Iowan Old Style', Georgia, 'Noto Serif CJK SC', 'Songti SC', serif; }
 body[data-room=chinese] .room-background { background: #211816 url('./chinese-room.webp') center center / cover no-repeat; }
 body[data-room=chinese] .room-background::after { background: linear-gradient(90deg, #21181638, #21181629 36%, #21181688 61%, #211816ae), linear-gradient(0deg, #211816 0%, transparent 32%, #21181652); }
-body[data-room=western] .room-background { background: repeating-linear-gradient(90deg, transparent 0 140px, #84a1b210 141px 144px), radial-gradient(ellipse at 0 70%, #426a8055, transparent 60%), #101a21; }
-body[data-room=japanese] .room-background { background: radial-gradient(ellipse at 10% 20%, #9c77ac55, transparent 50%), linear-gradient(135deg, #30314a, #1b192b); }
+body[data-room=western] .room-background { background: #101a21 url('./western-room.webp') center center / cover no-repeat; }
+body[data-room=western] .room-background::after { background: linear-gradient(90deg, #101a2112, #101a2140 45%, #101a21a3 70%), linear-gradient(0deg, #101a21 0%, transparent 35%, #101a2133); }
+body[data-room=japanese] .room-background { background: #1b192b url('./japanese-room.webp') center center / cover no-repeat; }
+body[data-room=japanese] .room-background::after { background: linear-gradient(90deg, #1b192b0d, #1b192b24 38%, #1b192b78 65%, #1b192b9a), linear-gradient(0deg, #1b192b 0%, transparent 38%, #1b192b22); }
 body[data-room=roaming] .room-background { background: radial-gradient(ellipse at 8% 70%, #9da77c40, transparent 52%), radial-gradient(ellipse at 95% 4%, #bb9b7140, transparent 46%), repeating-linear-gradient(110deg, transparent 0 150px, #d2d4b607 151px 153px), #16201d; }
 @media (max-width: 1280px) { .room-doors { grid-template-columns: repeat(3, minmax(0, 1fr)); } .door-roaming { grid-column: span 2; } }
 @media (max-width: 1100px) { .wordmark span { display: none; } .room-intro { margin-left: 24%; } .entrance-copy { margin-left: 36%; } }
@@ -153,6 +155,10 @@ body[data-room=roaming] .room-background { background: radial-gradient(ellipse a
   body[data-room=classical] .room-background { background-image: url('./classical-room-mobile.webp'); }
   body[data-room=chinese] .room-background { background-image: url('./chinese-room-mobile.webp'); background-position: 43% center; }
   body[data-room=chinese] .room-background::after { background: linear-gradient(0deg, #211816f5, #211816a3 60%, #21181664), linear-gradient(90deg, #21181635, #2118167a); }
+  body[data-room=western] .room-background { background-image: url('./western-room-mobile.webp'); background-position: center center; }
+  body[data-room=western] .room-background::after { background: linear-gradient(0deg, #101a21f4, #101a2199 58%, #101a214d), linear-gradient(90deg, #101a211c, #101a2180); }
+  body[data-room=japanese] .room-background { background-position: 18% center; }
+  body[data-room=japanese] .room-background::after { background: linear-gradient(0deg, #1b192bf4, #1b192ba3 60%, #1b192b58), linear-gradient(90deg, #1b192b35, #1b192b77); }
   .listening-scene { height: max(1150px, calc(100svh - 75px)); padding: 40px 8vw 85px; }
   .room-intro { margin-left: 0; text-align: center; }
   .room-intro h1 { font-size: 38px; margin-bottom: 15px; }

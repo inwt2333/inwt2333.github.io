@@ -30,7 +30,7 @@ const ready = new Promise((resolve,reject) => {
     browser = await chromium.launch({headless:true});
     const page = await browser.newPage({reducedMotion:'reduce'});
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
-    for(const asset of ['classical-room-mobile.webp','chinese-room.webp','chinese-room-mobile.webp']) {
+    for(const asset of ['classical-room-mobile.webp','chinese-room.webp','chinese-room-mobile.webp','western-room.webp','western-room-mobile.webp','japanese-room.webp']) {
       assert.equal((await page.request.get(base+'/assets/music/'+asset)).status(),200,asset+' should be served');
     }
     for(const width of [1440,1024,390,320]) {
@@ -38,11 +38,17 @@ const ready = new Promise((resolve,reject) => {
       for(const route of ['', 'classical/', 'chinese/', 'western/', 'japanese/', 'roaming/']) {
         const response=await page.goto(base+'/music/'+route);assert.equal(response.status(),200);
         await page.evaluate(()=>document.fonts.ready);
-        if(!route) assert.equal(await page.locator('.room-doors .door').count(),5,'门厅应展示五间听音室');
+        if(!route) {
+          assert.equal(await page.locator('.room-doors .door').count(),5,'门厅应展示五间听音室');
+          for(const room of ['western','japanese']) assert.match(await page.locator('.door-'+room).evaluate(el=>getComputedStyle(el).backgroundImage),new RegExp(room+'-room\\.webp'));
+        }
         if(route==='classical/' && width<=760) assert.match(await page.locator('.room-background').evaluate(el=>getComputedStyle(el).backgroundImage),/classical-room-mobile\.webp/);
         if(route==='chinese/') assert.match(await page.locator('.room-background').evaluate(el=>getComputedStyle(el).backgroundImage),width<=760?/chinese-room-mobile\.webp/:/chinese-room\.webp/);
+        if(route==='western/') assert.match(await page.locator('.room-background').evaluate(el=>getComputedStyle(el).backgroundImage),width<=760?/western-room-mobile\.webp/:/western-room\.webp/);
+        if(route==='japanese/') assert.match(await page.locator('.room-background').evaluate(el=>getComputedStyle(el).backgroundImage),/japanese-room\.webp/);
         assert.equal(await page.locator('.home-link').getAttribute('href'),route?'/music/':'/index.html','左上角应返回直接上级页面');
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,route+' overflow '+width);
+        if((width===1440 || width===390) && (route==='western/' || route==='japanese/')) await page.screenshot({path:path.join(reports,route.slice(0,-1)+'-'+width+'.png')});
       }
     }
     await page.goto(base+'/music/western/');
