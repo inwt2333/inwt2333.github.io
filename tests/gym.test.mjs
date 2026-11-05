@@ -2,6 +2,28 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { publishedEntries, stations, validateJournal, summary } from '../gym/data.mjs';
 
+test('November 3–5 preserve uneven sets, load changes and fatigue notes without repeating November 2', () => {
+  const day = date => publishedEntries.filter(e => e.date === `2026-11-${date}`);
+  const entry = (date, exercise) => day(date).find(e => e.exercise === exercise);
+  const sets = (date, exercise) => entry(date, exercise).loads.map(l => [l.weight, l.reps, l.sets, l.unit]);
+  assert.deepEqual(['02','03','04','05'].map(d => day(d).length), [7, 6, 7, 6]);
+  assert.deepEqual(sets('03', 'shoulder'), [[17,12,3,'lb'],[27,6,1,'lb'],[27,4,1,'lb']]);
+  assert.deepEqual(sets('03', 'extension'), [[50,12,1,'kg'],[50,20,2,'kg']]);
+  assert.deepEqual(sets('03', 'double-d-lat'), [[30,12,2,'kg'],[30,24,1,'kg']]);
+  assert.deepEqual(sets('03', 'fly'), [[27,12,2,'lb'],[37,12,1,'lb']]);
+  for (const [exercise, weight, unit] of [['row',27,'lb'],['abs',50,'kg'],['extension-curl',27,'lb']]) {
+    assert.deepEqual(sets('04', exercise), [[weight,12,2,unit],[weight,16,1,unit]]);
+  }
+  assert.deepEqual(sets('04', 'chest'), [[15,9,1,'kg'],[15,6,1,'kg']]);
+  assert.match(entry('04','shoulder').note, /肩推和胸推都推不起来/);
+  assert.match(entry('04','chest').note, /吃力/);
+  assert.deepEqual(sets('05', 'chest'), [[15,8,3,'kg']]);
+  assert.deepEqual(sets('05', 'back-extension'), [[15,12,1,'kg'],[20,12,1,'kg']]);
+  assert.match(entry('05','back-extension').note, /吃力/);
+  assert.deepEqual(['03','04','05'].map(d => [entry(d,'cardio').segments[0].minutes,entry(d,'cardio').note]),
+    [[40,'距离 3.4 km'],[30,'距离 2.6 km'],[30,'距离 2.4 km']]);
+});
+
 test('November 2 retains changing loads, final chest set and neutral grip pulldown', () => {
   const day = publishedEntries.filter(e => e.date === '2026-11-02');
   assert.equal(day.length, 7);
@@ -23,7 +45,7 @@ test('November 2 retains changing loads, final chest set and neutral grip pulldo
 });
 
 test('handwritten journal defaults omitted sets to one and retains mixed loads and units', () => {
-  assert.deepEqual(summary(publishedEntries), { days: 6, strength: 33, minutes: 136 });
+  assert.deepEqual(summary(publishedEntries), { days: 9, strength: 49, minutes: 236 });
   const abs = publishedEntries.find(e => e.date === '2026-10-22' && e.exercise === 'abs');
   assert.deepEqual(abs.loads, [
     { weight: 35, unit: 'kg', reps: 12, sets: 1 },
@@ -74,7 +96,7 @@ test('October 30 and 31 preserve load changes, effort note, and cardio distance'
     { weight: 27, unit: 'lb', reps: 12, sets: 3 });
   assert.equal(day31.find(e => e.exercise === 'abs').loads[0].weight, 45);
   assert.equal(day31.find(e => e.exercise === 'cardio').note, '距离 2.1 km');
-  assert.deepEqual(summary(publishedEntries), { days: 6, strength: 33, minutes: 136 });
+  assert.deepEqual(summary(publishedEntries), { days: 9, strength: 49, minutes: 236 });
 });
 
 test('old local saves and backups migrate omitted sets to one without changing explicit sets', () => {

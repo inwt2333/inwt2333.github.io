@@ -1,6 +1,6 @@
 // 手写记录按 2026 年归档。保留原单位，未写明组数按一组记录。
 export const stations = [
-  { id: 'pull', name: '拉力训练', en: 'PULL STATION', zone: 'back', color: '#568b7a', description: '高位下拉 · 高拉力背肌 · 中立握下拉', exercises: ['lat', 'high-pull', 'neutral-lat'] },
+  { id: 'pull', name: '拉力训练', en: 'PULL STATION', zone: 'back', color: '#568b7a', description: '高位下拉 · 高拉力背肌 · 中立握下拉 · 双D / 钢索下拉', exercises: ['lat', 'high-pull', 'neutral-lat', 'double-d-lat', 'cable-lat'] },
   { id: 'row', name: '坐姿划船', en: 'SEATED ROW', zone: 'back', color: '#568b7a', description: '一拉一放，慢慢积累。', exercises: ['row'] },
   { id: 'fly', name: '蝴蝶机', en: 'PEC DECK', zone: 'chest', color: '#bf8263', description: '把每一次夹胸都记下来。', exercises: ['fly'] },
   { id: 'chest', name: '坐式胸肌', en: 'CHEST PRESS', zone: 'chest', color: '#bf8263', description: '向前推一点，也向前走一点。', exercises: ['chest'] },
@@ -16,6 +16,9 @@ export const stations = [
 export const exercises = [
   { id: 'lat', name: '高位下拉', unit: 'lb' },
   { id: 'neutral-lat', name: '高位中立握下拉', unit: 'kg' },
+  { id: 'double-d-lat', name: '双D高位下拉', unit: 'kg' },
+  { id: 'cable-lat', name: '钢索高位下拉', unit: 'kg' },
+  { id: 'back-extension', name: '坐式背肌', unit: 'kg' },
   { id: 'row', name: '坐姿划船', unit: 'lb' },
   { id: 'fly', name: '蝴蝶机', unit: 'lb' },
   { id: 'high-pull', name: '高拉力背肌', unit: 'kg' },
@@ -70,6 +73,25 @@ export const publishedEntries = [
   strength('published-36', '2026-11-02', 'fly', 27, 12, 3),
   strength('published-37', '2026-11-02', 'neutral-lat', 30, 12, 2),
   { id: 'published-38', date: '2026-11-02', exercise: 'cardio', segments: [{ name: '爬坡', minutes: 30 }], note: '距离 2.5 km' },
+  strength('published-39', '2026-11-03', 'row', 27, 12, 3),
+  { id: 'published-40', date: '2026-11-03', exercise: 'shoulder', loads: [{ weight: 17, unit: 'lb', reps: 12, sets: 3 }, { weight: 27, unit: 'lb', reps: 6, sets: 1 }, { weight: 27, unit: 'lb', reps: 4, sets: 1 }], note: '27 lb：6+4，吃力' },
+  { id: 'published-41', date: '2026-11-03', exercise: 'extension', loads: [{ weight: 50, unit: 'kg', reps: 12, sets: 1 }, { weight: 50, unit: 'kg', reps: 20, sets: 2 }], note: '' },
+  { id: 'published-42', date: '2026-11-03', exercise: 'double-d-lat', loads: [{ weight: 30, unit: 'kg', reps: 12, sets: 2 }, { weight: 30, unit: 'kg', reps: 24, sets: 1 }], note: '' },
+  { id: 'published-43', date: '2026-11-03', exercise: 'fly', loads: [{ weight: 27, unit: 'lb', reps: 12, sets: 2 }, { weight: 37, unit: 'lb', reps: 12, sets: 1 }], note: '37 lb 吃力' },
+  { id: 'published-44', date: '2026-11-03', exercise: 'cardio', segments: [{ name: '爬坡', minutes: 40 }], note: '距离 3.4 km' },
+  { id: 'published-45', date: '2026-11-04', exercise: 'row', loads: [{ weight: 27, unit: 'lb', reps: 12, sets: 2 }, { weight: 27, unit: 'lb', reps: 16, sets: 1 }], note: '' },
+  { id: 'published-46', date: '2026-11-04', exercise: 'abs', loads: [{ weight: 50, unit: 'kg', reps: 12, sets: 2 }, { weight: 50, unit: 'kg', reps: 16, sets: 1 }], note: '' },
+  { id: 'published-47', date: '2026-11-04', exercise: 'extension-curl', loads: [{ weight: 27, unit: 'lb', reps: 12, sets: 2 }, { weight: 27, unit: 'lb', reps: 16, sets: 1 }], note: '' },
+  { id: 'published-48', date: '2026-11-04', exercise: 'shoulder', loads: [{ weight: 17, unit: 'lb', reps: 12, sets: 2 }, { weight: 27, unit: 'lb', reps: 8, sets: 1 }], note: '最大问题：推不动，肩推和胸推都推不起来' },
+  { id: 'published-49', date: '2026-11-04', exercise: 'chest', loads: [{ weight: 15, unit: 'kg', reps: 9, sets: 1 }, { weight: 15, unit: 'kg', reps: 6, sets: 1 }], note: '吃力；最大问题：推不动，肩推和胸推都推不起来' },
+  strength('published-50', '2026-11-04', 'cable-lat', 30, 12, 2),
+  { id: 'published-51', date: '2026-11-04', exercise: 'cardio', segments: [{ name: '爬坡', minutes: 30 }], note: '距离 2.6 km' },
+  strength('published-52', '2026-11-05', 'shoulder', 17, 12, 3),
+  strength('published-53', '2026-11-05', 'chest', 15, 8, 3),
+  strength('published-54', '2026-11-05', 'row', 27, 12, 2),
+  strength('published-55', '2026-11-05', 'abs', 50, 12, 3),
+  { id: 'published-56', date: '2026-11-05', exercise: 'back-extension', loads: [{ weight: 15, unit: 'kg', reps: 12, sets: 1 }, { weight: 20, unit: 'kg', reps: 12, sets: 1 }], note: '20 kg 吃力' },
+  { id: 'published-57', date: '2026-11-05', exercise: 'cardio', segments: [{ name: '爬坡', minutes: 30 }], note: '距离 2.4 km' },
 ];
 
 export const exerciseName = id => exercises.find(e => e.id === id)?.name || id;

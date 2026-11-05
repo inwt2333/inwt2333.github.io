@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from '../assets/vendor/three/addons/geometries/RoundedBoxGeometry.js';
-import { publishedEntries } from './data.mjs?v=journal-nov02';
+import { publishedEntries } from './data.mjs?v=journal-nov05';
 
 export function createEquipment(scene, m) {
   const geometry = new Map();
