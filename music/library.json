@@ -2,6 +2,107 @@
   "version": 1,
   "tracks": [
     {
+      "title": "远航入梦 Journey Into Sweet Dreams",
+      "artist": "陈致逸 / HOYO-MiX",
+      "album": "原神-珍珠之歌 The Shimmering Voyage",
+      "note": "梦到置身于茫茫大海中的一艘小帆船，仰望满天繁星。\n曲子的构成很简单。先是钢琴演奏主旋律，仿佛夜空中的繁星逐渐被点亮。随后小提琴与大提琴出现，小提琴接管主旋律，悠悠的琴声仿佛波浪。此时双簧管进入，旋律发生转换，全曲进入高潮部分，仿佛波涛突然开始汹涌，拍打着小船左右晃动。随着一段下行的旋律，曲调安静下来，回到小提与钢琴演奏主旋律的变奏。随后双簧管和大提琴再次演奏变奏织体，音调变低，响度变弱，梦到此就渐渐终止了，又返回沉睡当中。",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "",
+      "sourceId": "1861403397",
+      "url": "https://music.163.com/song?id=1861403397",
+      "cover": "https://p2.music.126.net/klj1ylCHIDtuINQEXo1WEg==/109951166180599033.jpg",
+      "playbackSourceId": "",
+      "excerptLines": [],
+      "room": "roaming",
+      "tags": [
+        "原神"
+      ],
+      "featured": false,
+      "duration": 150,
+      "id": "804b388a76084988"
+    },
+    {
+      "title": "永无乡假日",
+      "artist": "闹闹丶 / 洛天依",
+      "album": "永无乡假日",
+      "note": "何时才能回到那种无忧无虑的夏日？\n窗户看出去的是蓝天白云与道路对面的红色楼房，风吹着树叶沙沙作响。不时有小贩的叫卖声以及汽车的喇叭声。我躺在床上，袒胸露背，肆意地享受着窗外吹来的凉爽的夏日之风。\n没有任务，没有催促，没有指标，只有当下。无忧无虑，没心没肺。",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "",
+      "sourceId": "3442253505",
+      "url": "https://music.163.com/song?id=3442253505",
+      "cover": "https://p1.music.126.net/WkGHvdth1XUez02GVKVg9Q==/109951174022482748.jpg",
+      "playbackSourceId": "",
+      "excerptLines": [
+        {
+          "text": "请把我遗弃在这处永无乡",
+          "translation": ""
+        },
+        {
+          "text": "就让我被时间彻底地遗忘",
+          "translation": ""
+        },
+        {
+          "text": "不需要愿望不渴求生长",
+          "translation": ""
+        },
+        {
+          "text": "永远地循环着像这样",
+          "translation": ""
+        },
+        {
+          "text": "请别把我驱逐赶出永无乡",
+          "translation": ""
+        },
+        {
+          "text": "房间外的世界只剩下热浪",
+          "translation": ""
+        },
+        {
+          "text": "为某事疯狂为某物争抢",
+          "translation": ""
+        },
+        {
+          "text": "我没想让自己变那样",
+          "translation": ""
+        }
+      ],
+      "room": "chinese",
+      "tags": [
+        "青春",
+        "洛天依"
+      ],
+      "featured": false,
+      "duration": 216,
+      "id": "2d21587c0a8643c2"
+    },
+    {
+      "title": "Symphony No. 2 in E Minor, Op. 27: III. Adagio",
+      "artist": "Vladimir Ashkenazy / Philharmonia Orchestra",
+      "album": "Rachmaninov: Symphony No. 2",
+      "note": "拉赫马尼诺夫第二协奏曲第三乐章。\n最喜欢的一段旋律。\n仿佛太阳从海面上缓缓升起，波浪声拍打着金色的沙滩，舢板随着海浪而起伏，远离了尘世间的喧嚣。\n又仿佛置身于庄园之中，在黄昏时静坐于城堡旁边的湖畔，微风拂面，清香萦绕。",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "",
+      "sourceId": "543546142",
+      "url": "https://music.163.com/song?id=543546142",
+      "cover": "https://p1.music.126.net/uVK6TULTOUHv2bUW6qgfCg==/109951164695095914.jpg",
+      "playbackSourceId": "",
+      "excerptLines": [],
+      "room": "classical",
+      "tags": [
+        "反复听",
+        "拉赫马尼诺夫"
+      ],
+      "featured": true,
+      "duration": 905,
+      "id": "ea4ca73e0a644a34"
+    },
+    {
       "title": "皎洁的笑颜 Moonlike Smile",
       "artist": "陈致逸 / HOYO-MiX",
       "album": "原神-漩涡、落星与冰山  Vortex of Legends",
