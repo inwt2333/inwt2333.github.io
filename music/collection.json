@@ -2,6 +2,112 @@
   "version": 1,
   "tracks": [
     {
+      "title": "New Friends and Old Faces",
+      "artist": "Evan Call",
+      "album": "TVアニメ『葬送のフリーレン』Original Soundtrack",
+      "note": "中世纪的小调，树影下的漫步",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "",
+      "sourceId": "2146702266",
+      "url": "https://music.163.com/song?id=2146702266",
+      "cover": "https://p1.music.126.net/n21kvn_4tw2AFdVHJX4bjg==/109951169594833348.jpg",
+      "playbackSourceId": "",
+      "excerptLines": [],
+      "room": "roaming",
+      "tags": [
+        "日本",
+        "游戏"
+      ],
+      "featured": false,
+      "duration": 139,
+      "id": "116de10ae2754470"
+    },
+    {
+      "title": "希望的明日 Another Hopeful Tomorrow",
+      "artist": "陈致逸 / HOYO-MiX",
+      "album": "原神-皎月云间之梦 Jade Moon Upon a Sea of Clouds",
+      "note": "日出的璃月港，一切都刚刚苏醒，一切都生机勃勃。",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "",
+      "sourceId": "1492275686",
+      "url": "https://music.163.com/song?id=1492275686",
+      "cover": "https://p2.music.126.net/yoRaxBY77koSqhjh52g-DA==/109951165434255510.jpg",
+      "playbackSourceId": "",
+      "excerptLines": [],
+      "room": "classical",
+      "tags": [
+        "原神"
+      ],
+      "featured": false,
+      "duration": 86,
+      "id": "62fab4aa249d4260"
+    },
+    {
+      "title": "炉烟阗衢 Rising Smoke, Crowded Streets",
+      "artist": "HOYO-MiX",
+      "album": "原神-悯宥慈怜之垠 Where Mercy Endures",
+      "note": "神的旋律，听完仿佛回到了契诃夫小说中沙俄时期风雪交加的小路上。",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "",
+      "sourceId": "3437730058",
+      "url": "https://music.163.com/song?id=3437730058",
+      "cover": "https://p2.music.126.net/330QHr0gdVzDm41ecd0RJw==/109951173956314131.jpg",
+      "playbackSourceId": "",
+      "excerptLines": [],
+      "room": "roaming",
+      "tags": [
+        "原神"
+      ],
+      "featured": false,
+      "duration": 98,
+      "id": "8e9c8c6582f847b4"
+    },
+    {
+      "title": "普通朋友",
+      "artist": "陶喆",
+      "album": "I'm OK",
+      "note": "世界上最大的谎言，就是\n我们只是普通朋友\n但我不甘做普通朋友",
+      "composer": "",
+      "performers": "",
+      "work": "",
+      "date": "",
+      "sourceId": "150623",
+      "url": "https://music.163.com/song?id=150623",
+      "cover": "https://p2.music.126.net/tMQXBMTy8pGjGggX1j0YNQ==/109951169389595068.jpg",
+      "playbackSourceId": "",
+      "excerptLines": [
+        {
+          "text": "我感激你对我这样的坦白",
+          "translation": ""
+        },
+        {
+          "text": "但我给你的爱暂时收不回来",
+          "translation": ""
+        },
+        {
+          "text": "So I",
+          "translation": ""
+        },
+        {
+          "text": "不能只是 Be your friend",
+          "translation": ""
+        }
+      ],
+      "room": "chinese",
+      "tags": [
+        "陶喆"
+      ],
+      "featured": false,
+      "duration": 255,
+      "id": "aa3c1b98b2314e02"
+    },
+    {
       "title": "远航入梦 Journey Into Sweet Dreams",
       "artist": "陈致逸 / HOYO-MiX",
       "album": "原神-珍珠之歌 The Shimmering Voyage",
