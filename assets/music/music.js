@@ -20,12 +20,6 @@
     img.addEventListener('error', () => img.remove());
     return img;
   };
-  function side(value) {
-    document.querySelectorAll('[data-side]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === value)));
-    $('track-information').hidden = value !== 'a';
-    $('track-note').hidden = value !== 'b';
-  }
-  document.querySelectorAll('[data-side]').forEach(b => b.addEventListener('click', () => side(b.dataset.side)));
   const excerptSection = document.querySelector('.excerpt-section');
   let excerptLines = [], excerptIndex = 0, excerptTimer = null, excerptVisible = true;
   function stopExcerptTimer() {
@@ -88,7 +82,7 @@
     $('track-title').textContent = track.title;
     $('track-credits').textContent = [track.artist, track.album].filter(Boolean).join('\n');
     const info = document.createElement('dl');
-    const fields = [['专辑', track.album], ['作曲', track.composer], ['作品', track.work], ['演奏', track.performers], ['时长', track.duration ? `${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}` : ''], ['聆听', track.date]];
+    const fields = [['作曲', track.composer], ['作品', track.work], ['演奏', track.performers], ['时长', track.duration ? `${Math.floor(track.duration / 60)}:${String(track.duration % 60).padStart(2, '0')}` : ''], ['聆听', track.date]];
     for (const [name, value] of fields) {
       if (!value) continue;
       const dt = document.createElement('dt'), dd = document.createElement('dd');
@@ -97,9 +91,8 @@
     $('track-information').replaceChildren(info);
     $('track-note').textContent = track.note || '这张唱片的听后记，留待下一次落笔。';
     setExcerpt(track);
-    $('track-information').scrollTop = 0;
-    $('track-note').scrollTop = 0;
-    document.querySelector('.side-controls').hidden = false;
+    $('track-information').hidden = !info.children.length;
+    document.querySelector('.record-reading').scrollTop = 0;
     const cover = safeCover(track.cover);
     const label = document.querySelector('.record-cover');
     label.hidden = !cover;
@@ -134,7 +127,6 @@
       player.removeAttribute('src'); // Stop the previous song when this record has no embeddable source.
     }
     document.querySelector('.quiet-note').hidden = !shell.hidden;
-    side(track.note ? 'b' : 'a');
     document.querySelectorAll('.record-card').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.id === track.id)));
     if (scroll) {
       $('track-title').tabIndex = -1;

@@ -59,7 +59,7 @@
     document.querySelector('.live-preview').dataset.room = $('room').value;
     $('preview-title').textContent = $('title').value || '一张新的唱片';
     $('preview-credits').textContent = [$('artist').value,$('album').value].filter(Boolean).join('\n');
-    $('preview-note').textContent = $('note').value || '你的听后记，会留在唱片的 B 面。';
+    $('preview-note').textContent = $('note').value || '你的听后记，会与这张唱片一起留下。';
     const excerpt = $('preview-excerpt'); excerpt.replaceChildren();
     const lines = excerptEntries().filter(line => line.text);
     if (!lines.length) excerpt.textContent = '在这里留下一小段喜欢的词句。';
