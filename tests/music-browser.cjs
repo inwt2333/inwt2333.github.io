@@ -114,10 +114,10 @@ const ready = new Promise((resolve,reject) => {
     await autoplayPage.close();
     const geometry=()=>publicPage.evaluate(()=>{const stage=document.querySelector('.record-stage').getBoundingClientRect(),scene=document.querySelector('.listening-scene').getBoundingClientRect();return {x:stage.x,y:stage.y+scrollY,height:scene.height};});
     const original=await geometry();
-    await publicPage.locator('[data-side=a]').click();assert.equal(await publicPage.locator('#track-information').isVisible(),true);
-    assert.deepEqual(await geometry(),original,'A 面不应移动唱片或改变主画面高度');
-    await publicPage.locator('[data-side=b]').click();
-    assert.deepEqual(await geometry(),original,'B 面不应移动唱片或改变主画面高度');
+    assert.equal(await publicPage.locator('[data-side]').count(),0,'唱片不再提供两面切换');
+    assert.equal(await publicPage.locator('#track-information').isVisible(),true);
+    assert.equal(await publicPage.locator('#track-note').isVisible(),true);
+    assert.doesNotMatch(await publicPage.locator('#track-information').textContent(),/叶惠美/,'专辑已在标题下展示，不应重复');
     await publicPage.locator('#tag-filters button').last().click();assert.equal(await publicPage.locator('.record-card').count(),1);
     await publicPage.locator('.record-card').click();assert.match(await publicPage.locator('#track-note').textContent(),/第一段/);
     await publicPage.screenshot({path:path.join(reports,'collection-desktop.png'),fullPage:true});
@@ -126,7 +126,7 @@ const ready = new Promise((resolve,reject) => {
     await page.waitForFunction(()=>document.getElementById('save-status').textContent.startsWith('已保存'));
     await publicPage.reload();await publicPage.waitForFunction(()=>document.getElementById('track-title').textContent==='晴天');
     assert.deepEqual(await geometry(),original,'长听后记不应改变唱片位置或主画面高度');
-    assert.ok(await publicPage.locator('#track-note').evaluate(el=>el.scrollHeight>el.clientHeight),'长听后记应在阅读区内部滚动');
+    assert.ok(await publicPage.locator('.record-reading').evaluate(el=>el.scrollHeight>el.clientHeight),'长听后记应在阅读区内部滚动');
     await publicPage.locator('#excerpt-original').evaluate(el=>{el.textContent='在香榭丽舍大街，无论晴雨无论正午或是深夜，我们都把喜欢的旋律完整地留在这里，直到下一次唱片转动。';});
     await publicPage.locator('#excerpt-translation').evaluate(el=>{el.textContent='这里还有一段稍长的中文译文，应当完整展示在原句下方，而不会被窄屏截断。';el.hidden=false;});
     for(const width of [1024,820,673,390,320]) {
@@ -137,8 +137,9 @@ const ready = new Promise((resolve,reject) => {
       assert.ok(mobile.excerpt.top>=await publicPage.locator('.listening-scene').evaluate(el=>el.getBoundingClientRect().bottom),'窄屏歌曲摘录应留在唱片画面下方');
       assert.equal(await publicPage.locator('.shelf-anchor').isVisible(),false,'窄屏省略唱片柜入口');
       assert.ok(mobile.lyricWidth>=width*.88 && mobile.lyricScrollHeight<=mobile.lyricHeight+2 && mobile.lyricOverflow==='visible','窄屏应给歌词整行宽度并完整显示');
-      const before=await geometry();await publicPage.locator('[data-side=a]').click();assert.deepEqual(await geometry(),before,'手机切换 A 面时唱片不应移动');
-      await publicPage.locator('[data-side=b]').click();assert.deepEqual(await geometry(),before,'手机切换 B 面时唱片不应移动');
+      assert.equal(await publicPage.locator('#track-information').isVisible(),true);
+      assert.equal(await publicPage.locator('#track-note').isVisible(),true);
+      assert.ok(await publicPage.locator('.record-reading').evaluate(el=>el.scrollHeight>el.clientHeight),'手机长内容应在统一阅读区滚动');
     }
     await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:path.join(reports,'editor-desktop.png'),fullPage:true});
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
