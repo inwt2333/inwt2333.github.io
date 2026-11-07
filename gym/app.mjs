@@ -1,4 +1,4 @@
-import { stations, exercises, publishedEntries, exerciseName, byDate, dateLabel, localDate, cardioMinutes, validateJournal } from './data.mjs?v=journal-nov05';
+import { stations, exercises, publishedEntries, exerciseName, byDate, dateLabel, localDate, cardioMinutes, validateJournal } from './data.mjs?v=journal-nov07';
 import { musclePanel } from './anatomy.mjs?v=leg-machine-1';
 import { reportHTML } from './report.mjs?v=daily-1';
 
@@ -352,7 +352,7 @@ addEventListener('keydown', event => {
   }
 });
 // Full-viewport scene. The journal remains independent of the GPU renderer.
-import('./room.mjs?v=journal-nov05').then(({ createRoom }) => createRoom({
+import('./room.mjs?v=journal-nov07').then(({ createRoom }) => createRoom({
   container: $('#scene'),
   onHover: hint,
   onMenu: () => menu.showModal(),

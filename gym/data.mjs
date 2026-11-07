@@ -92,6 +92,13 @@ export const publishedEntries = [
   strength('published-55', '2026-11-05', 'abs', 50, 12, 3),
   { id: 'published-56', date: '2026-11-05', exercise: 'back-extension', loads: [{ weight: 15, unit: 'kg', reps: 12, sets: 1 }, { weight: 20, unit: 'kg', reps: 12, sets: 1 }], note: '20 kg 吃力' },
   { id: 'published-57', date: '2026-11-05', exercise: 'cardio', segments: [{ name: '爬坡', minutes: 30 }], note: '距离 2.4 km' },
+  { id: 'published-58', date: '2026-11-07', exercise: 'chest', loads: [{ weight: 15, unit: 'kg', reps: 12, sets: 2 }, { weight: 15, unit: 'kg', reps: 6, sets: 1 }], note: '' },
+  strength('published-59', '2026-11-07', 'row', 27, 12, 3),
+  { id: 'published-60', date: '2026-11-07', exercise: 'extension', loads: [{ weight: 40, unit: 'kg', reps: 12, sets: 2 }, { weight: 40, unit: 'kg', reps: 16, sets: 1 }], note: '' },
+  strength('published-61', '2026-11-07', 'shoulder', 17, 12, 3),
+  { id: 'published-62', date: '2026-11-07', exercise: 'cable-lat', loads: [{ weight: 30, unit: 'kg', reps: 12, sets: 2 }, { weight: 35, unit: 'kg', reps: 12, sets: 1 }], note: '' },
+  strength('published-63', '2026-11-07', 'fly', 27, 12, 3),
+  { id: 'published-64', date: '2026-11-07', exercise: 'cardio', segments: [{ name: '爬坡', minutes: 35 }], note: '距离 2.8 km' },
 ];
 
 export const exerciseName = id => exercises.find(e => e.id === id)?.name || id;
